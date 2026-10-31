@@ -1,0 +1,107 @@
+.admin-header {
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+
+  .header-left {
+    .module-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      .system-prefix {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      .divider {
+        color: #cbd5e1;
+        font-size: 0.9rem;
+      }
+
+      .active-module-pill {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #00ADEF;
+        background: #e0f2fe;
+        padding: 0.2rem 0.65rem;
+        border-radius: 20px;
+      }
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+
+      .avatar-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #00ADEF;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 173, 239, 0.25);
+      }
+
+      .profile-details {
+        display: flex;
+        flex-direction: column;
+
+        .admin-name {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.2;
+        }
+
+        .admin-role {
+          font-size: 0.7rem;
+          color: #64748b;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+    }
+  }
+}
+

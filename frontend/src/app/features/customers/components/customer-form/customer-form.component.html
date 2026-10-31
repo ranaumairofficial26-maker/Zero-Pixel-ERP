@@ -1,0 +1,125 @@
+<div class="customer-form-container">
+  @if (duplicateWarning(); as warning) {
+  <div class="duplicate-warning-banner">
+    <div class="warning-icon-col">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+        <line x1="12" y1="9" x2="12" y2="13" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+    </div>
+    <div class="warning-content-col">
+      <h4 class="warning-title">Duplicate Customer Record Detected</h4>
+      <p class="warning-desc">{{ warning.message }}</p>
+      <div class="existing-client-preview">
+        <span class="preview-item"><strong>ID:</strong> #{{ warning.existingClient.clientId }}</span>
+        <span class="preview-item"><strong>Company:</strong> {{ warning.existingClient.companyName }}</span>
+        <span class="preview-item"><strong>Phone:</strong> {{ warning.existingClient.phone }}</span>
+        @if (warning.existingClient.contactPerson) {
+        <span class="preview-item"><strong>Contact:</strong> {{ warning.existingClient.contactPerson }}</span>
+        }
+        <span class="preview-item">
+          <strong>Status:</strong>
+          {{ warning.existingClient.isArchived ? 'Archived' : (warning.existingClient.isActive ? 'Active' : 'Inactive')
+          }}
+        </span>
+      </div>
+      <div class="warning-actions">
+        <button type="button" class="btn-warning-open" (click)="openExistingCustomer()">
+          👁️ Open Existing Customer (#{{ warning.existingClient.clientId }})
+        </button>
+        <button type="button" class="btn-warning-force" (click)="saveAnyway()" [disabled]="isSubmitting()">
+          Save Anyway as Separate Customer
+        </button>
+        <button type="button" class="btn-warning-dismiss" (click)="clearDuplicateWarning()">
+          Edit Phone Number
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <form [formGroup]="customerForm" (ngSubmit)="onSubmit()" class="form-body">
+    <!-- Company Name Field -->
+    <div class="form-group">
+      <label for="companyName">
+        Company / Customer Name <span class="required">*</span>
+      </label>
+      <input id="companyName" type="text" formControlName="companyName"
+        placeholder="e.g. Alpha Tech Solutions or Muhammad Ali" class="form-control"
+        [class.is-invalid]="customerForm.get('companyName')?.invalid && customerForm.get('companyName')?.touched" />
+      @if (customerForm.get('companyName')?.invalid && customerForm.get('companyName')?.touched) {
+      <span class="field-error">Company / Customer Name is required (maximum 200 characters).</span>
+      }
+    </div>
+
+    <!-- Contact Person & Phone Row -->
+    <div class="form-row-2">
+      <div class="form-group">
+        <label for="contactPerson">Contact Person (Optional)</label>
+        <input id="contactPerson" type="text" formControlName="contactPerson" placeholder="e.g. Bilal Hussain"
+          class="form-control"
+          [class.is-invalid]="customerForm.get('contactPerson')?.invalid && customerForm.get('contactPerson')?.touched" />
+        @if (customerForm.get('contactPerson')?.invalid && customerForm.get('contactPerson')?.touched) {
+        <span class="field-error">Contact person cannot exceed 150 characters.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="phone">
+          Phone Number <span class="required">*</span>
+        </label>
+        <input id="phone" type="text" formControlName="phone" placeholder="e.g. 03001234567 or +92 300 1234567"
+          class="form-control"
+          [class.is-invalid]="customerForm.get('phone')?.invalid && customerForm.get('phone')?.touched" />
+        @if (customerForm.get('phone')?.invalid && customerForm.get('phone')?.touched) {
+        <span class="field-error">Valid phone number is required (e.g. 03001234567 or +923001234567).</span>
+        }
+      </div>
+    </div>
+
+    <!-- Email Field -->
+    <div class="form-group">
+      <label for="email">Email Address (Optional)</label>
+      <input id="email" type="email" formControlName="email" placeholder="e.g. client@company.com" class="form-control"
+        [class.is-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched" />
+      @if (customerForm.get('email')?.invalid && customerForm.get('email')?.touched) {
+      <span class="field-error">Please enter a valid email address.</span>
+      }
+    </div>
+
+    <!-- Address Field -->
+    <div class="form-group">
+      <label for="address">Address (Optional)</label>
+      <textarea id="address" rows="3" formControlName="address" placeholder="Office / delivery address..."
+        class="form-control textarea"></textarea>
+    </div>
+
+    <!-- Active Status Switch -->
+    <div class="form-switch-row">
+      <label class="switch-container">
+        <input type="checkbox" formControlName="isActive" id="isActive" />
+        <span class="switch-slider"></span>
+      </label>
+      <div class="switch-label-group">
+        <span class="switch-title">Active Customer Status</span>
+        <span class="switch-desc">Active customers can be selected for future transactions and orders.</span>
+      </div>
+    </div>
+
+    <!-- Form Actions Footer -->
+    <div class="form-actions-footer">
+      <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSubmitting()">
+        Cancel
+      </button>
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+        <span class="spinner"></span>
+        <span>Saving Customer...</span>
+        } @else {
+        <span>{{ customerToEdit ? 'Update Customer' : 'Save Customer' }}</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>
