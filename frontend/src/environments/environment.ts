@@ -1,5 +1,4 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:5282/api'
+  production: true,
+  apiUrl: 'https://zero-pixel-erp.onrender.com/api'
 };
-
