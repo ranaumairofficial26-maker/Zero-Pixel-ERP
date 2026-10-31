@@ -1,0 +1,79 @@
+services:
+  # ==========================================
+  # 1. PostgreSQL Database
+  # ==========================================
+  database:
+    image: postgres:16-alpine
+    container_name: zerppixels_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: ZeroPixelErpDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ZeroPixelErpDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # 2. .NET 8 Backend Web API
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zerppixels_backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5282
+      - ConnectionStrings__DefaultConnection=Host=database;Port=5432;Database=ZeroPixelErpDb;Username=postgres;Password=postgrespassword
+      - Jwt__Key=ZeroPixel_SuperSecure_Secret_JWT_Key_2026_Development_Only!
+      - Jwt__Issuer=ZeroPixelApi
+      - Jwt__Audience=ZeroPixelAdmin
+    ports:
+      - "5282:5282"
+
+  # ==========================================
+  # 3. Angular 18 Frontend + Nginx
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: zerppixels_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+      - "80:80"
+
+  # ==========================================
+  # 4. PgAdmin 4 Web GUI (Optional)
+  # ==========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: zerppixels_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@zerppixels.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    driver: local
+

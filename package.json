@@ -1,0 +1,10 @@
+{
+  "name": "zerp-pixels-crm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero Pixel ERP & CRM System",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build"
+  }
+}
+
