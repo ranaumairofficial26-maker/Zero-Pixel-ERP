@@ -24,8 +24,11 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateClientRequestValidator>();
 
 // 2. Database Context (PostgreSQL EF Core)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
     ?? "Host=localhost;Port=5432;Database=ZeroPixelErpDb;Username=postgres;Password=1234";
+
+var connectionString = ParseConnectionString(rawConnectionString);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -180,3 +183,31 @@ if (!string.IsNullOrWhiteSpace(port))
 }
 
 app.Run();
+
+static string ParseConnectionString(string input)
+{
+    if (string.IsNullOrWhiteSpace(input)) return input;
+
+    // If it's a URL like postgres://user:pass@host:port/dbname
+    if (input.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+        input.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        try
+        {
+            var uri = new Uri(input);
+            var userInfo = uri.UserInfo.Split(':');
+            var user = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : "";
+            var pass = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+            var db = uri.AbsolutePath.TrimStart('/');
+            var port = uri.Port > 0 ? uri.Port : 5432;
+
+            return $"Host={uri.Host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Require;Trust Server Certificate=true";
+        }
+        catch
+        {
+            return input;
+        }
+    }
+
+    return input;
+}
