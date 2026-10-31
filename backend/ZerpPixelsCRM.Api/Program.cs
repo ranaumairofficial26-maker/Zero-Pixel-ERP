@@ -71,12 +71,19 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 5. CORS policy for Angular Frontend
+// 5. CORS policy for Angular Frontend (Local + Vercel)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(
+                  "http://localhost:4200",
+                  "https://zero-pixel-erp.vercel.app"
+              )
+              .SetIsOriginAllowed(origin => 
+                  origin.EndsWith(".vercel.app") || 
+                  origin == "http://localhost:4200" || 
+                  origin == "http://localhost")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -165,5 +172,11 @@ app.UseAuthorization();
 app.MapGet("/api/health", () => Results.Ok(new { status = "Healthy", database = "PostgreSQL Connected", serverTime = DateTime.UtcNow }));
 
 app.MapControllers();
+
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    app.Urls.Add($"http://*:{port}");
+}
 
 app.Run();
