@@ -41,10 +41,24 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
               <span class="approval-pill" [class.approved]="latestApproval === 'Approved'" [class.rejected]="latestApproval === 'Rejected'" [class.revision]="latestApproval === 'Revision Requested'" [class.pending]="latestApproval === 'Pending'">
                 {{ latestApproval }}
               </span>
+              <span class="prod-type-pill" [class.in-house]="quotation.activeRevision.productionType === 'IN_HOUSE'" [class.outsourced]="quotation.activeRevision.productionType === 'OUTSOURCED'">
+                {{ quotation.activeRevision.productionType === 'OUTSOURCED' ? '🚚 Outsourced Production' : '🏢 In-House Production' }}
+              </span>
             </div>
           </div>
 
           <div class="header-actions">
+            @if (quotation.activeRevision.linkedOrderId) {
+              @if (quotation.activeRevision.productionType === 'OUTSOURCED') {
+                <a routerLink="/admin/production/outsourced" class="btn-action order-btn">
+                  🚚 View Outsourced Job
+                </a>
+              } @else {
+                <a routerLink="/admin/production/in-house" class="btn-action order-btn">
+                  🏢 View In-House Job
+                </a>
+              }
+            }
             <!-- PDF Preview -->
             <a [routerLink]="['/admin/quotations', quotation.quotationId, 'preview']" class="btn-action preview">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -137,6 +151,10 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
                     <span class="val badge">{{ quotation.quotationType }}</span>
                   </div>
                   <div class="info-row">
+                    <span class="label">Production:</span>
+                    <span class="val">{{ quotation.activeRevision.productionType === 'OUTSOURCED' ? 'Outsourced Production' : 'In-House Production' }}</span>
+                  </div>
+                  <div class="info-row">
                     <span class="label">Quotation Date:</span>
                     <span class="val">{{ quotation.activeRevision.quotationDate | date:'mediumDate' }}</span>
                   </div>
@@ -169,6 +187,7 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
                       <th class="col-idx">#</th>
                       <th>Product / Service</th>
                       <th>Specifications</th>
+                      <th>Production</th>
                       <th class="col-num">Qty</th>
                       <th>Unit</th>
                       <th class="col-num">Rate (PKR)</th>
@@ -226,6 +245,11 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
                               }
                             </div>
                           }
+                        </td>
+                        <td>
+                          <span class="item-prod-badge" [class.in-house]="(item.productionType || quotation.activeRevision.productionType) === 'IN_HOUSE'" [class.outsourced]="(item.productionType || quotation.activeRevision.productionType) === 'OUTSOURCED'">
+                            {{ (item.productionType || quotation.activeRevision.productionType) === 'OUTSOURCED' ? 'Outsourced' : 'In-House' }}
+                          </span>
                         </td>
                         <td class="col-num">{{ item.quantity | number }}</td>
                         <td>{{ item.unit }}</td>
@@ -469,6 +493,28 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
     .approval-pill.approved { background: #DCFCE7; color: #16A34A; }
     .approval-pill.rejected { background: #FEE2E2; color: #DC2626; }
     .approval-pill.revision { background: #FFEDD5; color: #C2410C; }
+    .prod-type-pill {
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .prod-type-pill.in-house { background: #F0FDF4; color: #16A34A; border: 1px solid #BBF7D0; }
+    .prod-type-pill.outsourced { background: #FAF5FF; color: #9333EA; border: 1px solid #E9D5FF; }
+    .order-btn {
+      background: #0284C7 !important;
+      color: #fff !important;
+      border-color: #0284C7 !important;
+    }
+    .item-prod-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .item-prod-badge.in-house { background: #F0FDF4; color: #16A34A; }
+    .item-prod-badge.outsourced { background: #FAF5FF; color: #9333EA; }
     .header-actions {
       display: flex;
       align-items: center;

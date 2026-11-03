@@ -9,15 +9,20 @@ public class UnitOfWork : IUnitOfWork
     private IClientRepository? _clients;
     private IAdminUserRepository? _adminUsers;
     private IQuotationRepository? _quotations;
+    private IPrintingOrderRepository? _printingOrders;
+    private IProductionJobRepository? _productionJobs;
 
     public UnitOfWork(AppDbContext context)
     {
         _context = context;
     }
 
+    public AppDbContext Context => _context;
     public IClientRepository Clients => _clients ??= new ClientRepository(_context);
     public IAdminUserRepository AdminUsers => _adminUsers ??= new AdminUserRepository(_context);
     public IQuotationRepository Quotations => _quotations ??= new QuotationRepository(_context);
+    public IPrintingOrderRepository PrintingOrders => _printingOrders ??= new PrintingOrderRepository(_context);
+    public IProductionJobRepository ProductionJobs => _productionJobs ??= new ProductionJobRepository(_context);
 
     public async Task<int> CompleteAsync()
     {
@@ -30,4 +35,3 @@ public class UnitOfWork : IUnitOfWork
         GC.SuppressFinalize(this);
     }
 }
-

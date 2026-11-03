@@ -148,6 +148,22 @@ import { Customer } from '../../../customers/models/customer.model';
               </button>
             </div>
 
+            <div class="production-type-card">
+              <div class="prod-type-info">
+                <span class="prod-icon">🏭</span>
+                <div>
+                  <label class="prod-label">Production Type <span class="required">*</span></label>
+                  <p class="prod-desc">Select whether this {{ isDigitalMarketing ? 'digital marketing' : 'printing' }} quotation will be produced In-House or Outsourced to a vendor.</p>
+                </div>
+              </div>
+              <div class="prod-type-dropdown-wrapper">
+                <select formControlName="productionType" class="prod-type-select-main" (change)="onQuotationProductionTypeChange()">
+                  <option value="IN_HOUSE">🏢 In-House Production</option>
+                  <option value="OUTSOURCED">🚚 Outsourced Production</option>
+                </select>
+              </div>
+            </div>
+
             <div formArrayName="items" class="items-list">
               @for (itemForm of itemsArray.controls; track $index) {
                 <div [formGroupName]="$index" class="item-block">
@@ -188,19 +204,18 @@ import { Customer } from '../../../customers/models/customer.model';
                         </div>
                       }
 
-                      <div [class]="isDigitalMarketing ? 'field-item span-2' : 'field-item span-2'">
+                      <div [class]="isDigitalMarketing ? 'field-item' : 'field-item span-2'">
                         <label class="field-label">{{ isDigitalMarketing ? 'Service Title' : 'Product Name' }} <span class="required">*</span></label>
                         <input type="text" formControlName="productName" class="form-input" [placeholder]="isDigitalMarketing ? 'e.g. Website Development, Marketing Campaign' : 'e.g. Brochure, Business Cards, Flyers'" />
                       </div>
 
-                      @if (!isDigitalMarketing) {
-                        <div class="field-item">
-                          <label class="field-label">Item Type</label>
-                          <select formControlName="itemType" class="form-select">
-                            <option value="Printing">Printing Product</option>
-                          </select>
-                        </div>
-                      }
+                      <div class="field-item">
+                        <label class="field-label">Production Route</label>
+                        <select formControlName="productionType" class="form-select">
+                          <option value="IN_HOUSE">🏢 In-House</option>
+                          <option value="OUTSOURCED">🚚 Outsourced</option>
+                        </select>
+                      </div>
 
                       <div class="field-item">
                         <label class="field-label">Unit</label>
@@ -421,6 +436,47 @@ import { Customer } from '../../../customers/models/customer.model';
     </div>
   `,
   styles: [`
+    .production-type-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #F0FDF4;
+      border: 1px solid #BBF7D0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+    .prod-type-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .prod-icon {
+      font-size: 22px;
+    }
+    .prod-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #166534;
+      display: block;
+    }
+    .prod-desc {
+      font-size: 11.5px;
+      color: #15803D;
+      margin: 2px 0 0 0;
+    }
+    .prod-type-select-main {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #86EFAC;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      color: #166534;
+      outline: none;
+      cursor: pointer;
+    }
     .quotation-form-page {
       display: flex;
       flex-direction: column;
@@ -977,6 +1033,7 @@ export class QuotationCreateComponent implements OnInit {
       customerEmail: [''],
       customerAddress: [''],
       quotationType: [initialType, [Validators.required]],
+      productionType: ['IN_HOUSE', [Validators.required]],
       currency: ['PKR'],
       quotationDate: [today, [Validators.required]],
       validUntil: [expiry, [Validators.required]],
@@ -1014,6 +1071,7 @@ export class QuotationCreateComponent implements OnInit {
       sortOrder: [this.itemsArray ? this.itemsArray.length + 1 : 1],
       productName: [isDm ? 'Digital Marketing Campaign' : '', [Validators.required]],
       itemType: [isDm ? 'Service' : 'Printing'],
+      productionType: [this.form?.get('productionType')?.value || 'IN_HOUSE'],
       serviceCategory: [isDm ? 'Marketing' : ''],
       description: [''],
       sizeDimensions: [''],
@@ -1034,6 +1092,13 @@ export class QuotationCreateComponent implements OnInit {
   addItem() {
     this.itemsArray.push(this.createItemFormGroup());
     this.recalculateTotals();
+  }
+
+  onQuotationProductionTypeChange() {
+    const selectedType = this.form.get('productionType')?.value || 'IN_HOUSE';
+    for (let i = 0; i < this.itemsArray.length; i++) {
+      this.itemsArray.at(i).patchValue({ productionType: selectedType });
+    }
   }
 
   removeItem(index: number) {
@@ -1194,6 +1259,7 @@ export class QuotationCreateComponent implements OnInit {
       return {
         sortOrder: idx + 1,
         itemType: isDm ? 'Service' : (item.itemType || 'Printing'),
+        productionType: item.productionType || formRaw.productionType || 'IN_HOUSE',
         productName: item.productName,
         description: item.description,
         sizeDimensions: isDm ? null : item.sizeDimensions,
@@ -1218,6 +1284,7 @@ export class QuotationCreateComponent implements OnInit {
       customerEmail: formRaw.customerEmail,
       customerAddress: formRaw.customerAddress,
       quotationType: formRaw.quotationType,
+      productionType: formRaw.productionType || 'IN_HOUSE',
       currency: formRaw.currency,
       quotationDate: formRaw.quotationDate,
       validUntil: formRaw.validUntil,

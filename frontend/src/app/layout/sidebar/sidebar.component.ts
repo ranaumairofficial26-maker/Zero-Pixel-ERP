@@ -10,31 +10,36 @@ import { filter } from 'rxjs';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent implements OnInit {
+export class SidebarComponent {
   private router = inject(Router);
 
-  salesExpanded = signal<boolean>(true);
-
-  ngOnInit(): void {
-    if (this.isSalesRouteActive()) {
-      this.salesExpanded.set(true);
-    }
-
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      if (this.isSalesRouteActive()) {
-        this.salesExpanded.set(true);
-      }
-    });
-  }
+  salesExpanded = signal<boolean>(false);
+  productionExpanded = signal<boolean>(false);
+  intelligenceExpanded = signal<boolean>(false);
 
   toggleSales(): void {
     this.salesExpanded.update(v => !v);
   }
 
+  toggleProduction(): void {
+    this.productionExpanded.update(v => !v);
+  }
+
+  toggleIntelligence(): void {
+    this.intelligenceExpanded.update(v => !v);
+  }
+
   isSalesRouteActive(): boolean {
-    return this.router.url.startsWith('/admin/customers') || this.router.url.startsWith('/admin/quotations');
+    return this.router.url.startsWith('/admin/customers') || 
+           this.router.url.startsWith('/admin/quotations');
+  }
+
+  isProductionRouteActive(): boolean {
+    return this.router.url.startsWith('/admin/production');
+  }
+
+  isIntelligenceRouteActive(): boolean {
+    return this.router.url.startsWith('/admin/printing-intelligence');
   }
 
   isRouteActive(routePath: string): boolean {

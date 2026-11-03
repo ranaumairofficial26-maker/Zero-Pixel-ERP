@@ -16,6 +16,11 @@ public class AppDbContext : DbContext
     public DbSet<QuotationItem> QuotationItems => Set<QuotationItem>();
     public DbSet<QuotationSendLog> QuotationSendLogs => Set<QuotationSendLog>();
     public DbSet<QuotationApprovalLog> QuotationApprovalLogs => Set<QuotationApprovalLog>();
+    public DbSet<PrintingOrder> PrintingOrders => Set<PrintingOrder>();
+    public DbSet<PrintingOrderItem> PrintingOrderItems => Set<PrintingOrderItem>();
+    public DbSet<ProductionJob> ProductionJobs => Set<ProductionJob>();
+    public DbSet<ProductionJobItem> ProductionJobItems => Set<ProductionJobItem>();
+    public DbSet<SheetCalculation> SheetCalculations => Set<SheetCalculation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -504,6 +509,52 @@ public class AppDbContext : DbContext
                   .HasColumnName("created_at")
                   .HasColumnType("timestamptz")
                   .IsRequired();
+        });
+                // 8. Configure SheetCalculation entity
+        modelBuilder.Entity<SheetCalculation>(entity =>
+        {
+            entity.ToTable("sheet_calculations");
+            entity.HasKey(e => e.CalculationId);
+            entity.Property(e => e.CalculationId)
+                  .HasColumnName("calculation_id")
+                  .UseIdentityAlwaysColumn();
+            entity.Property(e => e.Length)
+                  .HasColumnName("length")
+                  .HasColumnType("numeric(12,3)");
+            entity.Property(e => e.Width)
+                  .HasColumnName("width")
+                  .HasColumnType("numeric(12,3)");
+            entity.Property(e => e.Gsm)
+                  .HasColumnName("gsm")
+                  .HasColumnType("numeric(12,3)");
+            entity.Property(e => e.RatePerKg)
+                  .HasColumnName("rate_per_kg")
+                  .HasColumnType("numeric(18,4)");
+            entity.Property(e => e.SheetsPerRim)
+                  .HasColumnName("sheets_per_rim")
+                  .HasDefaultValue(500);
+            entity.Property(e => e.RequiredSheets)
+                  .HasColumnName("required_sheets")
+                  .HasDefaultValue(500);
+            entity.Property(e => e.ConversionFactor)
+                  .HasColumnName("conversion_factor")
+                  .HasColumnType("numeric(12,4)")
+                  .HasDefaultValue(3100m);
+            entity.Property(e => e.RimPrice)
+                  .HasColumnName("rim_price")
+                  .HasColumnType("numeric(18,4)");
+            entity.Property(e => e.PerSheetPrice)
+                  .HasColumnName("per_sheet_price")
+                  .HasColumnType("numeric(18,4)");
+            entity.Property(e => e.TotalPaperCost)
+                  .HasColumnName("total_paper_cost")
+                  .HasColumnType("numeric(18,4)");
+            entity.Property(e => e.Notes)
+                  .HasColumnName("notes")
+                  .HasColumnType("text");
+            entity.Property(e => e.CreatedAt)
+                  .HasColumnName("created_at")
+                  .HasColumnType("timestamptz");
         });
     }
 }

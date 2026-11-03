@@ -1,87 +1,481 @@
 <div class="dashboard-stage">
-  <!-- Page Header -->
-  <div class="dashboard-header">
-    <div>
-      <div class="breadcrumb-label">ERP OVERVIEW & METRICS</div>
-      <h1 class="page-title">Executive Dashboard</h1>
-      <p class="page-subtitle">Welcome to Zero Pixel ERP. Here is your current customer and database status.</p>
+  <!-- Top Welcome & Controls Bar -->
+  <header class="executive-topbar">
+    <div class="welcome-col">
+      <div class="system-status-pill">
+        <span class="live-dot"></span>
+        <span class="status-name">ERP LIVE SYSTEM ACTIVE</span>
+        <span class="divider">&bull;</span>
+        <span class="date-display">{{ currentDate | date:'fullDate' }}</span>
+      </div>
+      <h1 class="page-title">{{ greeting }}, Admin</h1>
+      <p class="page-subtitle">Zero Pixel ERP Executive Command Center &bull; Live overview of customer accounts, smart quotations, and multi-channel production.</p>
     </div>
-    <div class="header-actions">
-      <a routerLink="/admin/customers" class="btn-primary-blue">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Manage Customers</span>
+
+    <div class="topbar-actions">
+      <button type="button" class="btn-refresh" (click)="loadStats()" [disabled]="isLoading()" title="Refresh Dashboard Stats">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" [class.spinning]="isLoading()">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        <span>Refresh</span>
+      </button>
+
+      <a routerLink="/admin/customers" class="btn-secondary-action">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>Customers</span>
+      </a>
+
+      <a routerLink="/admin/quotations/create" class="btn-primary-gradient">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>New Smart Quotation</span>
       </a>
     </div>
-  </div>
+  </header>
 
-  <!-- Metric KPI Cards -->
-  <div class="kpi-grid">
-    <div class="kpi-card cyan-border">
+  <!-- 4-Column Executive KPI Cards -->
+  <section class="kpi-grid">
+    <!-- Active Customers -->
+    <div class="kpi-card cyan-theme">
+      <div class="card-glow"></div>
       <div class="kpi-top">
-        <span class="kpi-label">ACTIVE CUSTOMERS</span>
-        <span class="badge-pill bg-cyan">LIVE</span>
-      </div>
-      <div class="kpi-value-row">
-        <span class="kpi-number">{{ totalActive() }}</span>
-        <div class="kpi-icon-disc bg-cyan-soft">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00ADEF" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        <div class="label-wrapper">
+          <span class="kpi-tag">CLIENT DIRECTORY</span>
+          <h3 class="kpi-label">Active Customers</h3>
+        </div>
+        <div class="icon-disc">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
         </div>
       </div>
-    </div>
-
-    <div class="kpi-card green-border">
-      <div class="kpi-top">
-        <span class="kpi-label">TOTAL REGISTERED</span>
-        <span class="badge-pill bg-green">DATABASE</span>
-      </div>
-      <div class="kpi-value-row">
-        <span class="kpi-number">{{ totalCustomers() }}</span>
-        <div class="kpi-icon-disc bg-green-soft">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="kpi-body">
+        <div class="number-display">
+          <span class="number">{{ totalActive() }}</span>
+          <span class="subtext">Verified Registered Accounts</span>
         </div>
       </div>
+      <a routerLink="/admin/customers" class="card-link">
+        <span>Manage Customer Directory</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
     </div>
 
-    <div class="kpi-card amber-border">
+    <!-- Smart Quotations -->
+    <div class="kpi-card indigo-theme">
+      <div class="card-glow"></div>
       <div class="kpi-top">
-        <span class="kpi-label">INACTIVE CUSTOMERS</span>
-        <span class="badge-pill bg-amber">DORMANT</span>
-      </div>
-      <div class="kpi-value-row">
-        <span class="kpi-number">{{ totalInactive() }}</span>
-        <div class="kpi-icon-disc bg-amber-soft">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <div class="label-wrapper">
+          <span class="kpi-tag">ESTIMATES &amp; PRICING</span>
+          <h3 class="kpi-label">Smart Quotations</h3>
+        </div>
+        <div class="icon-disc">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
         </div>
       </div>
-    </div>
-
-    <div class="kpi-card red-border">
-      <div class="kpi-top">
-        <span class="kpi-label">ARCHIVED RECORDS</span>
-        <span class="badge-pill bg-red">SOFT-DELETED</span>
-      </div>
-      <div class="kpi-value-row">
-        <span class="kpi-number">{{ totalArchived() }}</span>
-        <div class="kpi-icon-disc bg-red-soft">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <div class="kpi-body">
+        <div class="number-display">
+          <span class="number">{{ totalQuotations() }}</span>
+          <span class="subtext">Active Quotation Records</span>
         </div>
       </div>
+      <a routerLink="/admin/quotations" class="card-link">
+        <span>View Quotation Proposals</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
     </div>
-  </div>
 
-  <!-- Quick Access Card -->
-  <div class="banner-card">
-    <div class="banner-content">
-      <span class="step-tag">CURRENT PHASE &bull; STEP 1</span>
-      <h2>Customer Management Module Active</h2>
-      <p>
-        The customer records managed here serve as the central client directory for upcoming Step 2: Smart Quotations and Production Orders. 
-        All customer phone numbers are automatically normalized to detect and prevent duplicate records.
-      </p>
-      <div class="banner-buttons">
-        <a routerLink="/admin/customers" class="btn-primary-blue">Go to Customers Module &rarr;</a>
+    <!-- In-House Production -->
+    <div class="kpi-card emerald-theme">
+      <div class="card-glow"></div>
+      <div class="kpi-top">
+        <div class="label-wrapper">
+          <span class="kpi-tag">INTERNAL FLOOR</span>
+          <h3 class="kpi-label">In-House Production</h3>
+        </div>
+        <div class="icon-disc">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"/>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+        </div>
       </div>
+      <div class="kpi-body">
+        <div class="number-display">
+          <span class="number">{{ totalInHouseJobs() }}</span>
+          <span class="subtext highlight-emerald">
+            <span class="pulse-indicator"></span>
+            {{ inHouseInProgress() }} Active In Progress
+          </span>
+        </div>
+      </div>
+      <a routerLink="/admin/production/in-house" class="card-link">
+        <span>Monitor Shop Floor Queue</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
     </div>
+
+    <!-- Outsourced Production -->
+    <div class="kpi-card amber-theme">
+      <div class="card-glow"></div>
+      <div class="kpi-top">
+        <div class="label-wrapper">
+          <span class="kpi-tag">VENDOR DISPATCH</span>
+          <h3 class="kpi-label">Outsourced Jobs</h3>
+        </div>
+        <div class="icon-disc">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="3" width="15" height="13"/>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+            <circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <div class="number-display">
+          <span class="number">{{ totalOutsourcedJobs() }}</span>
+          <span class="subtext highlight-amber">
+            <span class="pulse-indicator amber"></span>
+            {{ outsourcedInProgress() }} Active Vendor POs
+          </span>
+        </div>
+      </div>
+      <a routerLink="/admin/production/outsourced" class="card-link">
+        <span>Vendor Orders &amp; Delivery</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Executive Dual Layout (Main Operations + Strategic Shortcuts) -->
+  <div class="dashboard-main-layout">
+    <!-- Left Column: Operations Hub & Live Queue -->
+    <main class="operations-column">
+      <!-- Workflow Modules Navigation Cards -->
+      <section class="section-card">
+        <div class="section-header">
+          <div>
+            <span class="section-tag">CORE OPERATIONS</span>
+            <h2 class="section-title">Production &amp; Quotation Workflows</h2>
+          </div>
+          <span class="active-badge">3 Modules Integrated</span>
+        </div>
+
+        <div class="workflow-cards-grid">
+          <!-- In-House Production Hub Card -->
+          <div class="workflow-card">
+            <div class="wf-icon-head floor">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              <span class="wf-status-pill in-house">In-House</span>
+            </div>
+            <div class="wf-content">
+              <h4>In-House Production Floor</h4>
+              <p>Track shop-floor manufacturing live, manage execution queues, and dispatch finished goods.</p>
+              <div class="wf-stats-row">
+                <span class="stat-bubble">{{ totalInHouseJobs() }} Total Jobs</span>
+                <span class="stat-bubble live">{{ inHouseInProgress() }} In Progress</span>
+              </div>
+            </div>
+            <a routerLink="/admin/production/in-house" class="btn-wf-action">
+              <span>Open Floor Queue</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+
+          <!-- Outsourced Production Hub Card -->
+          <div class="workflow-card">
+            <div class="wf-icon-head vendor">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13"/>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <span class="wf-status-pill outsourced">Outsourced</span>
+            </div>
+            <div class="wf-content">
+              <h4>Outsourced Production</h4>
+              <p>Assign vendor Purchase Orders, record internal vendor costs, and monitor delivery timelines.</p>
+              <div class="wf-stats-row">
+                <span class="stat-bubble">{{ totalOutsourcedJobs() }} Total Jobs</span>
+                <span class="stat-bubble pending">{{ outsourcedInProgress() }} Active POs</span>
+              </div>
+            </div>
+            <a routerLink="/admin/production/outsourced" class="btn-wf-action">
+              <span>Manage Vendors</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+
+          <!-- Smart Quotations Hub Card -->
+          <div class="workflow-card">
+            <div class="wf-icon-head quote">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              <span class="wf-status-pill quotes">Quoting Engine</span>
+            </div>
+            <div class="wf-content">
+              <h4>Smart Quotations Builder</h4>
+              <p>Configure Printing &amp; Digital Marketing pricing with revision control, VAT rules, and PDF generation.</p>
+              <div class="wf-stats-row">
+                <span class="stat-bubble">{{ totalQuotations() }} Quotations</span>
+                <span class="stat-bubble auto">Auto-Sync</span>
+              </div>
+            </div>
+            <a routerLink="/admin/quotations" class="btn-wf-action">
+              <span>View Quotations</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Production Jobs Queue -->
+      <section class="section-card live-feed-card mt-4">
+        <div class="section-header">
+          <div class="header-info">
+            <div class="live-status-badge">
+              <span class="live-pulse-dot"></span>
+              <span class="live-tag">LIVE PRODUCTION FEED</span>
+            </div>
+            <h2 class="section-title">Recent Production Activity</h2>
+            <p class="section-subtitle">Real-time status of In-House print runs and Outsourced vendor jobs</p>
+          </div>
+          <div class="header-queue-actions">
+            <a routerLink="/admin/production/in-house" class="queue-btn in-house">
+              <span class="queue-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 18H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+                  <rect x="6" y="14" width="12" height="8"/>
+                  <polyline points="6 9 6 2 18 2 18 9"/>
+                </svg>
+              </span>
+              <span>In-House Queue</span>
+              <span class="count-pill">{{ totalInHouseJobs() }}</span>
+              <span class="arrow">&rarr;</span>
+            </a>
+            <a routerLink="/admin/production/outsourced" class="queue-btn outsourced">
+              <span class="queue-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="1" y="3" width="15" height="13"/>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+                  <circle cx="5.5" cy="18.5" r="2.5"/>
+                  <circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+              </span>
+              <span>Outsourced Queue</span>
+              <span class="count-pill">{{ totalOutsourcedJobs() }}</span>
+              <span class="arrow">&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        @if (isLoading()) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading live activity feed...</p>
+          </div>
+        } @else if (recentJobs().length === 0) {
+          <div class="empty-feed-card">
+            <div class="empty-feed-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <h4>No Active Production Jobs In Queue</h4>
+            <p>Approve a Smart Quotation with In-House or Outsourced assignment to generate production jobs automatically.</p>
+            <a routerLink="/admin/quotations/create" class="btn-empty-action">+ Create New Quotation</a>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="live-activity-table">
+              <thead>
+                <tr>
+                  <th>Job Code</th>
+                  <th>Order Reference</th>
+                  <th>Customer</th>
+                  <th>Type</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (job of recentJobs(); track job.jobId) {
+                  <tr>
+                    <td>
+                      <span class="job-badge-code">{{ job.jobNumber }}</span>
+                    </td>
+                    <td>
+                      <span class="order-ref-pill">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        {{ job.orderNumber }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="cust-cell">
+                        <span class="cust-avatar">{{ (job.customerName || 'C').charAt(0).toUpperCase() }}</span>
+                        <div class="cust-info">
+                          <span class="cust-title">{{ job.customerName }}</span>
+                          @if (job.customerPhone) {
+                            <span class="cust-sub">{{ job.customerPhone }}</span>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="prod-badge" [class.in-house]="job.productionType === 'IN_HOUSE'" [class.outsourced]="job.productionType === 'OUTSOURCED'">
+                        @if (job.productionType === 'IN_HOUSE') {
+                          <span class="badge-dot emerald"></span>
+                          <span>🏢 In-House</span>
+                        } @else {
+                          <span class="badge-dot amber"></span>
+                          <span>🚚 Outsourced</span>
+                        }
+                      </span>
+                    </td>
+                    <td>
+                      <span class="priority-pill" [class.urgent]="job.priority === 'Urgent'" [class.high]="job.priority === 'High'" [class.normal]="job.priority !== 'Urgent' && job.priority !== 'High'">
+                        <span class="priority-indicator"></span>
+                        {{ job.priority || 'Normal' }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-pill" [class]="getStatusBadgeClass(job.status)">
+                        <span class="status-indicator"></span>
+                        {{ job.status }}
+                      </span>
+                    </td>
+                    <td class="text-right">
+                      <a 
+                        [routerLink]="job.productionType === 'IN_HOUSE' ? '/admin/production/in-house' : '/admin/production/outsourced'" 
+                        class="btn-job-jump"
+                        [title]="'Open ' + (job.productionType === 'IN_HOUSE' ? 'In-House' : 'Outsourced') + ' Job Details'"
+                      >
+                        <span>Open</span>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </main>
+
+    <!-- Right Column: Shortcuts & System Telemetry -->
+    <aside class="sidebar-column">
+      <!-- Quick Shortcuts Card -->
+      <div class="sidebar-widget quick-actions-widget">
+        <div class="widget-header">
+          <div class="bolt-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h3 class="widget-title">Quick Operations</h3>
+        </div>
+
+        <div class="quick-links-list">
+          <a routerLink="/admin/quotations/create" class="quick-link-item">
+            <div class="item-icon-box cyan">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <line x1="9" y1="15" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <strong>Draft Quotation</strong>
+              <span>Smart pricing with PDF preview</span>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+
+          <a routerLink="/admin/customers" class="quick-link-item">
+            <div class="item-icon-box green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" y1="11" x2="19" y2="17"/>
+                <line x1="22" y1="14" x2="16" y2="14"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <strong>Customer Accounts</strong>
+              <span>Verified directory &amp; phone lookup</span>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+
+          <a routerLink="/admin/production/in-house" class="quick-link-item">
+            <div class="item-icon-box blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <strong>Shop Floor Board</strong>
+              <span>Job acceptance &amp; live progress</span>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+
+          <a routerLink="/admin/production/outsourced" class="quick-link-item">
+            <div class="item-icon-box orange">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13"/>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+            </div>
+            <div class="item-info">
+              <strong>Vendor PO Dispatch</strong>
+              <span>Outsourced POs &amp; vendor records</span>
+            </div>
+            <span class="arrow">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </aside>
   </div>
 </div>
-
