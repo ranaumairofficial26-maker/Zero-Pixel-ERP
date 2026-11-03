@@ -171,6 +171,26 @@
   }
 }
 
+select.form-control {
+  cursor: pointer;
+  background-color: #ffffff;
+  font-weight: 600;
+}
+
+.badge-material {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.badge-size {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #00adef;
+}
+
 .form-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;

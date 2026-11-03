@@ -2,6 +2,29 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ZerpPixelsCRM.Api.DTOs;
 
+public class PaperSizeDto
+{
+    public int PaperSizeId { get; set; }
+    public string SizeName { get; set; } = string.Empty;
+    public decimal LengthInches { get; set; }
+    public decimal WidthInches { get; set; }
+    public bool IsActive { get; set; }
+}
+
+public class PrintingMaterialDto
+{
+    public int MaterialId { get; set; }
+    public string MaterialName { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+}
+
+public class AddCustomMaterialRequest
+{
+    [Required]
+    [MaxLength(150)]
+    public string MaterialName { get; set; } = string.Empty;
+}
+
 public class CalculateSheetCostRequest
 {
     [Range(0.01, 10000, ErrorMessage = "Length must be greater than zero")]
@@ -24,6 +47,9 @@ public class CalculateSheetCostRequest
 
     [Range(0.0001, 1000000, ErrorMessage = "Conversion factor must be greater than zero")]
     public decimal ConversionFactor { get; set; } = 3100m;
+
+    public string? MaterialName { get; set; }
+    public string? PaperSizeName { get; set; }
 }
 
 public class CalculateSheetCostResponse
@@ -35,6 +61,8 @@ public class CalculateSheetCostResponse
     public int SheetsPerRim { get; set; }
     public int RequiredSheets { get; set; }
     public decimal ConversionFactor { get; set; }
+    public string? MaterialName { get; set; }
+    public string? PaperSizeName { get; set; }
 
     public decimal ReferenceRimWeightKg { get; set; }
     public decimal EquivalentRims { get; set; }
@@ -66,6 +94,9 @@ public class SaveSheetCalculationRequest
     [Range(0.0001, 1000000, ErrorMessage = "Conversion factor must be greater than zero")]
     public decimal ConversionFactor { get; set; } = 3100m;
 
+    public string? MaterialName { get; set; }
+    public string? PaperSizeName { get; set; }
+
     public string? Notes { get; set; }
 }
 
@@ -79,6 +110,8 @@ public class SheetCalculationDto
     public int SheetsPerRim { get; set; }
     public int RequiredSheets { get; set; }
     public decimal ConversionFactor { get; set; }
+    public string? MaterialName { get; set; }
+    public string? PaperSizeName { get; set; }
     public decimal ReferenceRimWeightKg { get; set; }
     public decimal EquivalentRims { get; set; }
     public decimal RimPrice { get; set; }

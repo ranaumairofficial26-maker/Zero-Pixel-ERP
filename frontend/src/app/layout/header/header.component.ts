@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -12,6 +13,7 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class HeaderComponent {
   authService = inject(AuthService);
+  themeService = inject(ThemeService);
   private router = inject(Router);
 
   get currentModule(): string {

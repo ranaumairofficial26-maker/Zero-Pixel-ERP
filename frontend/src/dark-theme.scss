@@ -1,0 +1,864 @@
+/* ========================================================
+   ZERO PIXEL ERP - GLOBAL DARK THEME (COMPREHENSIVE)
+   Complete Dark Mode Coverage across ALL components, pages & dialogs
+   ======================================================== */
+
+// Dark Theme Color Tokens
+$dark-bg-root: #090d16;
+$dark-bg-surface: #111827;
+$dark-bg-card: #131c2e;
+$dark-bg-input: #172133;
+$dark-bg-hover: #1c283e;
+$dark-bg-active: #23314c;
+
+$dark-border-subtle: #1f293d;
+$dark-border-medium: #2a374f;
+$dark-border-focus: #00adef;
+
+$dark-text-high: #f8fafc;
+$dark-text-body: #e2e8f0;
+$dark-text-muted: #94a3b8;
+$dark-text-dim: #64748b;
+
+html.dark-mode,
+body.dark-mode {
+  background-color: $dark-bg-root !important;
+  color: $dark-text-body !important;
+  color-scheme: dark;
+
+  // Custom Scrollbars
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: $dark-bg-root;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: $dark-border-medium;
+    border-radius: 4px;
+    &:hover {
+      background: #475569;
+    }
+  }
+
+  /* ======================================================
+     1. APP SHELL & LAYOUT
+     ====================================================== */
+  .admin-shell,
+  .content-wrapper,
+  .page-container {
+    background-color: $dark-bg-root !important;
+    color: $dark-text-body !important;
+  }
+
+  /* ======================================================
+     2. HEADER NAVBAR
+     ====================================================== */
+  .admin-header {
+    background: $dark-bg-surface !important;
+    border-bottom: 1px solid $dark-border-subtle !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+
+    .header-left {
+      .module-title-wrap {
+        .system-prefix { color: $dark-text-high !important; }
+        .divider { color: $dark-border-medium !important; }
+        .active-module-pill {
+          background: rgba(0, 173, 239, 0.15) !important;
+          color: #38bdf8 !important;
+        }
+      }
+    }
+
+    .header-right {
+      .btn-theme-toggle {
+        background: $dark-bg-input !important;
+        border-color: $dark-border-medium !important;
+        color: #f59e0b !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+
+        &:hover {
+          background: $dark-bg-hover !important;
+          border-color: #f59e0b !important;
+          color: #fbbf24 !important;
+        }
+      }
+
+      .admin-profile {
+        .avatar-circle {
+          box-shadow: 0 0 12px rgba(0, 173, 239, 0.35) !important;
+        }
+        .profile-details {
+          .admin-name { color: $dark-text-high !important; }
+          .admin-role { color: $dark-text-muted !important; }
+        }
+      }
+
+      .btn-logout {
+        border-color: $dark-border-medium !important;
+        color: $dark-text-muted !important;
+        &:hover {
+          background: rgba(239, 68, 68, 0.15) !important;
+          border-color: rgba(239, 68, 68, 0.4) !important;
+          color: #f87171 !important;
+        }
+      }
+    }
+  }
+
+  /* ======================================================
+     3. SIDEBAR NAVIGATION
+     ====================================================== */
+  .sidebar-wrapper {
+    background: $dark-bg-surface !important;
+    border-right: 1px solid $dark-border-subtle !important;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.35) !important;
+
+    .brand-top {
+      background: $dark-bg-surface !important;
+      border-bottom: 1px solid $dark-border-subtle !important;
+      .brand-name { color: $dark-text-high !important; }
+      .brand-slogan { color: $dark-text-muted !important; }
+    }
+
+    .nav-container {
+      .nav-section-title { color: $dark-text-dim !important; }
+      .nav-item-link {
+        color: $dark-text-muted !important;
+        .item-icon svg { color: $dark-text-dim !important; }
+        &:hover {
+          background: $dark-bg-input !important;
+          color: #38bdf8 !important;
+          .item-icon svg { color: #38bdf8 !important; }
+        }
+        &.active {
+          background: rgba(0, 173, 239, 0.15) !important;
+          color: #38bdf8 !important;
+          border-left: 3px solid #00adef;
+          .item-icon svg { color: #00adef !important; }
+        }
+      }
+
+      .sub-menu {
+        border-left-color: $dark-border-subtle !important;
+        .sub-link {
+          color: $dark-text-muted !important;
+          &:hover { color: #38bdf8 !important; }
+          &.active { color: #00adef !important; }
+        }
+      }
+    }
+
+    .sidebar-footer {
+      background: $dark-bg-surface !important;
+      border-top: 1px solid $dark-border-subtle !important;
+      .system-badge {
+        background: $dark-bg-input !important;
+        color: $dark-text-muted !important;
+        border: 1px solid $dark-border-subtle !important;
+      }
+    }
+  }
+
+  /* ======================================================
+     4. ALL PAGE HEADERS & GENERAL SURFACES
+     ====================================================== */
+  .page-header,
+  .executive-topbar,
+  .section-card,
+  .card,
+  .calc-card,
+  .result-card,
+  .history-card,
+  .material-card,
+  .form-card,
+  .detail-card,
+  .summary-card,
+  .filter-card,
+  .table-card,
+  .customer-card,
+  .customer-header-card,
+  .info-block,
+  .modal-card,
+  .empty-ledger-card,
+  .sidebar-widget,
+  .cost-summary-card,
+  .price-card,
+  .step-card,
+  .items-card,
+  .customer-search-card {
+    background: $dark-bg-surface !important;
+    border-color: $dark-border-subtle !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    color: $dark-text-body !important;
+  }
+
+  .page-title,
+  .section-title,
+  .modal-title,
+  .widget-title,
+  .title {
+    color: $dark-text-high !important;
+  }
+
+  .page-subtitle,
+  .section-subtitle,
+  .modal-subtitle,
+  .subtitle {
+    color: $dark-text-muted !important;
+  }
+
+  /* ======================================================
+     5. WORKFLOW CARDS GRID (DASHBOARD - Image 1)
+     ====================================================== */
+  .workflow-cards-grid {
+    .workflow-card {
+      background: $dark-bg-card !important;
+      border: 1px solid $dark-border-subtle !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+      &:hover {
+        background: $dark-bg-input !important;
+        border-color: $dark-border-medium !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+      }
+
+      .wf-content {
+        h4 {
+          color: $dark-text-high !important;
+        }
+        p {
+          color: $dark-text-muted !important;
+        }
+
+        .wf-stats-row {
+          .stat-bubble {
+            background: $dark-bg-input !important;
+            border: 1px solid $dark-border-subtle !important;
+            color: $dark-text-body !important;
+
+            &.live {
+              background: rgba(16, 185, 129, 0.15) !important;
+              color: #34d399 !important;
+              border-color: rgba(16, 185, 129, 0.3) !important;
+            }
+            &.pending {
+              background: rgba(245, 158, 11, 0.15) !important;
+              color: #fbbf24 !important;
+              border-color: rgba(245, 158, 11, 0.3) !important;
+            }
+            &.auto {
+              background: rgba(99, 102, 241, 0.15) !important;
+              color: #a5b4fc !important;
+              border-color: rgba(99, 102, 241, 0.3) !important;
+            }
+          }
+        }
+      }
+
+      .btn-wf-action {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-high !important;
+
+        &:hover {
+          background: #00adef !important;
+          border-color: #00adef !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+
+  /* ======================================================
+     6. CUSTOMERS SEARCH & FILTER BAR (Image 2)
+     ====================================================== */
+  .controls-card {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-subtle !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+    .search-wrap {
+      .search-icon {
+        color: $dark-text-dim !important;
+      }
+
+      .search-input {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-high !important;
+
+        &::placeholder {
+          color: $dark-text-dim !important;
+        }
+        &:focus {
+          border-color: #00adef !important;
+          box-shadow: 0 0 0 3px rgba(0, 173, 239, 0.25) !important;
+        }
+      }
+    }
+
+    .status-tabs-group {
+      .tab-pill {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-muted !important;
+
+        &:hover {
+          background: $dark-bg-hover !important;
+          color: $dark-text-high !important;
+          border-color: #475569 !important;
+        }
+
+        &.active {
+          background: #00adef !important;
+          border-color: #00adef !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+  }
+
+  /* ======================================================
+     7. QUOTATIONS SEARCH & FILTER TOOLBAR (Image 3)
+     ====================================================== */
+  .toolbar-section {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-subtle !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+    .search-box {
+      background: $dark-bg-input !important;
+      border: 1px solid $dark-border-medium !important;
+      border-radius: 8px !important;
+
+      .search-icon {
+        color: $dark-text-dim !important;
+      }
+
+      .toolbar-search-input,
+      input {
+        background: transparent !important;
+        border: none !important;
+        color: $dark-text-high !important;
+
+        &::placeholder {
+          color: $dark-text-dim !important;
+        }
+      }
+    }
+
+    .filters-group {
+      .filter-select {
+        background-color: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-high !important;
+
+        &:focus {
+          border-color: #00adef !important;
+        }
+
+        option {
+          background-color: $dark-bg-surface !important;
+          color: $dark-text-high !important;
+        }
+      }
+    }
+  }
+
+  /* ======================================================
+     8. PRODUCTION PAGES (IN-HOUSE & OUTSOURCED - Images 4 & 5)
+     ====================================================== */
+  // KPI Cards on Production Pages & Everywhere
+  .kpi-grid,
+  .summary-cards-grid {
+    .kpi-card,
+    .summary-card {
+      background: $dark-bg-surface !important;
+      border: 1px solid $dark-border-subtle !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+
+      .kpi-label,
+      .card-label {
+        color: $dark-text-muted !important;
+      }
+
+      .kpi-val,
+      .card-count {
+        color: #ffffff !important;
+
+        &.queued { color: #fbbf24 !important; }
+        &.in-progress { color: #38bdf8 !important; }
+        &.completed { color: #34d399 !important; }
+        &.pending { color: #f59e0b !important; }
+        &.vendor { color: #c084fc !important; }
+        &.inspected { color: #38bdf8 !important; }
+        &.cost { color: #34d399 !important; }
+      }
+    }
+  }
+
+  // Filter Toolbar Cards on Production Pages
+  .toolbar-card {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-subtle !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+    .status-tabs {
+      .tab-btn {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-muted !important;
+
+        &:hover {
+          background: $dark-bg-hover !important;
+          color: $dark-text-high !important;
+        }
+
+        &.active {
+          background: rgba(16, 185, 129, 0.2) !important;
+          color: #34d399 !important;
+          border-color: rgba(16, 185, 129, 0.5) !important;
+        }
+      }
+    }
+
+    .search-box {
+      background: $dark-bg-input !important;
+      border: 1px solid $dark-border-medium !important;
+      border-radius: 8px !important;
+
+      input {
+        background: transparent !important;
+        border: none !important;
+        color: $dark-text-high !important;
+
+        &::placeholder {
+          color: $dark-text-dim !important;
+        }
+      }
+    }
+  }
+
+  // Production Tables & Containers
+  .table-container {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-subtle !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+
+    .jobs-table {
+      thead tr,
+      th {
+        background: #0d1424 !important;
+        color: $dark-text-muted !important;
+        border-bottom: 2px solid $dark-border-subtle !important;
+      }
+
+      tbody tr {
+        background: $dark-bg-surface !important;
+        border-bottom: 1px solid $dark-border-subtle !important;
+
+        &:hover {
+          background: $dark-bg-hover !important;
+        }
+      }
+
+      td {
+        background: transparent !important;
+        color: $dark-text-body !important;
+        border-bottom: 1px solid $dark-border-subtle !important;
+
+        strong {
+          color: $dark-text-high !important;
+        }
+
+        .btn-action {
+          background: $dark-bg-input !important;
+          border: 1px solid $dark-border-medium !important;
+          color: $dark-text-high !important;
+
+          &.edit {
+            color: #38bdf8 !important;
+          }
+          &.delete {
+            color: #f87171 !important;
+          }
+
+          &:hover {
+            background: $dark-bg-hover !important;
+            border-color: #475569 !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* ======================================================
+     9. UNIVERSAL INPUTS, SELECTS, FORMS
+     ====================================================== */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="date"],
+  select,
+  textarea,
+  .form-control,
+  .form-select,
+  .form-input,
+  .form-textarea {
+    background-color: $dark-bg-input !important;
+    border: 1px solid $dark-border-medium !important;
+    color: $dark-text-high !important;
+
+    &::placeholder {
+      color: $dark-text-dim !important;
+    }
+
+    &:focus {
+      background-color: $dark-bg-input !important;
+      border-color: #00adef !important;
+      box-shadow: 0 0 0 3px rgba(0, 173, 239, 0.25) !important;
+      color: #ffffff !important;
+    }
+
+    option {
+      background-color: $dark-bg-surface !important;
+      color: $dark-text-high !important;
+    }
+  }
+
+  label,
+  .form-label,
+  .field-label {
+    color: $dark-text-body !important;
+  }
+
+  /* ======================================================
+     10. UNIVERSAL TABLES ACROSS ALL MODULES
+     ====================================================== */
+  table,
+  .table,
+  .table-responsive,
+  .customer-table,
+  .quotations-table,
+  .line-items-table,
+  .history-table {
+    background: $dark-bg-surface !important;
+    border-color: $dark-border-subtle !important;
+
+    thead, thead tr, th {
+      background: #0d1424 !important;
+      color: $dark-text-muted !important;
+      border-bottom: 2px solid $dark-border-subtle !important;
+    }
+
+    tbody tr {
+      background: transparent !important;
+      border-bottom: 1px solid $dark-border-subtle !important;
+
+      &:hover {
+        background: $dark-bg-hover !important;
+      }
+    }
+
+    td {
+      color: $dark-text-body !important;
+      border-bottom: 1px solid $dark-border-subtle !important;
+    }
+  }
+
+  /* ======================================================
+     11. SHEET CALCULATOR WORKSPACE & CARDS (Image 1)
+     ====================================================== */
+  .sheet-calculator-container {
+    color: $dark-text-body !important;
+
+    .workspace-card,
+    .inputs-card,
+    .breakdown-card,
+    .results-card,
+    .history-card {
+      background: $dark-bg-surface !important;
+      border: 1px solid $dark-border-subtle !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .badge-size {
+      color: #38bdf8 !important;
+    }
+
+    .card-header-row {
+      border-bottom: 1px solid $dark-border-subtle !important;
+
+      .card-title {
+        color: $dark-text-high !important;
+      }
+      .card-desc {
+        color: $dark-text-muted !important;
+      }
+    }
+
+    .compact-material-control {
+      background: $dark-bg-card !important;
+      border: 1px solid $dark-border-subtle !important;
+
+      .compact-material-label {
+        color: $dark-text-muted !important;
+      }
+
+      .compact-select {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-high !important;
+
+        option {
+          background: $dark-bg-surface !important;
+          color: $dark-text-high !important;
+        }
+      }
+    }
+
+    .input-label {
+      color: $dark-text-high !important;
+    }
+
+    .form-control {
+      background: $dark-bg-input !important;
+      border: 1px solid $dark-border-medium !important;
+      color: $dark-text-high !important;
+
+      &:focus {
+        border-color: #00adef !important;
+      }
+    }
+
+    .hint-feedback {
+      color: $dark-text-dim !important;
+    }
+
+    .factor-explanation {
+      background: $dark-bg-card !important;
+      color: $dark-text-muted !important;
+
+      code {
+        background: $dark-bg-input !important;
+        color: #38bdf8 !important;
+      }
+    }
+
+    .btn-secondary,
+    .btn-reset {
+      background: $dark-bg-input !important;
+      border: 1px solid $dark-border-medium !important;
+      color: $dark-text-high !important;
+
+      &:hover:not(:disabled) {
+        background: $dark-bg-hover !important;
+        border-color: #475569 !important;
+        color: #ffffff !important;
+      }
+    }
+
+    // Results Column Cards
+    .results-kpi-grid {
+      .kpi-card {
+        background: $dark-bg-card !important;
+        border: 1px solid $dark-border-subtle !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+        &.rim-kpi,
+        &.sheet-kpi {
+          background: $dark-bg-card !important;
+
+          .kpi-icon {
+            background: $dark-bg-input !important;
+            color: #38bdf8 !important;
+          }
+        }
+
+        .kpi-content {
+          .kpi-label {
+            color: $dark-text-muted !important;
+          }
+          .kpi-value-row {
+            .currency {
+              color: #00adef !important;
+            }
+            .amount {
+              color: $dark-text-high !important;
+            }
+          }
+          .kpi-subtext {
+            color: $dark-text-dim !important;
+          }
+        }
+      }
+    }
+
+    .metrics-secondary-row {
+      .metric-mini-box {
+        background: $dark-bg-card !important;
+        border: 1px solid $dark-border-subtle !important;
+
+        .mini-label {
+          color: $dark-text-muted !important;
+        }
+        .mini-val {
+          color: $dark-text-high !important;
+        }
+        .mini-sub {
+          color: $dark-text-dim !important;
+        }
+      }
+    }
+
+    .live-indicator {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: rgba(16, 185, 129, 0.3) !important;
+      color: #34d399 !important;
+    }
+  }
+
+  /* ======================================================
+     12. PAGINATION FOOTERS ACROSS ALL MODULES (Image 2)
+     ====================================================== */
+  .pagination-footer,
+  .pagination-bar,
+  .table-pagination,
+  .pagination-section {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-subtle !important;
+    border-top: 1px solid $dark-border-subtle !important;
+    color: $dark-text-body !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
+
+    .page-size-selector,
+    .pagination-info {
+      color: $dark-text-muted !important;
+      label {
+        color: $dark-text-muted !important;
+      }
+      strong,
+      .total-indicator {
+        color: $dark-text-high !important;
+      }
+    }
+
+    .page-select,
+    select {
+      background-color: $dark-bg-input !important;
+      border: 1px solid $dark-border-medium !important;
+      color: $dark-text-high !important;
+      border-radius: 6px !important;
+
+      option {
+        background-color: $dark-bg-surface !important;
+        color: $dark-text-high !important;
+      }
+    }
+
+    .pagination-controls {
+      .page-current,
+      .page-indicator {
+        color: $dark-text-high !important;
+      }
+
+      .btn-page {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-high !important;
+        border-radius: 6px !important;
+
+        &:hover:not(:disabled) {
+          background: $dark-bg-hover !important;
+          border-color: #00adef !important;
+          color: #38bdf8 !important;
+        }
+
+        &:disabled {
+          opacity: 0.35 !important;
+          background: $dark-bg-card !important;
+          border-color: $dark-border-subtle !important;
+          color: $dark-text-dim !important;
+          cursor: not-allowed !important;
+        }
+      }
+    }
+  }
+
+  /* ======================================================
+     13. MODALS & DIALOGS
+     ====================================================== */
+  .modal-backdrop,
+  .dialog-backdrop,
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-container,
+  .modal-dialog,
+  .dialog-modal,
+  .modal-content {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-medium !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+    color: $dark-text-body !important;
+
+    .modal-header,
+    .dialog-header {
+      border-bottom: 1px solid $dark-border-subtle !important;
+      background: $dark-bg-surface !important;
+      h3, h4, .title { color: $dark-text-high !important; }
+      .btn-close, .close-btn {
+        color: $dark-text-muted !important;
+        &:hover { color: $dark-text-high !important; }
+      }
+    }
+
+    .modal-footer,
+    .dialog-footer {
+      border-top: 1px solid $dark-border-subtle !important;
+      background: $dark-bg-surface !important;
+
+      .btn-cancel {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-body !important;
+        &:hover { background: $dark-bg-hover !important; color: $dark-text-high !important; }
+      }
+    }
+  }
+
+  /* ======================================================
+     12. BUTTONS & ACTIONS
+     ====================================================== */
+  .btn-refresh,
+  .btn-secondary-action,
+  .btn-action-outline,
+  .action-back,
+  .btn-page {
+    background: $dark-bg-input !important;
+    border: 1px solid $dark-border-medium !important;
+    color: $dark-text-body !important;
+
+    &:hover {
+      background: $dark-bg-hover !important;
+      border-color: #475569 !important;
+      color: $dark-text-high !important;
+    }
+  }
+
+  // Badges & Pills
+  .active-badge,
+  .system-status-pill,
+  .badge-default {
+    background: $dark-bg-input !important;
+    border: 1px solid $dark-border-subtle !important;
+    color: $dark-text-muted !important;
+  }
+}

@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, timeout } from 'rxjs';
+import { Observable, timeout, catchError, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   SheetCalculation,
   SaveSheetCalculationRequest,
-  CalculationResult
+  CalculationResult,
+  PaperSize,
+  PrintingMaterial
 } from '../models/sheet-calculator.model';
 
 @Injectable({
@@ -19,6 +21,43 @@ export class SheetCalculatorService {
       return 'http://localhost:5282/api';
     }
     return environment.apiUrl || 'http://localhost:5282/api';
+  }
+
+  // --- Materials API ---
+  getMaterials(): Observable<PrintingMaterial[]> {
+    return this.http.get<PrintingMaterial[]>(`${this.baseUrl}/sheet-calculator/materials`).pipe(
+      timeout(10000),
+      catchError(() => of([
+        { materialName: 'ART/MATT PAPER', isActive: true },
+        { materialName: 'OFFSET PAPER', isActive: true },
+        { materialName: 'ART CARD', isActive: true },
+        { materialName: 'Carbonless Paper', isActive: true },
+        { materialName: 'FLYING PAPER', isActive: true },
+        { materialName: 'Bleach Card', isActive: true },
+        { materialName: 'Box Board', isActive: true },
+        { materialName: 'Sticker', isActive: true }
+      ]))
+    );
+  }
+
+  addMaterial(materialName: string): Observable<PrintingMaterial> {
+    return this.http.post<PrintingMaterial>(`${this.baseUrl}/sheet-calculator/materials`, { materialName }).pipe(
+      timeout(10000)
+    );
+  }
+
+  // --- Paper Sizes API ---
+  getPaperSizes(): Observable<PaperSize[]> {
+    return this.http.get<PaperSize[]>(`${this.baseUrl}/sheet-calculator/paper-sizes`).pipe(
+      timeout(10000),
+      catchError(() => of([
+        { sizeName: 'A4', lengthInches: 8.27, widthInches: 11.679, isActive: true },
+        { sizeName: 'A5', lengthInches: 5.7, widthInches: 8.27, isActive: true },
+        { sizeName: 'Letter', lengthInches: 8.5, widthInches: 11, isActive: true },
+        { sizeName: 'Legal', lengthInches: 8.5, widthInches: 14, isActive: true },
+        { sizeName: '7 × 9', lengthInches: 7, widthInches: 9, isActive: true }
+      ]))
+    );
   }
 
   // --- Calculations APIs ---

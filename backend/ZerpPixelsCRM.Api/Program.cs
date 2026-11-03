@@ -225,7 +225,25 @@ using (var scope = app.Services.CreateScope())
             CREATE INDEX IF NOT EXISTS IX_printing_orders_quotation_id ON printing_orders(quotation_id);
             CREATE INDEX IF NOT EXISTS IX_production_jobs_status ON production_jobs(status);
             CREATE INDEX IF NOT EXISTS IX_production_jobs_production_type ON production_jobs(production_type);
-            DROP TABLE IF EXISTS printing_materials CASCADE;
+            CREATE TABLE IF NOT EXISTS printing_materials (
+                material_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                material_name VARCHAR(150) NOT NULL UNIQUE,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS UQ_printing_materials_name ON printing_materials(LOWER(material_name));
+            INSERT INTO printing_materials (material_name, is_active, created_at, updated_at)
+            VALUES 
+                ('ART/MATT PAPER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('OFFSET PAPER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('ART CARD', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('Carbonless Paper', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('FLYING PAPER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('Bleach Card', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('Box Board', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('Sticker', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (material_name) DO NOTHING;
             ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_id CASCADE;
             ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_name_snapshot CASCADE;
             CREATE TABLE IF NOT EXISTS sheet_calculations (
@@ -243,7 +261,30 @@ using (var scope = app.Services.CreateScope())
                 notes TEXT,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
-            CREATE INDEX IF NOT EXISTS IX_sheet_calculations_created_at ON sheet_calculations(created_at DESC);");
+            CREATE INDEX IF NOT EXISTS IX_sheet_calculations_created_at ON sheet_calculations(created_at DESC);
+            ALTER TABLE sheet_calculations ADD COLUMN IF NOT EXISTS paper_size_name VARCHAR(100);
+            ALTER TABLE sheet_calculations ADD COLUMN IF NOT EXISTS material_name VARCHAR(150);
+            CREATE TABLE IF NOT EXISTS paper_sizes (
+                paper_size_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                size_name VARCHAR(100) NOT NULL UNIQUE,
+                length_inches NUMERIC(10,3) NOT NULL,
+                width_inches NUMERIC(10,3) NOT NULL,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS UQ_paper_sizes_name ON paper_sizes(LOWER(size_name));
+            INSERT INTO paper_sizes (size_name, length_inches, width_inches, is_active, created_at, updated_at)
+            VALUES 
+                ('A4', 8.27, 11.679, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('A5', 5.7, 8.27, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('Letter', 8.5, 11, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('Legal', 8.5, 14, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+                ('7 × 9', 7, 9, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ON CONFLICT (size_name) DO UPDATE SET
+                length_inches = EXCLUDED.length_inches,
+                width_inches = EXCLUDED.width_inches,
+                updated_at = CURRENT_TIMESTAMP;");
 
         var authService = services.GetRequiredService<IAuthService>();
         await authService.SeedAdminUserAsync();
