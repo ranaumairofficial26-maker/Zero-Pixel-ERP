@@ -244,6 +244,22 @@ using (var scope = app.Services.CreateScope())
                 ('Box Board', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
                 ('Sticker', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ON CONFLICT (material_name) DO NOTHING;
+            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_length NUMERIC(10,3);
+            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_width NUMERIC(10,3);
+            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_gsm NUMERIC(10,3);
+            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_rate_per_kg NUMERIC(18,4);
+            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_sheets_per_rim INTEGER;
+            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_conversion_factor NUMERIC(12,4);
+            UPDATE printing_materials
+            SET 
+                default_length = 23,
+                default_width = 36,
+                default_gsm = 100,
+                default_rate_per_kg = 680,
+                default_sheets_per_rim = 500,
+                default_conversion_factor = 3100,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE UPPER(TRIM(material_name)) = 'OFFSET PAPER';
             ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_id CASCADE;
             ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_name_snapshot CASCADE;
             CREATE TABLE IF NOT EXISTS sheet_calculations (

@@ -37,7 +37,13 @@ public class SheetCalculatorController : ControllerBase
             {
                 MaterialId = m.MaterialId,
                 MaterialName = m.MaterialName,
-                IsActive = m.IsActive
+                IsActive = m.IsActive,
+                DefaultLength = m.DefaultLength,
+                DefaultWidth = m.DefaultWidth,
+                DefaultGsm = m.DefaultGsm,
+                DefaultRatePerKg = m.DefaultRatePerKg,
+                DefaultSheetsPerRim = m.DefaultSheetsPerRim,
+                DefaultConversionFactor = m.DefaultConversionFactor
             })
             .ToListAsync();
 

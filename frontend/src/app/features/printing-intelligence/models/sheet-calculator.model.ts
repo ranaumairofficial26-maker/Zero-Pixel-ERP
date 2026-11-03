@@ -10,6 +10,12 @@ export interface PrintingMaterial {
   materialId?: number;
   materialName: string;
   isActive?: boolean;
+  defaultLength?: number;
+  defaultWidth?: number;
+  defaultGsm?: number;
+  defaultRatePerKg?: number;
+  defaultSheetsPerRim?: number;
+  defaultConversionFactor?: number;
 }
 
 export interface SheetCalculation {

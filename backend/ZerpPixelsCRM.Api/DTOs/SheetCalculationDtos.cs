@@ -16,6 +16,12 @@ public class PrintingMaterialDto
     public int MaterialId { get; set; }
     public string MaterialName { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
+    public decimal? DefaultLength { get; set; }
+    public decimal? DefaultWidth { get; set; }
+    public decimal? DefaultGsm { get; set; }
+    public decimal? DefaultRatePerKg { get; set; }
+    public int? DefaultSheetsPerRim { get; set; }
+    public decimal? DefaultConversionFactor { get; set; }
 }
 
 public class AddCustomMaterialRequest
