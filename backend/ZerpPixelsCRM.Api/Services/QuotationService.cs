@@ -9,11 +9,19 @@ public class QuotationService : IQuotationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly QuotationPdfService _pdfService;
+    private readonly IPrintingOrderService? _printingOrderService;
+    private readonly ILogger<QuotationService>? _logger;
 
-    public QuotationService(IUnitOfWork _unitOfWork, QuotationPdfService pdfService)
+    public QuotationService(
+        IUnitOfWork _unitOfWork, 
+        QuotationPdfService pdfService, 
+        IPrintingOrderService? printingOrderService = null, 
+        ILogger<QuotationService>? logger = null)
     {
         this._unitOfWork = _unitOfWork;
         _pdfService = pdfService;
+        _printingOrderService = printingOrderService;
+        _logger = logger;
     }
 
     public async Task<PaginatedResponse<QuotationListItemDto>> GetQuotationsAsync(
@@ -93,6 +101,7 @@ public class QuotationService : IQuotationService
             Quotation = quotation,
             RevisionNumber = 1,
             Status = "Draft",
+            ProductionType = string.IsNullOrWhiteSpace(request.ProductionType) ? "IN_HOUSE" : request.ProductionType.Trim(),
             QuotationDate = request.QuotationDate.HasValue ? ToUtcDateTime(request.QuotationDate.Value) : now,
             ValidUntil = request.ValidUntil.HasValue ? ToUtcDateTime(request.ValidUntil.Value) : now.AddDays(15),
             Subtotal = pricing.Subtotal,
@@ -117,6 +126,7 @@ public class QuotationService : IQuotationService
                 Revision = revision,
                 SortOrder = itemReq.SortOrder > 0 ? itemReq.SortOrder : sort++,
                 ItemType = itemReq.ItemType ?? "Printing",
+                ProductionType = string.IsNullOrWhiteSpace(itemReq.ProductionType) ? (string.IsNullOrWhiteSpace(request.ProductionType) ? "IN_HOUSE" : request.ProductionType.Trim()) : itemReq.ProductionType.Trim(),
                 ProductName = itemReq.ProductName.Trim(),
                 Description = itemReq.Description?.Trim(),
                 SizeDimensions = itemReq.SizeDimensions?.Trim(),
@@ -138,6 +148,18 @@ public class QuotationService : IQuotationService
 
         await _unitOfWork.Quotations.AddAsync(quotation);
         await _unitOfWork.CompleteAsync();
+
+        if (_printingOrderService != null)
+        {
+            try
+            {
+                await _printingOrderService.CreateOrSyncOrderFromRevisionAsync(revision.RevisionId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Could not auto-sync production order for revision {RevisionId}", revision.RevisionId);
+            }
+        }
 
         return MapToQuotationDetailsDto(quotation);
     }
@@ -189,6 +211,7 @@ public class QuotationService : IQuotationService
         {
             activeRevision.ValidUntil = ToUtcDateTime(request.ValidUntil.Value);
         }
+        activeRevision.ProductionType = string.IsNullOrWhiteSpace(request.ProductionType) ? activeRevision.ProductionType : request.ProductionType.Trim();
         activeRevision.Subtotal = pricing.Subtotal;
         activeRevision.DiscountType = request.DiscountType ?? "None";
         activeRevision.DiscountValue = request.DiscountValue;
@@ -230,6 +253,19 @@ public class QuotationService : IQuotationService
         }
 
         await _unitOfWork.CompleteAsync();
+
+        if (_printingOrderService != null)
+        {
+            try
+            {
+                await _printingOrderService.CreateOrSyncOrderFromRevisionAsync(activeRevision.RevisionId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Could not auto-sync production order for updated revision {RevisionId}", activeRevision.RevisionId);
+            }
+        }
+
         return MapToQuotationDetailsDto(quotation);
     }
 
@@ -258,6 +294,19 @@ public class QuotationService : IQuotationService
         quotation.UpdatedAt = now;
 
         await _unitOfWork.CompleteAsync();
+
+        if (_printingOrderService != null)
+        {
+            try
+            {
+                await _printingOrderService.CreateOrSyncOrderFromRevisionAsync(activeRevision.RevisionId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Could not auto-sync production order for finalized revision {RevisionId}", activeRevision.RevisionId);
+            }
+        }
+
         return MapToQuotationDetailsDto(quotation);
     }
 
@@ -277,6 +326,7 @@ public class QuotationService : IQuotationService
             QuotationId = quotation.QuotationId,
             RevisionNumber = nextRevNum,
             Status = "Draft",
+            ProductionType = currentLatest.ProductionType,
             QuotationDate = now,
             ValidUntil = now.AddDays(15),
             Subtotal = currentLatest.Subtotal,
@@ -300,6 +350,7 @@ public class QuotationService : IQuotationService
                 Revision = newRevision,
                 SortOrder = item.SortOrder,
                 ItemType = item.ItemType,
+                ProductionType = item.ProductionType,
                 ProductName = item.ProductName,
                 Description = item.Description,
                 SizeDimensions = item.SizeDimensions,
@@ -374,6 +425,18 @@ public class QuotationService : IQuotationService
 
         await _unitOfWork.Quotations.AddApprovalLogAsync(log);
         await _unitOfWork.CompleteAsync();
+
+        if (request.Decision.Equals("Approved", StringComparison.OrdinalIgnoreCase) && _printingOrderService != null)
+        {
+            try
+            {
+                await _printingOrderService.CreateOrderFromApprovedRevisionAsync(revision.RevisionId);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Could not auto-create order for approved revision {RevisionId}", revision.RevisionId);
+            }
+        }
 
         return new QuotationApprovalLogDto
         {
@@ -460,6 +523,7 @@ public class QuotationService : IQuotationService
             QuotationId = revision.QuotationId,
             RevisionNumber = revision.RevisionNumber,
             Status = revision.Status,
+            ProductionType = revision.ProductionType ?? "IN_HOUSE",
             QuotationDate = revision.QuotationDate,
             ValidUntil = revision.ValidUntil,
             Subtotal = revision.Subtotal,
@@ -481,6 +545,7 @@ public class QuotationService : IQuotationService
                 RevisionId = i.RevisionId,
                 SortOrder = i.SortOrder,
                 ItemType = i.ItemType,
+                ProductionType = i.ProductionType ?? "IN_HOUSE",
                 ProductName = i.ProductName,
                 Description = i.Description,
                 SizeDimensions = i.SizeDimensions,

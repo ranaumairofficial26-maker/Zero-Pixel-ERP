@@ -16,6 +16,7 @@ public class QuotationListItemDto
     public decimal GrandTotal { get; set; }
     public string Currency { get; set; } = "PKR";
     public string Status { get; set; } = "Draft";
+    public string ProductionType { get; set; } = "IN_HOUSE";
     public string SendingStatus { get; set; } = "Not Sent";
     public string ApprovalStatus { get; set; } = "Pending";
     public DateTime CreatedAt { get; set; }
@@ -67,6 +68,10 @@ public class QuotationRevisionDto
     public long QuotationId { get; set; }
     public int RevisionNumber { get; set; }
     public string Status { get; set; } = "Draft";
+    public string ProductionType { get; set; } = "IN_HOUSE";
+    public long? LinkedOrderId { get; set; }
+    public string? LinkedOrderNumber { get; set; }
+    public string? LinkedOrderStatus { get; set; }
     public DateTime QuotationDate { get; set; }
     public DateTime ValidUntil { get; set; }
     public decimal Subtotal { get; set; }
@@ -94,6 +99,7 @@ public class QuotationItemDto
     public long RevisionId { get; set; }
     public int SortOrder { get; set; }
     public string ItemType { get; set; } = "Printing";
+    public string ProductionType { get; set; } = "IN_HOUSE";
     public string ProductName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? SizeDimensions { get; set; }
@@ -143,6 +149,7 @@ public class CreateQuotationRequest
     public string? CustomerAddress { get; set; }
 
     public string QuotationType { get; set; } = "Printing"; // Printing | Service
+    public string ProductionType { get; set; } = "IN_HOUSE"; // IN_HOUSE | OUTSOURCED
     public string Currency { get; set; } = "PKR";
     public DateTime? QuotationDate { get; set; }
     public DateTime? ValidUntil { get; set; }
@@ -162,6 +169,7 @@ public class CreateQuotationItemRequest
 {
     public int SortOrder { get; set; }
     public string ItemType { get; set; } = "Printing";
+    public string? ProductionType { get; set; } = "IN_HOUSE";
     public string ProductName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string? SizeDimensions { get; set; }

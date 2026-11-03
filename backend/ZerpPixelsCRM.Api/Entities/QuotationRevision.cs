@@ -25,6 +25,11 @@ public class QuotationRevision
     [Column("status")]
     public string Status { get; set; } = "Draft"; // Draft | Finalized | Converted | Expired
 
+    [Required]
+    [MaxLength(50)]
+    [Column("production_type")]
+    public string ProductionType { get; set; } = "IN_HOUSE"; // IN_HOUSE | OUTSOURCED
+
     [Column("quotation_date")]
     public DateTime QuotationDate { get; set; } = DateTime.UtcNow;
 

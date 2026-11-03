@@ -13,7 +13,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'quotations',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
       },
       {
@@ -31,6 +31,18 @@ export const routes: Routes = [
       {
         path: 'quotations',
         loadChildren: () => import('./features/quotations/quotations.routes').then(m => m.QUOTATION_ROUTES)
+      },
+      {
+        path: 'production/in-house',
+        loadComponent: () => import('./features/production/pages/in-house-production/in-house-production.component').then(m => m.InHouseProductionComponent)
+      },
+      {
+        path: 'production/outsourced',
+        loadComponent: () => import('./features/production/pages/outsourced-production/outsourced-production.component').then(m => m.OutsourcedProductionComponent)
+      },
+      {
+        path: 'printing-intelligence/sheet-calculator',
+        loadComponent: () => import('./features/printing-intelligence/pages/sheet-calculator/sheet-calculator.component').then(m => m.SheetCalculatorComponent)
       }
     ]
   },
@@ -38,6 +50,14 @@ export const routes: Routes = [
   {
     path: 'quotations',
     redirectTo: 'admin/quotations'
+  },
+  {
+    path: 'production',
+    redirectTo: 'admin/production/in-house'
+  },
+  {
+    path: 'printing-intelligence',
+    redirectTo: 'admin/printing-intelligence/sheet-calculator'
   },
   {
     path: 'customers',
@@ -49,11 +69,11 @@ export const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'admin/quotations',
+    redirectTo: 'login',
     pathMatch: 'full'
   },
   {
     path: '**',
-    redirectTo: 'admin/quotations'
+    redirectTo: 'login'
   }
 ];

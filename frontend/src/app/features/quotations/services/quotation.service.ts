@@ -18,7 +18,17 @@ import {
 })
 export class QuotationService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/quotations`;
+
+  private get baseUrl(): string {
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      return 'http://localhost:5282/api';
+    }
+    return environment.apiUrl || 'http://localhost:5282/api';
+  }
+
+  private get apiUrl(): string {
+    return `${this.baseUrl}/quotations`;
+  }
 
   getQuotations(
     params: {

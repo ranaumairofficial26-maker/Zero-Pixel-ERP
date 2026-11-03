@@ -40,7 +40,7 @@ export class LoginComponent {
       next: (res) => {
         this.isLoading.set(false);
         this.toastService.success(`Welcome back, ${res.fullName}!`, 'Login Successful');
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin/customers';
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin/dashboard';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

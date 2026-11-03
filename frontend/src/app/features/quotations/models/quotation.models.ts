@@ -13,6 +13,7 @@ export interface QuotationListItem {
   grandTotal: number;
   currency: string;
   status: 'Draft' | 'Finalized';
+  productionType?: 'IN_HOUSE' | 'OUTSOURCED';
   sendingStatus: string;
   approvalStatus: 'Pending' | 'Approved' | 'Rejected' | 'Revision Requested';
   createdAt: string;
@@ -59,6 +60,10 @@ export interface QuotationRevision {
   quotationId: number;
   revisionNumber: number;
   status: string;
+  productionType?: 'IN_HOUSE' | 'OUTSOURCED';
+  linkedOrderId?: number;
+  linkedOrderNumber?: string;
+  linkedOrderStatus?: string;
   quotationDate: string;
   validUntil: string;
   subtotal: number;
@@ -84,6 +89,7 @@ export interface QuotationItem {
   revisionId?: number;
   sortOrder: number;
   itemType: 'Printing' | 'Service';
+  productionType?: 'IN_HOUSE' | 'OUTSOURCED';
   productName: string;
   description?: string;
   sizeDimensions?: string;
@@ -129,6 +135,7 @@ export interface CreateQuotationPayload {
   customerEmail?: string;
   customerAddress?: string;
   quotationType: string;
+  productionType?: 'IN_HOUSE' | 'OUTSOURCED';
   currency: string;
   quotationDate?: string;
   validUntil?: string;
@@ -144,6 +151,7 @@ export interface CreateQuotationPayload {
 export interface CreateQuotationItemPayload {
   sortOrder: number;
   itemType: string;
+  productionType?: 'IN_HOUSE' | 'OUTSOURCED';
   productName: string;
   description?: string;
   sizeDimensions?: string;

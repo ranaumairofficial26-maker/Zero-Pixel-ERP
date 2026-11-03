@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using ZerpPixelsCRM.Api.Data;
+using ZerpPixelsCRM.Api.Entities;
 using ZerpPixelsCRM.Api.Interfaces;
 using ZerpPixelsCRM.Api.Middleware;
 using ZerpPixelsCRM.Api.Repositories.Implementations;
@@ -42,6 +43,10 @@ builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
 // 4. Dependency Injection for Business Services
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPrintingOrderRepository, PrintingOrderRepository>();
+builder.Services.AddScoped<IProductionJobRepository, ProductionJobRepository>();
+builder.Services.AddScoped<IPrintingOrderService, PrintingOrderService>();
+builder.Services.AddScoped<IProductionService, ProductionService>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
 builder.Services.AddSingleton<QuotationPdfService>();
 
@@ -143,7 +148,102 @@ using (var scope = app.Services.CreateScope())
         // Ensure Digital Marketing columns exist safely on quotation_items
         await context.Database.ExecuteSqlRawAsync(
             "ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS service_category VARCHAR(50); " +
-            "ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS service_details TEXT;");
+            "ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS service_details TEXT; " +
+            "ALTER TABLE quotation_revisions ADD COLUMN IF NOT EXISTS production_type VARCHAR(50) DEFAULT 'IN_HOUSE'; " +
+            "ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS production_type VARCHAR(50) DEFAULT 'IN_HOUSE'; " +
+            @"CREATE TABLE IF NOT EXISTS printing_orders (
+                order_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                order_number VARCHAR(50) NOT NULL UNIQUE,
+                quotation_id BIGINT NOT NULL REFERENCES quotations(quotation_id) ON DELETE CASCADE,
+                revision_id BIGINT NOT NULL UNIQUE REFERENCES quotation_revisions(revision_id) ON DELETE CASCADE,
+                client_id BIGINT REFERENCES clients(client_id) ON DELETE SET NULL,
+                customer_name VARCHAR(200) NOT NULL,
+                contact_person VARCHAR(150),
+                customer_phone VARCHAR(30) NOT NULL,
+                customer_email VARCHAR(200),
+                customer_address TEXT,
+                status VARCHAR(50) NOT NULL DEFAULT 'Pending Review',
+                production_type VARCHAR(50) NOT NULL DEFAULT 'IN_HOUSE',
+                subtotal NUMERIC(18,2) NOT NULL DEFAULT 0,
+                discount_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                tax_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                grand_total NUMERIC(18,2) NOT NULL DEFAULT 0,
+                notes TEXT,
+                confirmed_at TIMESTAMPTZ,
+                confirmed_by VARCHAR(100),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS printing_order_items (
+                order_item_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                order_id BIGINT NOT NULL REFERENCES printing_orders(order_id) ON DELETE CASCADE,
+                quotation_item_id BIGINT,
+                product_name VARCHAR(250) NOT NULL,
+                description TEXT,
+                size_dimensions VARCHAR(150),
+                material VARCHAR(150),
+                gsm VARCHAR(50),
+                printing_color VARCHAR(100),
+                finishing VARCHAR(150),
+                quantity NUMERIC(18,3) NOT NULL DEFAULT 1,
+                unit VARCHAR(50) NOT NULL DEFAULT 'pcs',
+                unit_price NUMERIC(18,2) NOT NULL DEFAULT 0,
+                line_total NUMERIC(18,2) NOT NULL DEFAULT 0,
+                production_type VARCHAR(50) NOT NULL DEFAULT 'IN_HOUSE',
+                notes TEXT
+            );
+            CREATE TABLE IF NOT EXISTS production_jobs (
+                job_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                job_number VARCHAR(50) NOT NULL UNIQUE,
+                order_id BIGINT NOT NULL REFERENCES printing_orders(order_id) ON DELETE CASCADE,
+                production_type VARCHAR(50) NOT NULL,
+                status VARCHAR(50) NOT NULL DEFAULT 'Queued',
+                priority VARCHAR(30) NOT NULL DEFAULT 'Normal',
+                target_start_date TIMESTAMPTZ,
+                due_date TIMESTAMPTZ,
+                completed_at TIMESTAMPTZ,
+                assigned_operator VARCHAR(150),
+                machine_name VARCHAR(150),
+                vendor_name VARCHAR(200),
+                vendor_phone VARCHAR(50),
+                vendor_email VARCHAR(200),
+                vendor_reference VARCHAR(100),
+                outsourced_cost NUMERIC(18,2),
+                expected_delivery_date TIMESTAMPTZ,
+                notes TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT UQ_production_jobs_order_prod_type UNIQUE(order_id, production_type)
+            );
+            CREATE TABLE IF NOT EXISTS production_job_items (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                job_id BIGINT NOT NULL REFERENCES production_jobs(job_id) ON DELETE CASCADE,
+                order_item_id BIGINT NOT NULL REFERENCES printing_order_items(order_item_id) ON DELETE CASCADE,
+                CONSTRAINT UQ_job_order_item UNIQUE(job_id, order_item_id)
+            );
+            CREATE INDEX IF NOT EXISTS IX_printing_orders_status ON printing_orders(status);
+            CREATE INDEX IF NOT EXISTS IX_printing_orders_quotation_id ON printing_orders(quotation_id);
+            CREATE INDEX IF NOT EXISTS IX_production_jobs_status ON production_jobs(status);
+            CREATE INDEX IF NOT EXISTS IX_production_jobs_production_type ON production_jobs(production_type);
+            DROP TABLE IF EXISTS printing_materials CASCADE;
+            ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_id CASCADE;
+            ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_name_snapshot CASCADE;
+            CREATE TABLE IF NOT EXISTS sheet_calculations (
+                calculation_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                length NUMERIC(12,3) NOT NULL,
+                width NUMERIC(12,3) NOT NULL,
+                gsm NUMERIC(12,3) NOT NULL,
+                rate_per_kg NUMERIC(18,4) NOT NULL,
+                sheets_per_rim INTEGER NOT NULL DEFAULT 500,
+                required_sheets INTEGER NOT NULL DEFAULT 500,
+                conversion_factor NUMERIC(12,4) NOT NULL DEFAULT 3100,
+                rim_price NUMERIC(18,4) NOT NULL,
+                per_sheet_price NUMERIC(18,4) NOT NULL,
+                total_paper_cost NUMERIC(18,4) NOT NULL,
+                notes TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_sheet_calculations_created_at ON sheet_calculations(created_at DESC);");
 
         var authService = services.GetRequiredService<IAuthService>();
         await authService.SeedAdminUserAsync();

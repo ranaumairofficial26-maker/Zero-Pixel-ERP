@@ -18,8 +18,15 @@ export class AuthService {
   currentUser = signal<AdminUser | null>(this.getStoredUser());
   token = signal<string | null>(this.getStoredToken());
 
+  private get baseUrl(): string {
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      return 'http://localhost:5282/api';
+    }
+    return environment.apiUrl || 'http://localhost:5282/api';
+  }
+
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, credentials).pipe(
+    return this.http.post<AuthResponse>(`${this.baseUrl}/auth/login`, credentials).pipe(
       tap(res => {
         this.setSession(res);
       })

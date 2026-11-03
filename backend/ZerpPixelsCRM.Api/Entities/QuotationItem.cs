@@ -25,6 +25,10 @@ public class QuotationItem
     [Column("item_type")]
     public string ItemType { get; set; } = "Printing"; // Printing | Service
 
+    [MaxLength(50)]
+    [Column("production_type")]
+    public string? ProductionType { get; set; } = "IN_HOUSE"; // IN_HOUSE | OUTSOURCED
+
     [Required]
     [MaxLength(250)]
     [Column("product_name")]

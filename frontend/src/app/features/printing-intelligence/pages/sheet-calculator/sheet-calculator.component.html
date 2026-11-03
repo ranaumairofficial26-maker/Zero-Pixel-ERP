@@ -1,0 +1,327 @@
+<div class="sheet-calculator-container">
+  <!-- Toast Notification -->
+  <div *ngIf="feedbackMessage()" class="toast-alert" [ngClass]="'toast-' + feedbackMessage()!.type">
+    <div class="toast-icon">
+      <svg *ngIf="feedbackMessage()!.type === 'success'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <svg *ngIf="feedbackMessage()!.type === 'error'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <svg *ngIf="feedbackMessage()!.type === 'info'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    </div>
+    <span class="toast-text">{{ feedbackMessage()!.text }}</span>
+  </div>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="breadcrumbs">
+        <span>Printing Intelligence</span>
+        <span class="sep">/</span>
+        <span class="current">Sheet Calculator</span>
+      </div>
+      <h1 class="page-title">Sheet Cost Calculator</h1>
+      <p class="page-subtitle">
+        Automated sheet costing & precision rim pricing powered by Excel-validated formulas.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="resetForm()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>Reset Defaults</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE: CALCULATOR INPUTS & REAL-TIME RESULTS -->
+  <div class="calculator-workspace-grid">
+    <!-- Left Column: Inputs Form -->
+    <div class="workspace-card inputs-card">
+      <div class="card-header-row">
+        <div>
+          <h3 class="card-title">Paper Specifications & Cost Inputs</h3>
+          <p class="card-desc">Enter dimensions, grammage and rate to calculate instant paper costing.</p>
+        </div>
+
+        <!-- Compact Material Control -->
+        <div class="compact-material-control">
+          <label class="compact-material-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>Material:</span>
+          </label>
+          <div class="compact-select-box">
+            <select 
+              class="compact-select" 
+              [ngModel]="selectedMaterial()" 
+              (ngModelChange)="onMaterialChange($event)"
+            >
+              <option *ngFor="let opt of materialOptions" [value]="opt.name">
+                {{ opt.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="calcForm" class="calculator-form">
+        <div class="form-row-2">
+          <!-- Length -->
+          <div class="form-group">
+            <label class="input-label">Length (L) <span class="unit">(inches)</span> <span class="req">*</span></label>
+            <input 
+              type="number" 
+              step="0.5" 
+              class="form-control" 
+              formControlName="length" 
+              placeholder="e.g. 23"
+            />
+            <div class="error-feedback" *ngIf="calcForm.get('length')?.invalid && calcForm.get('length')?.touched">
+              Length must be greater than 0
+            </div>
+          </div>
+
+          <!-- Width -->
+          <div class="form-group">
+            <label class="input-label">Width (W) <span class="unit">(inches)</span> <span class="req">*</span></label>
+            <input 
+              type="number" 
+              step="0.5" 
+              class="form-control" 
+              formControlName="width" 
+              placeholder="e.g. 36"
+            />
+            <div class="error-feedback" *ngIf="calcForm.get('width')?.invalid && calcForm.get('width')?.touched">
+              Width must be greater than 0
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <!-- GSM -->
+          <div class="form-group">
+            <label class="input-label">GSM (Grammage) <span class="req">*</span></label>
+            <input 
+              type="number" 
+              step="5" 
+              class="form-control" 
+              formControlName="gsm" 
+              placeholder="e.g. 115"
+            />
+            <div class="error-feedback" *ngIf="calcForm.get('gsm')?.invalid && calcForm.get('gsm')?.touched">
+              GSM must be greater than 0
+            </div>
+          </div>
+
+          <!-- Rate per KG -->
+          <div class="form-group">
+            <label class="input-label">Rate per KG <span class="unit">(PKR)</span> <span class="req">*</span></label>
+            <input 
+              type="number" 
+              step="1" 
+              class="form-control" 
+              formControlName="ratePerKg" 
+              placeholder="e.g. 580"
+            />
+            <div class="error-feedback" *ngIf="calcForm.get('ratePerKg')?.invalid && calcForm.get('ratePerKg')?.touched">
+              Rate per KG must be non-negative
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <!-- Sheets per Rim -->
+          <div class="form-group">
+            <label class="input-label">Sheets per Rim <span class="req">*</span></label>
+            <input 
+              type="number" 
+              class="form-control" 
+              formControlName="sheetsPerRim" 
+              placeholder="e.g. 500"
+            />
+            <div class="hint-feedback">Standard paper rim = 500 sheets</div>
+          </div>
+
+          <!-- Required Sheets -->
+          <div class="form-group">
+            <label class="input-label">Required Sheets <span class="req">*</span></label>
+            <input 
+              type="number" 
+              class="form-control highlight-input" 
+              formControlName="requiredSheets" 
+              placeholder="e.g. 500"
+            />
+            <div class="hint-feedback">Total print run requirement</div>
+          </div>
+        </div>
+
+        <!-- Conversion Factor -->
+        <div class="form-group">
+          <label class="input-label">Conversion Factor <span class="req">*</span></label>
+          <input 
+            type="number" 
+            step="1" 
+            class="form-control" 
+            formControlName="conversionFactor" 
+            placeholder="3100"
+          />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-action-buttons">
+          <button 
+            type="button" 
+            class="btn btn-primary btn-save-calc" 
+            (click)="saveCurrentCalculation()"
+            [disabled]="isSavingCalculation() || calcForm.invalid"
+          >
+            <svg *ngIf="!isSavingCalculation()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span *ngIf="!isSavingCalculation()">Save Calculation</span>
+            <span *ngIf="isSavingCalculation()">Saving...</span>
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            (click)="resetForm()"
+          >
+            Reset Defaults
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Right Column: Real-Time Results & Mathematical Breakdown -->
+    <div class="workspace-card results-card">
+      <div class="card-header-row">
+        <div>
+          <h3 class="card-title">Real-Time Cost Breakdown</h3>
+          <p class="card-desc">Instantly calculated as you adjust specifications.</p>
+        </div>
+        <span class="live-indicator">
+          <span class="pulse-dot"></span>
+          Live Derived
+        </span>
+      </div>
+
+      <!-- Result Cards Grid -->
+      <div class="results-kpi-grid">
+        <!-- 1. Rim Price Card -->
+        <div class="kpi-card rim-kpi">
+          <div class="kpi-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Rim Price ({{ calcForm.value.sheetsPerRim }} Sheets)</span>
+            <div class="kpi-value-row">
+              <span class="currency">PKR</span>
+              <span class="amount">{{ calcResult().rimPrice | number:'1.2-2' }}</span>
+            </div>
+            <span class="kpi-subtext">Total cost for 1 complete rim</span>
+          </div>
+        </div>
+
+        <!-- 2. Per Sheet Price Card -->
+        <div class="kpi-card sheet-kpi">
+          <div class="kpi-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          </div>
+          <div class="kpi-content">
+            <span class="kpi-label">Per Sheet Price</span>
+            <div class="kpi-value-row">
+              <span class="currency">PKR</span>
+              <span class="amount">{{ calcResult().perSheetPrice | number:'1.2-4' }}</span>
+            </div>
+            <span class="kpi-subtext">Cost per single cut sheet</span>
+          </div>
+        </div>
+
+        <!-- 3. Required Sheets Total Cost Card (Primary Focus) -->
+        <div class="kpi-card total-kpi primary-card">
+          <div class="kpi-content">
+            <span class="kpi-label">Required Sheets Total Cost ({{ calcForm.value.requiredSheets }} Sheets)</span>
+            <div class="kpi-value-row highlight">
+              <span class="currency">PKR</span>
+              <span class="amount lg">{{ calcResult().totalPaperCost | number:'1.2-2' }}</span>
+            </div>
+            <span class="kpi-subtext">Total paper budget for {{ calcForm.value.requiredSheets }} required sheets</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Metrics Row -->
+      <div class="metrics-secondary-row">
+        <div class="metric-mini-box">
+          <span class="mini-label">Reference Rim Weight</span>
+          <span class="mini-value">{{ calcResult().referenceRimWeightKg | number:'1.2-4' }} <small>KG</small></span>
+          <span class="mini-hint">500 sheets reference @ {{ calcForm.value.conversionFactor }}</span>
+        </div>
+        <div class="metric-mini-box">
+          <span class="mini-label">Equivalent Rims</span>
+          <span class="mini-value">{{ calcResult().equivalentRims | number:'1.2-2' }} <small>Rims</small></span>
+          <span class="mini-hint">{{ calcForm.value.requiredSheets }} ÷ {{ calcForm.value.sheetsPerRim }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVED CALCULATIONS HISTORY -->
+  <section class="saved-history-section">
+    <div class="section-card">
+      <div class="history-header-row">
+        <div>
+          <h3 class="section-title">Saved Calculations History</h3>
+        </div>
+        <button type="button" class="btn btn-outline-sm" (click)="loadSavedCalculations()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh History
+        </button>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="savedCalculations().length === 0 && !isLoadingCalculations()" class="empty-history-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <h4>No Saved Calculations Yet</h4>
+        <p>Use the "Save Calculation" button above to preserve paper costing records.</p>
+      </div>
+
+      <!-- History Table -->
+      <div *ngIf="savedCalculations().length > 0" class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Size & GSM</th>
+              <th>Rate / KG</th>
+              <th>Rim Sheets</th>
+              <th>Req. Sheets</th>
+              <th>Rim Price</th>
+              <th>Per Sheet</th>
+              <th>Total Cost</th>
+              <th>Date</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of savedCalculations()">
+              <td class="col-id">#{{ item.calculationId }}</td>
+              <td class="font-semibold">{{ item.length }}" × {{ item.width }}", {{ item.gsm }} GSM</td>
+              <td>PKR {{ item.ratePerKg | number:'1.2-2' }}</td>
+              <td>{{ item.sheetsPerRim }}</td>
+              <td class="font-bold">{{ item.requiredSheets }}</td>
+              <td>PKR {{ item.rimPrice | number:'1.2-2' }}</td>
+              <td>PKR {{ item.perSheetPrice | number:'1.2-4' }}</td>
+              <td class="col-total font-bold text-accent">PKR {{ item.totalPaperCost | number:'1.2-2' }}</td>
+              <td class="col-date">{{ item.createdAt | date:'short' }}</td>
+              <td class="text-right col-actions">
+                <button type="button" class="btn-action-load" (click)="loadCalculationIntoForm(item)" title="Load into calculator">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                  Load
+                </button>
+                <button type="button" class="btn-action-delete" (click)="deleteSavedCalculation(item.calculationId)" title="Delete record">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
