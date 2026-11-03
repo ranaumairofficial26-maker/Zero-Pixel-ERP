@@ -1,3 +1,17 @@
+export interface PaperSize {
+  paperSizeId?: number;
+  sizeName: string;
+  lengthInches?: number;
+  widthInches?: number;
+  isActive?: boolean;
+}
+
+export interface PrintingMaterial {
+  materialId?: number;
+  materialName: string;
+  isActive?: boolean;
+}
+
 export interface SheetCalculation {
   calculationId: number;
   length: number;
@@ -7,6 +21,8 @@ export interface SheetCalculation {
   sheetsPerRim: number;
   requiredSheets: number;
   conversionFactor: number;
+  materialName?: string | null;
+  paperSizeName?: string | null;
   referenceRimWeightKg: number;
   equivalentRims: number;
   rimPrice: number;
@@ -24,6 +40,8 @@ export interface SaveSheetCalculationRequest {
   sheetsPerRim: number;
   requiredSheets: number;
   conversionFactor: number;
+  materialName?: string | null;
+  paperSizeName?: string | null;
   notes?: string | null;
 }
 

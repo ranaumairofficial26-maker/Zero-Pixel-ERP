@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin, catchError, of } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 import { CustomerService } from '../customers/services/customer.service';
 import { QuotationService } from '../quotations/services/quotation.service';
 import { ProductionService } from '../production/services/production.service';
@@ -15,6 +16,7 @@ import { ProductionJob } from '../production/models/production.model';
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
+  private authService = inject(AuthService);
   private customerService = inject(CustomerService);
   private quotationService = inject(QuotationService);
   private productionService = inject(ProductionService);
@@ -36,6 +38,11 @@ export class DashboardComponent implements OnInit {
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
     return 'Good Evening';
+  }
+
+  get adminDisplayName(): string {
+    const name = this.authService.currentUser()?.fullName || 'Naveed Ahmad';
+    return name.toLowerCase().includes('admin') ? name : `Admin ${name}`;
   }
 
   ngOnInit(): void {

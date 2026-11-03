@@ -20,6 +20,103 @@ public class SheetCalculatorController : ControllerBase
     }
 
     /// <summary>
+    /// Gets active paper size presets from PostgreSQL database.
+    /// </summary>
+    /// <summary>
+    /// Gets active printing materials from PostgreSQL database.
+    /// </summary>
+    [HttpGet("materials")]
+    [ProducesResponseType(typeof(List<PrintingMaterialDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<PrintingMaterialDto>>> GetMaterials()
+    {
+        var materials = await _context.PrintingMaterials
+            .AsNoTracking()
+            .Where(m => m.IsActive)
+            .OrderBy(m => m.MaterialId)
+            .Select(m => new PrintingMaterialDto
+            {
+                MaterialId = m.MaterialId,
+                MaterialName = m.MaterialName,
+                IsActive = m.IsActive
+            })
+            .ToListAsync();
+
+        return Ok(materials);
+    }
+
+    /// <summary>
+    /// Adds a custom material to PostgreSQL master without duplicates.
+    /// </summary>
+    [HttpPost("materials")]
+    [ProducesResponseType(typeof(PrintingMaterialDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<PrintingMaterialDto>> AddMaterial([FromBody] AddCustomMaterialRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req.MaterialName))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Invalid Material Name",
+                Detail = "Material name cannot be empty."
+            });
+        }
+
+        var trimmed = req.MaterialName.Trim();
+        var existing = await _context.PrintingMaterials
+            .FirstOrDefaultAsync(m => m.MaterialName.ToLower() == trimmed.ToLower());
+
+        if (existing != null)
+        {
+            return Ok(new PrintingMaterialDto
+            {
+                MaterialId = existing.MaterialId,
+                MaterialName = existing.MaterialName,
+                IsActive = existing.IsActive
+            });
+        }
+
+        var newMat = new PrintingMaterial
+        {
+            MaterialName = trimmed,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        _context.PrintingMaterials.Add(newMat);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetMaterials), new { id = newMat.MaterialId }, new PrintingMaterialDto
+        {
+            MaterialId = newMat.MaterialId,
+            MaterialName = newMat.MaterialName,
+            IsActive = newMat.IsActive
+        });
+    }
+
+    [HttpGet("paper-sizes")]
+    [ProducesResponseType(typeof(List<PaperSizeDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<PaperSizeDto>>> GetPaperSizes()
+    {
+        var sizes = await _context.PaperSizes
+            .AsNoTracking()
+            .Where(s => s.IsActive)
+            .OrderBy(s => s.PaperSizeId)
+            .Select(s => new PaperSizeDto
+            {
+                PaperSizeId = s.PaperSizeId,
+                SizeName = s.SizeName,
+                LengthInches = s.LengthInches,
+                WidthInches = s.WidthInches,
+                IsActive = s.IsActive
+            })
+            .ToListAsync();
+
+        return Ok(sizes);
+    }
+
+    /// <summary>
     /// Executes real-time calculation based on Excel reference formulas.
     /// </summary>
     [HttpPost("calculate")]
@@ -37,7 +134,7 @@ public class SheetCalculatorController : ControllerBase
             });
         }
 
-        var result = ComputeCosts(req.Length, req.Width, req.Gsm, req.RatePerKg, req.SheetsPerRim, req.RequiredSheets, req.ConversionFactor);
+        var result = ComputeCosts(req.Length, req.Width, req.Gsm, req.RatePerKg, req.SheetsPerRim, req.RequiredSheets, req.ConversionFactor, req.PaperSizeName, req.MaterialName);
         return Ok(result);
     }
 
@@ -61,7 +158,7 @@ public class SheetCalculatorController : ControllerBase
         }
 
         // Server-side recalculation
-        var computed = ComputeCosts(req.Length, req.Width, req.Gsm, req.RatePerKg, req.SheetsPerRim, req.RequiredSheets, req.ConversionFactor);
+        var computed = ComputeCosts(req.Length, req.Width, req.Gsm, req.RatePerKg, req.SheetsPerRim, req.RequiredSheets, req.ConversionFactor, req.PaperSizeName, req.MaterialName);
 
         var record = new SheetCalculation
         {
@@ -72,6 +169,8 @@ public class SheetCalculatorController : ControllerBase
             SheetsPerRim = req.SheetsPerRim,
             RequiredSheets = req.RequiredSheets,
             ConversionFactor = req.ConversionFactor,
+            MaterialName = req.MaterialName?.Trim(),
+            PaperSizeName = req.PaperSizeName?.Trim(),
             RimPrice = computed.RimPrice,
             PerSheetPrice = computed.PerSheetPrice,
             TotalPaperCost = computed.TotalPaperCost,
@@ -100,7 +199,7 @@ public class SheetCalculatorController : ControllerBase
         if (!string.IsNullOrWhiteSpace(search))
         {
             var trimmed = search.Trim().ToLower();
-            query = query.Where(c => c.Notes != null && c.Notes.ToLower().Contains(trimmed));
+            query = query.Where(c => (c.Notes != null && c.Notes.ToLower().Contains(trimmed)) || (c.MaterialName != null && c.MaterialName.ToLower().Contains(trimmed)) || (c.PaperSizeName != null && c.PaperSizeName.ToLower().Contains(trimmed)));
         }
 
         var records = await query
@@ -110,7 +209,7 @@ public class SheetCalculatorController : ControllerBase
 
         var dtos = records.Select(c =>
         {
-            var computed = ComputeCosts(c.Length, c.Width, c.Gsm, c.RatePerKg, c.SheetsPerRim, c.RequiredSheets, c.ConversionFactor);
+            var computed = ComputeCosts(c.Length, c.Width, c.Gsm, c.RatePerKg, c.SheetsPerRim, c.RequiredSheets, c.ConversionFactor, c.PaperSizeName, c.MaterialName);
             return MapToDto(c, computed.ReferenceRimWeightKg, computed.EquivalentRims);
         }).ToList();
 
@@ -154,7 +253,8 @@ public class SheetCalculatorController : ControllerBase
         decimal ratePerKg,
         int sheetsPerRim,
         int requiredSheets,
-        decimal conversionFactor)
+        decimal conversionFactor,
+        string? paperSizeName = null, string? materialName = null)
     {
         decimal referenceRimWeightKg = (length * width * gsm) / conversionFactor;
         decimal rimMultiplier = (decimal)sheetsPerRim / 500m;
@@ -172,6 +272,8 @@ public class SheetCalculatorController : ControllerBase
             SheetsPerRim = sheetsPerRim,
             RequiredSheets = requiredSheets,
             ConversionFactor = conversionFactor,
+            MaterialName = materialName,
+            PaperSizeName = paperSizeName,
             ReferenceRimWeightKg = Math.Round(referenceRimWeightKg, 4, MidpointRounding.AwayFromZero),
             EquivalentRims = Math.Round(equivalentRims, 2, MidpointRounding.AwayFromZero),
             RimPrice = Math.Round(rimPrice, 2, MidpointRounding.AwayFromZero),
@@ -192,6 +294,8 @@ public class SheetCalculatorController : ControllerBase
             SheetsPerRim = c.SheetsPerRim,
             RequiredSheets = c.RequiredSheets,
             ConversionFactor = c.ConversionFactor,
+            MaterialName = c.MaterialName,
+            PaperSizeName = c.PaperSizeName,
             ReferenceRimWeightKg = refWeight,
             EquivalentRims = eqRims,
             RimPrice = Math.Round(c.RimPrice, 2, MidpointRounding.AwayFromZero),

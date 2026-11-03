@@ -21,6 +21,8 @@ public class AppDbContext : DbContext
     public DbSet<ProductionJob> ProductionJobs => Set<ProductionJob>();
     public DbSet<ProductionJobItem> ProductionJobItems => Set<ProductionJobItem>();
     public DbSet<SheetCalculation> SheetCalculations => Set<SheetCalculation>();
+    public DbSet<PaperSize> PaperSizes => Set<PaperSize>();
+    public DbSet<PrintingMaterial> PrintingMaterials => Set<PrintingMaterial>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

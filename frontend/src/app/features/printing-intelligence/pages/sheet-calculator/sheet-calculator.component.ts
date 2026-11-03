@@ -6,7 +6,8 @@ import { SheetCalculatorService } from '../../services/sheet-calculator.service'
 import {
   SheetCalculation,
   SaveSheetCalculationRequest,
-  CalculationResult
+  CalculationResult,
+  PaperSize
 } from '../../models/sheet-calculator.model';
 
 @Component({
@@ -26,20 +27,37 @@ export class SheetCalculatorComponent implements OnInit {
   isSavingCalculation = signal<boolean>(false);
   feedbackMessage = signal<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
-  selectedMaterial = signal<string>('Art / Matt Paper');
+  selectedMaterial = signal<string>('ART/MATT PAPER');
+  selectedPaperSize = signal<string>('Custom Size');
 
-  materialOptions = [
-    { name: 'Art / Matt Paper', length: 23, width: 36, gsm: 115, rate: 580, sheets: 500, conv: 3100 },
-    { name: 'Offset Paper', length: 23, width: 36, gsm: 75, rate: 420, sheets: 500, conv: 3100 },
-    { name: 'Art Card', length: 25, width: 36, gsm: 300, rate: 620, sheets: 100, conv: 3100 },
-    { name: 'Sticker Paper', length: 20, width: 30, gsm: 80, rate: 750, sheets: 500, conv: 3100 },
-    { name: 'Kraft Paper', length: 24, width: 36, gsm: 120, rate: 390, sheets: 500, conv: 3100 }
+  defaultMaterials: string[] = [
+    'ART/MATT PAPER',
+    'OFFSET PAPER',
+    'ART CARD',
+    'Carbonless Paper',
+    'FLYING PAPER',
+    'Bleach Card',
+    'Box Board',
+    'Sticker'
   ];
+
+  materials = signal<string[]>(this.defaultMaterials);
+
+  defaultPaperSizes: PaperSize[] = [
+    { sizeName: 'A4', lengthInches: 8.27, widthInches: 11.679, isActive: true },
+    { sizeName: 'A5', lengthInches: 5.7, widthInches: 8.27, isActive: true },
+    { sizeName: 'Letter', lengthInches: 8.5, widthInches: 11, isActive: true },
+    { sizeName: 'Legal', lengthInches: 8.5, widthInches: 14, isActive: true },
+    { sizeName: '7 × 9', lengthInches: 7, widthInches: 9, isActive: true },
+    { sizeName: 'Custom Size', isActive: true }
+  ];
+
+  paperSizes = signal<PaperSize[]>(this.defaultPaperSizes);
 
   // --- Calculation Form ---
   calcForm: FormGroup = this.fb.group({
-    length: [23, [Validators.required, Validators.min(0.1), Validators.max(1000)]],
-    width: [36, [Validators.required, Validators.min(0.1), Validators.max(1000)]],
+    length: [23, [Validators.required, Validators.min(0.01), Validators.max(10000)]],
+    width: [36, [Validators.required, Validators.min(0.01), Validators.max(10000)]],
     gsm: [115, [Validators.required, Validators.min(1), Validators.max(2000)]],
     ratePerKg: [580, [Validators.required, Validators.min(0)]],
     sheetsPerRim: [500, [Validators.required, Validators.min(1)]],
@@ -58,14 +76,64 @@ export class SheetCalculatorComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSavedCalculations();
+    this.loadMaterials();
+    this.loadPaperSizes();
 
-    // Listen to form value changes for immediate real-time calculations
+    // Listen to form value changes for immediate real-time calculations and dimension override detection
     this.calcForm.valueChanges.subscribe(() => {
+      this.checkDimensionOverride();
       this.recalculate();
     });
 
     // Initial calculation
     this.recalculate();
+  }
+
+  // --- Load Materials from PostgreSQL Master Table ---
+  loadMaterials(): void {
+    this.calculatorService.getMaterials().subscribe({
+      next: (mats) => {
+        if (mats && mats.length > 0) {
+          const list: string[] = [];
+          mats.forEach(m => {
+            if (!list.includes(m.materialName)) {
+              list.push(m.materialName);
+            }
+          });
+          this.defaultMaterials.forEach(dm => {
+            if (!list.includes(dm)) {
+              list.push(dm);
+            }
+          });
+          this.materials.set(list);
+        } else {
+          this.materials.set(this.defaultMaterials);
+        }
+      },
+      error: () => {
+        this.materials.set(this.defaultMaterials);
+      }
+    });
+  }
+
+  // --- Load Paper Sizes from Master Table ---
+  loadPaperSizes(): void {
+    this.calculatorService.getPaperSizes().subscribe({
+      next: (sizes) => {
+        if (sizes && sizes.length > 0) {
+          const list = [...sizes];
+          if (!list.some(s => s.sizeName === 'Custom Size')) {
+            list.push({ sizeName: 'Custom Size', isActive: true });
+          }
+          this.paperSizes.set(list);
+        } else {
+          this.paperSizes.set(this.defaultPaperSizes);
+        }
+      },
+      error: () => {
+        this.paperSizes.set(this.defaultPaperSizes);
+      }
+    });
   }
 
   // --- Real-time Calculations ---
@@ -92,27 +160,50 @@ export class SheetCalculatorComponent implements OnInit {
     this.calcResult.set(result);
   }
 
+  // --- Paper Size Change ---
+  onPaperSizeChange(sizeName: string): void {
+    this.selectedPaperSize.set(sizeName);
+
+    if (sizeName === 'Custom Size') {
+      // Custom size allows manual length/width entry without overwriting
+      return;
+    }
+
+    const found = this.paperSizes().find(s => s.sizeName === sizeName);
+    if (found && found.lengthInches != null && found.widthInches != null) {
+      this.calcForm.patchValue({
+        length: found.lengthInches,
+        width: found.widthInches
+      });
+      this.recalculate();
+    }
+  }
+
+  // --- Detect If User Manually Edits Dimensions of a Preset ---
+  private checkDimensionOverride(): void {
+    if (this.selectedPaperSize() === 'Custom Size') return;
+
+    const currentPreset = this.paperSizes().find(s => s.sizeName === this.selectedPaperSize());
+    if (!currentPreset || currentPreset.lengthInches == null || currentPreset.widthInches == null) return;
+
+    const currentLen = Number(this.calcForm.get('length')?.value);
+    const currentWid = Number(this.calcForm.get('width')?.value);
+
+    // If manual edit changes the preset's dimensions, switch to Custom Size without resetting
+    if (Math.abs(currentLen - currentPreset.lengthInches) > 0.001 || Math.abs(currentWid - currentPreset.widthInches) > 0.001) {
+      this.selectedPaperSize.set('Custom Size');
+    }
+  }
+
   // --- Material Change ---
   onMaterialChange(materialName: string): void {
     this.selectedMaterial.set(materialName);
-    const found = this.materialOptions.find(m => m.name === materialName);
-    if (found) {
-      this.calcForm.patchValue({
-        length: found.length,
-        width: found.width,
-        gsm: found.gsm,
-        ratePerKg: found.rate,
-        sheetsPerRim: found.sheets,
-        conversionFactor: found.conv
-      });
-      this.recalculate();
-      this.showToast('info', `Loaded defaults for ${found.name}`);
-    }
   }
 
   // --- Reset Form to Excel Defaults ---
   resetForm(): void {
-    this.selectedMaterial.set('Art / Matt Paper');
+    this.selectedMaterial.set('ART/MATT PAPER');
+    this.selectedPaperSize.set('Custom Size');
     this.calcForm.reset({
       length: 23,
       width: 36,
@@ -123,7 +214,7 @@ export class SheetCalculatorComponent implements OnInit {
       conversionFactor: 3100
     });
     this.recalculate();
-    this.showToast('info', 'Form reset to standard defaults (23" × 36", 115 GSM, PKR 580/KG).');
+    this.showToast('info', 'Form reset to standard defaults.');
   }
 
   // --- Saved Calculations Operations ---
@@ -156,7 +247,9 @@ export class SheetCalculatorComponent implements OnInit {
       ratePerKg: Number(val.ratePerKg),
       sheetsPerRim: Number(val.sheetsPerRim),
       requiredSheets: Number(val.requiredSheets),
-      conversionFactor: Number(val.conversionFactor)
+      conversionFactor: Number(val.conversionFactor),
+      materialName: this.selectedMaterial(),
+      paperSizeName: this.selectedPaperSize()
     };
 
     this.isSavingCalculation.set(true);
@@ -174,6 +267,25 @@ export class SheetCalculatorComponent implements OnInit {
   }
 
   loadCalculationIntoForm(item: SheetCalculation): void {
+    if (item.materialName) {
+      if (!this.materials().some(m => m.toLowerCase() === item.materialName!.toLowerCase())) {
+        this.materials.update(list => [...list, item.materialName!]);
+      }
+      this.selectedMaterial.set(item.materialName);
+    }
+
+    if (item.paperSizeName) {
+      this.selectedPaperSize.set(item.paperSizeName);
+    } else {
+      // Infer size if matches preset
+      const match = this.paperSizes().find(s => 
+        s.lengthInches != null && s.widthInches != null &&
+        Math.abs(s.lengthInches - item.length) <= 0.001 &&
+        Math.abs(s.widthInches - item.width) <= 0.001
+      );
+      this.selectedPaperSize.set(match ? match.sizeName : 'Custom Size');
+    }
+
     this.calcForm.patchValue({
       length: item.length,
       width: item.width,

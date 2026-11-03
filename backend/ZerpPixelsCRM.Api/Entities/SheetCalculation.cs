@@ -41,6 +41,12 @@ public class SheetCalculation
     [Column("total_paper_cost", TypeName = "numeric(18,4)")]
     public decimal TotalPaperCost { get; set; }
 
+    [Column("material_name", TypeName = "varchar(150)")]
+    public string? MaterialName { get; set; }
+
+    [Column("paper_size_name", TypeName = "varchar(100)")]
+    public string? PaperSizeName { get; set; }
+
     [Column("notes", TypeName = "text")]
     public string? Notes { get; set; }
 
