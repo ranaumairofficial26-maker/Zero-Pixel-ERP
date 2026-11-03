@@ -29,7 +29,16 @@ export class SheetCalculatorService {
       timeout(10000),
       catchError(() => of([
         { materialName: 'ART/MATT PAPER', isActive: true },
-        { materialName: 'OFFSET PAPER', isActive: true },
+        { 
+          materialName: 'OFFSET PAPER', 
+          isActive: true,
+          defaultLength: 23,
+          defaultWidth: 36,
+          defaultGsm: 100,
+          defaultRatePerKg: 680,
+          defaultSheetsPerRim: 500,
+          defaultConversionFactor: 3100
+        },
         { materialName: 'ART CARD', isActive: true },
         { materialName: 'Carbonless Paper', isActive: true },
         { materialName: 'FLYING PAPER', isActive: true },

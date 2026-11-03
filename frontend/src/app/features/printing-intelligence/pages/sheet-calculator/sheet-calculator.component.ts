@@ -7,7 +7,8 @@ import {
   SheetCalculation,
   SaveSheetCalculationRequest,
   CalculationResult,
-  PaperSize
+  PaperSize,
+  PrintingMaterial
 } from '../../models/sheet-calculator.model';
 
 @Component({
@@ -27,7 +28,7 @@ export class SheetCalculatorComponent implements OnInit {
   isSavingCalculation = signal<boolean>(false);
   feedbackMessage = signal<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
-  selectedMaterial = signal<string>('ART/MATT PAPER');
+  selectedMaterial = signal<string>('OFFSET PAPER');
   selectedPaperSize = signal<string>('Custom Size');
 
   defaultMaterials: string[] = [
@@ -42,6 +43,7 @@ export class SheetCalculatorComponent implements OnInit {
   ];
 
   materials = signal<string[]>(this.defaultMaterials);
+  materialRecords = signal<PrintingMaterial[]>([]);
 
   defaultPaperSizes: PaperSize[] = [
     { sizeName: 'A4', lengthInches: 8.27, widthInches: 11.679, isActive: true },
@@ -58,8 +60,8 @@ export class SheetCalculatorComponent implements OnInit {
   calcForm: FormGroup = this.fb.group({
     length: [23, [Validators.required, Validators.min(0.01), Validators.max(10000)]],
     width: [36, [Validators.required, Validators.min(0.01), Validators.max(10000)]],
-    gsm: [115, [Validators.required, Validators.min(1), Validators.max(2000)]],
-    ratePerKg: [580, [Validators.required, Validators.min(0)]],
+    gsm: [100, [Validators.required, Validators.min(1), Validators.max(2000)]],
+    ratePerKg: [680, [Validators.required, Validators.min(0)]],
     sheetsPerRim: [500, [Validators.required, Validators.min(1)]],
     requiredSheets: [500, [Validators.required, Validators.min(1)]],
     conversionFactor: [3100, [Validators.required, Validators.min(1)]]
@@ -67,10 +69,10 @@ export class SheetCalculatorComponent implements OnInit {
 
   // --- Derived Real-time Calculation Result ---
   calcResult = signal<CalculationResult>({
-    rimPrice: 17815.35,
-    perSheetPrice: 35.6307,
-    totalPaperCost: 17815.35,
-    referenceRimWeightKg: 30.7161,
+    rimPrice: 18162.58,
+    perSheetPrice: 36.3252,
+    totalPaperCost: 18162.58,
+    referenceRimWeightKg: 26.7097,
     equivalentRims: 1.0
   });
 
@@ -94,6 +96,7 @@ export class SheetCalculatorComponent implements OnInit {
     this.calculatorService.getMaterials().subscribe({
       next: (mats) => {
         if (mats && mats.length > 0) {
+          this.materialRecords.set(mats);
           const list: string[] = [];
           mats.forEach(m => {
             if (!list.includes(m.materialName)) {
@@ -198,23 +201,53 @@ export class SheetCalculatorComponent implements OnInit {
   // --- Material Change ---
   onMaterialChange(materialName: string): void {
     this.selectedMaterial.set(materialName);
+
+    if (materialName === 'OFFSET PAPER') {
+      this.calcForm.patchValue({
+        length: 23,
+        width: 36,
+        gsm: 100,
+        ratePerKg: 680,
+        sheetsPerRim: 500,
+        conversionFactor: 3100
+      });
+      this.selectedPaperSize.set('Custom Size');
+      this.recalculate();
+      this.showToast('info', 'Loaded OFFSET PAPER specifications (23" × 36", 100 GSM, PKR 680/KG).');
+      return;
+    }
+
+    const found = this.materialRecords().find(m => m.materialName.toUpperCase() === materialName.toUpperCase());
+    if (found && found.defaultGsm != null) {
+      this.calcForm.patchValue({
+        length: found.defaultLength ?? 23,
+        width: found.defaultWidth ?? 36,
+        gsm: found.defaultGsm,
+        ratePerKg: found.defaultRatePerKg ?? 0,
+        sheetsPerRim: found.defaultSheetsPerRim ?? 500,
+        conversionFactor: found.defaultConversionFactor ?? 3100
+      });
+      this.selectedPaperSize.set('Custom Size');
+      this.recalculate();
+      this.showToast('info', `Loaded ${materialName} specifications.`);
+    }
   }
 
   // --- Reset Form to Excel Defaults ---
   resetForm(): void {
-    this.selectedMaterial.set('ART/MATT PAPER');
+    this.selectedMaterial.set('OFFSET PAPER');
     this.selectedPaperSize.set('Custom Size');
     this.calcForm.reset({
       length: 23,
       width: 36,
-      gsm: 115,
-      ratePerKg: 580,
+      gsm: 100,
+      ratePerKg: 680,
       sheetsPerRim: 500,
       requiredSheets: 500,
       conversionFactor: 3100
     });
     this.recalculate();
-    this.showToast('info', 'Form reset to standard defaults.');
+    this.showToast('info', 'Form reset to default specifications (OFFSET PAPER, 23" × 36", 100 GSM, PKR 680/KG).');
   }
 
   // --- Saved Calculations Operations ---
