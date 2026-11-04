@@ -22,7 +22,7 @@ import { ToastService } from '../../../../core/services/toast.service';
             <span>Outsourced Production</span>
           </div>
           <h1 class="title">Outsourced Production Management</h1>
-          <p class="subtitle">Real PostgreSQL tracking for third-party vendor POs, outsourced costs, delivery schedules, and receipt inspections.</p>
+          <p class="subtitle">Real-time tracking for third-party vendor POs, outsourced costs, delivery schedules, and receipt inspections.</p>
         </div>
       </header>
 
@@ -722,6 +722,206 @@ import { ToastService } from '../../../../core/services/toast.service';
       font-weight: 600;
       color: #fff;
       cursor: pointer;
+    }
+
+    /* Dark Mode Support */
+    :host-context(.dark-mode),
+    :host-context(body.dark-mode) {
+      .page-header,
+      .kpi-card,
+      .toolbar-card,
+      .table-container,
+      .loading-state,
+      .empty-state,
+      .modal-dialog {
+        background: #111827;
+        border-color: #1f293d;
+      }
+
+      .title,
+      .kpi-val,
+      .modal-title {
+        color: #f8fafc;
+      }
+
+      .subtitle,
+      .breadcrumbs,
+      .kpi-label,
+      .modal-subtitle {
+        color: #94a3b8;
+      }
+
+      .search-box {
+        background: #172133;
+        border-color: #2a374f;
+        input {
+          background: transparent;
+          color: #f8fafc;
+          &::placeholder { color: #64748b; }
+        }
+        svg { stroke: #94a3b8; }
+      }
+
+      .tab-btn {
+        color: #94a3b8;
+        &:hover {
+          background: #172133;
+          color: #f8fafc;
+        }
+        &.active {
+          background: rgba(147, 51, 234, 0.15);
+          color: #c084fc;
+          border-color: rgba(147, 51, 234, 0.3);
+        }
+      }
+
+      .data-table th {
+        background: #0d1424;
+        color: #94a3b8;
+        border-color: #1f293d;
+      }
+
+      .data-table td {
+        border-color: #1f293d;
+        color: #e2e8f0;
+      }
+
+      .data-table tbody tr:hover td {
+        background: #162032;
+      }
+
+      .job-code {
+        color: #c084fc;
+      }
+
+      .job-date {
+        color: #64748b;
+      }
+
+      .order-link {
+        color: #38bdf8;
+      }
+
+      .cust-name {
+        color: #cbd5e1;
+      }
+
+      .item-chip {
+        color: #cbd5e1;
+        .chip-qty {
+          background: #1e293b;
+          color: #38bdf8;
+          border: 1px solid #2a374f;
+        }
+        .chip-name {
+          color: #f8fafc;
+        }
+        .chip-spec {
+          color: #94a3b8;
+        }
+      }
+
+      .vendor-box {
+        .v-name { color: #f8fafc; }
+        .v-phone { color: #94a3b8; }
+      }
+
+      .no-vendor-pill {
+        background: #2a1f0a;
+        color: #fbbf24;
+        border: 1px solid #78350f;
+      }
+
+      .cost-col {
+        .cost-amount { color: #34d399; }
+        .cost-badge { color: #64748b; }
+      }
+
+      .delivery-date {
+        color: #f8fafc;
+      }
+
+      .status-quick-select {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+
+        &.st-pending-po {
+          background: #2a1f0a;
+          color: #fbbf24;
+          border-color: #78350f;
+        }
+        &.st-vendor {
+          background: #2e1065;
+          color: #c084fc;
+          border-color: #581c87;
+        }
+        &.st-completed {
+          background: #064e3b;
+          color: #34d399;
+          border-color: #059669;
+        }
+      }
+
+      .btn-action.edit {
+        background: #172133;
+        border-color: #2a374f;
+        color: #cbd5e1;
+        &:hover {
+          background: #1f293d;
+          color: #ffffff;
+        }
+      }
+
+      .btn-manage {
+        background: #2e1065;
+        color: #c084fc;
+        border-color: #581c87;
+        &:hover {
+          background: #3b0764;
+          color: #e9d5ff;
+        }
+      }
+
+      .notice-box {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+
+      .modal-header,
+      .modal-footer {
+        border-color: #1f293d;
+      }
+
+      .modal-footer {
+        background: #0f172a;
+      }
+
+      .form-label {
+        color: #cbd5e1;
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+        &:focus {
+          border-color: #9333ea;
+        }
+      }
+
+      .btn-cancel {
+        background: #172133;
+        border-color: #2a374f;
+        color: #cbd5e1;
+        &:hover {
+          background: #1f293d;
+          color: #f8fafc;
+        }
+      }
     }
   `]
 })

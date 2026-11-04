@@ -140,6 +140,116 @@ body.dark-mode {
         }
       }
 
+      .nav-group {
+        .nav-group-header {
+          color: $dark-text-body !important;
+
+          .item-label {
+            color: $dark-text-body !important;
+          }
+
+          .item-icon {
+            color: $dark-text-muted !important;
+            svg { color: $dark-text-muted !important; }
+          }
+
+          .dropdown-chevron {
+            color: $dark-text-dim !important;
+            svg { color: $dark-text-dim !important; }
+          }
+
+          &:hover {
+            background: $dark-bg-input !important;
+            color: #38bdf8 !important;
+
+            .item-label {
+              color: $dark-text-high !important;
+            }
+            .item-icon svg {
+              color: #38bdf8 !important;
+            }
+            .dropdown-chevron svg {
+              color: #38bdf8 !important;
+            }
+          }
+        }
+
+        &.group-active {
+          .nav-group-header {
+            color: #ffffff !important;
+            background: rgba(0, 173, 239, 0.08) !important;
+
+            .item-label {
+              color: #ffffff !important;
+              font-weight: 700 !important;
+            }
+
+            .item-icon {
+              color: #38bdf8 !important;
+              svg { color: #38bdf8 !important; }
+            }
+
+            .dropdown-chevron {
+              color: #38bdf8 !important;
+              svg { color: #38bdf8 !important; }
+            }
+          }
+        }
+
+        .nav-submenu {
+          border-left: 2px solid $dark-border-subtle !important;
+
+          .submenu-link {
+            color: $dark-text-muted !important;
+            background: transparent !important;
+
+            .submenu-bullet {
+              background: $dark-border-medium !important;
+            }
+
+            .submenu-icon svg {
+              color: $dark-text-dim !important;
+            }
+
+            .submenu-label {
+              color: $dark-text-muted !important;
+            }
+
+            &:hover {
+              background: $dark-bg-input !important;
+              color: #38bdf8 !important;
+
+              .submenu-bullet {
+                background: #00adef !important;
+              }
+              .submenu-icon svg {
+                color: #00adef !important;
+              }
+              .submenu-label {
+                color: #38bdf8 !important;
+              }
+            }
+
+            &.sub-active {
+              background: rgba(0, 173, 239, 0.15) !important;
+              color: #38bdf8 !important;
+              border: 1px solid rgba(0, 173, 239, 0.3) !important;
+
+              .submenu-bullet {
+                background: #00adef !important;
+              }
+              .submenu-icon svg {
+                color: #00adef !important;
+              }
+              .submenu-label {
+                color: #38bdf8 !important;
+                font-weight: 700 !important;
+              }
+            }
+          }
+        }
+      }
+
       .sub-menu {
         border-left-color: $dark-border-subtle !important;
         .sub-link {
@@ -168,10 +278,6 @@ body.dark-mode {
   .executive-topbar,
   .section-card,
   .card,
-  .calc-card,
-  .result-card,
-  .history-card,
-  .material-card,
   .form-card,
   .detail-card,
   .summary-card,
@@ -379,9 +485,69 @@ body.dark-mode {
       border: 1px solid $dark-border-subtle !important;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
 
+      .kpi-top {
+        .kpi-tag {
+          color: $dark-text-muted !important;
+        }
+
+        .kpi-label {
+          color: $dark-text-high !important;
+        }
+      }
+
       .kpi-label,
       .card-label {
+        color: $dark-text-high !important;
+      }
+
+      .number-display {
+        .number {
+          color: #ffffff !important;
+        }
+
+        .subtext {
+          color: $dark-text-body !important;
+
+          &.highlight-emerald { color: #34d399 !important; }
+          &.highlight-amber { color: #fbbf24 !important; }
+        }
+      }
+
+      .card-link {
+        border-top: 1px solid $dark-border-subtle !important;
         color: $dark-text-muted !important;
+
+        &:hover {
+          color: #38bdf8 !important;
+        }
+
+        svg {
+          color: inherit !important;
+        }
+      }
+
+      &.cyan-theme .icon-disc {
+        background: rgba(0, 173, 239, 0.15) !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(0, 173, 239, 0.3) !important;
+      }
+
+      &.indigo-theme .icon-disc {
+        background: rgba(99, 102, 241, 0.15) !important;
+        color: #818cf8 !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+      }
+
+      &.emerald-theme .icon-disc {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+      }
+
+      &.amber-theme .icon-disc {
+        background: rgba(245, 158, 11, 0.15) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
       }
 
       .kpi-val,
@@ -543,6 +709,7 @@ body.dark-mode {
   table,
   .table,
   .table-responsive,
+  .data-table,
   .customer-table,
   .quotations-table,
   .line-items-table,
@@ -556,175 +723,54 @@ body.dark-mode {
       border-bottom: 2px solid $dark-border-subtle !important;
     }
 
-    tbody tr {
+    tbody tr,
+    tr {
       background: transparent !important;
       border-bottom: 1px solid $dark-border-subtle !important;
 
-      &:hover {
+      &:hover,
+      &:hover td,
+      &:hover th {
+        background-color: $dark-bg-hover !important;
         background: $dark-bg-hover !important;
+        color: $dark-text-high !important;
       }
     }
 
     td {
       color: $dark-text-body !important;
       border-bottom: 1px solid $dark-border-subtle !important;
-    }
-  }
-
-  /* ======================================================
-     11. SHEET CALCULATOR WORKSPACE & CARDS (Image 1)
-     ====================================================== */
-  .sheet-calculator-container {
-    color: $dark-text-body !important;
-
-    .workspace-card,
-    .inputs-card,
-    .breakdown-card,
-    .results-card,
-    .history-card {
-      background: $dark-bg-surface !important;
-      border: 1px solid $dark-border-subtle !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+      background: transparent !important;
     }
 
-    .badge-size {
+    .customer-name,
+    .primary-date {
+      color: $dark-text-high !important;
+      font-weight: 700;
+    }
+
+    .amount-val {
       color: #38bdf8 !important;
+      font-weight: 800;
     }
 
-    .card-header-row {
-      border-bottom: 1px solid $dark-border-subtle !important;
-
-      .card-title {
-        color: $dark-text-high !important;
-      }
-      .card-desc {
-        color: $dark-text-muted !important;
-      }
-    }
-
-    .compact-material-control {
-      background: $dark-bg-card !important;
-      border: 1px solid $dark-border-subtle !important;
-
-      .compact-material-label {
-        color: $dark-text-muted !important;
-      }
-
-      .compact-select {
-        background: $dark-bg-input !important;
-        border: 1px solid $dark-border-medium !important;
-        color: $dark-text-high !important;
-
-        option {
-          background: $dark-bg-surface !important;
-          color: $dark-text-high !important;
-        }
-      }
-    }
-
-    .input-label {
-      color: $dark-text-high !important;
-    }
-
-    .form-control {
-      background: $dark-bg-input !important;
-      border: 1px solid $dark-border-medium !important;
-      color: $dark-text-high !important;
-
-      &:focus {
-        border-color: #00adef !important;
-      }
-    }
-
-    .hint-feedback {
-      color: $dark-text-dim !important;
-    }
-
-    .factor-explanation {
-      background: $dark-bg-card !important;
+    .customer-phone,
+    .sub-date {
       color: $dark-text-muted !important;
-
-      code {
-        background: $dark-bg-input !important;
-        color: #38bdf8 !important;
-      }
     }
 
-    .btn-secondary,
-    .btn-reset {
-      background: $dark-bg-input !important;
-      border: 1px solid $dark-border-medium !important;
-      color: $dark-text-high !important;
-
-      &:hover:not(:disabled) {
-        background: $dark-bg-hover !important;
-        border-color: #475569 !important;
-        color: #ffffff !important;
-      }
+    .product-text {
+      color: $dark-text-body !important;
     }
 
-    // Results Column Cards
-    .results-kpi-grid {
-      .kpi-card {
-        background: $dark-bg-card !important;
-        border: 1px solid $dark-border-subtle !important;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
-
-        &.rim-kpi,
-        &.sheet-kpi {
-          background: $dark-bg-card !important;
-
-          .kpi-icon {
-            background: $dark-bg-input !important;
-            color: #38bdf8 !important;
-          }
-        }
-
-        .kpi-content {
-          .kpi-label {
-            color: $dark-text-muted !important;
-          }
-          .kpi-value-row {
-            .currency {
-              color: #00adef !important;
-            }
-            .amount {
-              color: $dark-text-high !important;
-            }
-          }
-          .kpi-subtext {
-            color: $dark-text-dim !important;
-          }
-        }
-      }
-    }
-
-    .metrics-secondary-row {
-      .metric-mini-box {
-        background: $dark-bg-card !important;
-        border: 1px solid $dark-border-subtle !important;
-
-        .mini-label {
-          color: $dark-text-muted !important;
-        }
-        .mini-val {
-          color: $dark-text-high !important;
-        }
-        .mini-sub {
-          color: $dark-text-dim !important;
-        }
-      }
-    }
-
-    .live-indicator {
-      background: rgba(16, 185, 129, 0.15) !important;
-      border-color: rgba(16, 185, 129, 0.3) !important;
-      color: #34d399 !important;
+    .quote-link {
+      color: #38bdf8 !important;
+      font-weight: 700;
     }
   }
 
   /* ======================================================
-     12. PAGINATION FOOTERS ACROSS ALL MODULES (Image 2)
+     11. PAGINATION FOOTERS ACROSS ALL MODULES (Image 2)
      ====================================================== */
   .pagination-footer,
   .pagination-bar,
@@ -860,5 +906,298 @@ body.dark-mode {
     background: $dark-bg-input !important;
     border: 1px solid $dark-border-subtle !important;
     color: $dark-text-muted !important;
+  }
+
+  /* ======================================================
+     13. UNIVERSAL DARK HOVER SYSTEM (NO WHITE HOVER IN DARK MODE)
+     ====================================================== */
+  // 1. All Table Rows, Cells & Records on Hover
+  tr:hover,
+  tr:hover td,
+  tr:hover th,
+  tbody tr:hover,
+  tbody tr:hover td,
+  tbody tr:hover th,
+  table tr:hover td,
+  table tbody tr:hover td,
+  .history-table tr:hover td,
+  .customer-table tr:hover td,
+  .quotations-table tr:hover td,
+  .jobs-table tbody tr:hover,
+  .jobs-table tbody tr:hover td,
+  .data-table tr:hover td {
+    background-color: $dark-bg-hover !important;
+    background: $dark-bg-hover !important;
+    color: $dark-text-high !important;
+  }
+
+  // 2. All KPI, Workflow, Summary & Stat Cards on Hover
+  .kpi-card:hover,
+  .kpi-grid .kpi-card:hover,
+  .workflow-card:hover,
+  .workflow-cards-grid .workflow-card:hover,
+  .summary-card:hover,
+  .summary-cards-grid .summary-card:hover,
+  .stat-card:hover,
+  .stats-grid .stat-card:hover,
+  .section-card:hover,
+  .workspace-card:hover,
+  .card:hover,
+  .metric-mini-box:hover,
+  .info-block:hover {
+    background-color: $dark-bg-card !important;
+    background: $dark-bg-card !important;
+    border-color: $dark-border-medium !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  // 3. All Secondary & Outline Buttons, Action Buttons, Pills & Tabs on Hover
+  .btn-outline:hover,
+  .btn-secondary:hover,
+  .btn-subtle:hover,
+  .btn-default:hover,
+  .btn-ghost:hover,
+  .btn-light:hover,
+  .btn-action:hover,
+  .btn-action-load:hover,
+  .action-btn:hover,
+  .queue-btn:hover,
+  .tab-btn:hover,
+  .tab-pill:hover,
+  .status-tabs .tab-btn:hover,
+  .status-tabs-group .tab-pill:hover,
+  .btn-wf-action:hover,
+  .btn-refresh:hover,
+  .pagination-controls .btn-page:hover,
+  .pagination-bar button:hover,
+  .pagination-footer button:hover {
+    background-color: $dark-bg-hover !important;
+    background: $dark-bg-hover !important;
+    border-color: #00adef !important;
+    color: #38bdf8 !important;
+  }
+
+  // 4. Delete / Danger Buttons on Hover
+  .btn-action-delete:hover,
+  .btn-action.delete:hover,
+  .btn-danger:hover,
+  .btn-delete:hover {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    color: #f87171 !important;
+  }
+
+  // 5. Inputs, Selects & Form Controls on Hover
+  input:hover:not(:disabled):not([type="checkbox"]):not([type="radio"]),
+  select:hover:not(:disabled),
+  textarea:hover:not(:disabled),
+  .form-control:hover:not(:disabled),
+  .form-select:hover:not(:disabled) {
+    background-color: $dark-bg-input !important;
+    background: $dark-bg-input !important;
+    border-color: #00adef !important;
+  }
+
+  // 6. Navigation, Breadcrumbs & Links on Hover
+  .nav-item-link:hover,
+  .sub-link:hover,
+  .view-all-link:hover,
+  .breadcrumbs a:hover,
+  .header-links a:hover {
+    background-color: $dark-bg-hover !important;
+    color: #38bdf8 !important;
+  }
+
+  /* ======================================================
+     PRINTING CALCULATOR (Step 3 & Step 5 Dark Mode)
+     ====================================================== */
+  .calc-card,
+  .specs-box-compact,
+  .per-color-config-box {
+    background: $dark-bg-card !important;
+    border-color: $dark-border-subtle !important;
+    color: $dark-text-body !important;
+  }
+
+  .per-color-config-box {
+    border: 1px dashed $dark-border-medium !important;
+
+    .checkbox-label,
+    .toggle-text {
+      color: $dark-text-body !important;
+    }
+
+    .formula-preview-badge {
+      background: #082f49 !important;
+      color: #38bdf8 !important;
+      border: 1px solid #0369a1 !important;
+    }
+  }
+
+  .specs-box-compact {
+    border: 1px solid $dark-border-subtle !important;
+
+    .field-label {
+      color: $dark-text-muted !important;
+    }
+
+    .form-input {
+      background: $dark-bg-input !important;
+      border-color: $dark-border-medium !important;
+      color: $dark-text-high !important;
+
+      &::placeholder {
+        color: $dark-text-dim !important;
+      }
+    }
+  }
+
+  /* Custom Dimensions Panel */
+  .dimension-edit-panel {
+    background: $dark-bg-card !important;
+    border-color: $dark-border-subtle !important;
+
+    &.custom-mode {
+      border-color: #15803d !important;
+      background: rgba(6, 78, 59, 0.25) !important;
+    }
+
+    .dimension-header-bar {
+      .header-title { color: #f8fafc !important; }
+      .badge-status-pill {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+        &.badge-editable {
+          background: rgba(34, 197, 94, 0.2) !important;
+          color: #4ade80 !important;
+          border-color: rgba(34, 197, 94, 0.4) !important;
+        }
+      }
+      .btn-switch-custom {
+        background: #172133 !important;
+        border-color: #2a374f !important;
+        color: #38bdf8 !important;
+      }
+    }
+
+    .dim-compact-row {
+      .dim-cross { color: #64748b !important; }
+      .dim-input-group {
+        background: #172133 !important;
+        border-color: #2a374f !important;
+
+        &.is-editable {
+          border-color: #16a34a !important;
+        }
+
+        &:focus-within {
+          border-color: #4ade80 !important;
+          box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2) !important;
+        }
+
+        .dim-addon {
+          background: #0f172a !important;
+          color: #94a3b8 !important;
+          border-right-color: #2a374f !important;
+        }
+
+        .dim-input {
+          color: #f8fafc !important;
+          &.dim-input-editable { color: #4ade80 !important; }
+          &::placeholder { color: #64748b !important; }
+        }
+
+        .dim-unit-tag {
+          background: #0f172a !important;
+          color: #94a3b8 !important;
+          border-left-color: #2a374f !important;
+        }
+      }
+    }
+
+    .canonical-info-row {
+      background: #172133 !important;
+      border-color: #2a374f !important;
+      .canonical-text {
+        color: #94a3b8 !important;
+        strong { color: #f8fafc !important; }
+      }
+    }
+  }
+
+  /* Production Modules (In-House & Outsourced) */
+  .order-link {
+    color: #38bdf8 !important;
+    font-weight: 700;
+  }
+
+  .cust-name {
+    color: #cbd5e1 !important;
+  }
+
+  .item-chip {
+    color: #cbd5e1 !important;
+
+    .chip-qty {
+      background: #1e293b !important;
+      color: #38bdf8 !important;
+      border: 1px solid #2a374f !important;
+    }
+    .chip-name {
+      color: #f8fafc !important;
+    }
+    .chip-spec {
+      color: #94a3b8 !important;
+    }
+  }
+
+  .vendor-box {
+    .v-name { color: #f8fafc !important; }
+    .v-phone { color: #94a3b8 !important; }
+  }
+
+  .no-vendor-pill {
+    background: #2a1f0a !important;
+    color: #fbbf24 !important;
+    border: 1px solid #78350f !important;
+  }
+
+  .cost-col {
+    .cost-amount { color: #34d399 !important; font-weight: 700; }
+    .cost-badge { color: #64748b !important; }
+  }
+
+  .delivery-date {
+    color: #f8fafc !important;
+  }
+
+  .status-quick-select {
+    background: #172133 !important;
+    border-color: #2a374f !important;
+    color: #f8fafc !important;
+
+    &.st-queued,
+    &.st-pending-po {
+      background: #2a1f0a !important;
+      color: #fbbf24 !important;
+      border-color: #78350f !important;
+    }
+    &.st-printing,
+    &.st-inspected {
+      background: #082f49 !important;
+      color: #38bdf8 !important;
+      border-color: #0369a1 !important;
+    }
+    &.st-vendor {
+      background: #2e1065 !important;
+      color: #c084fc !important;
+      border-color: #581c87 !important;
+    }
+    &.st-completed {
+      background: #064e3b !important;
+      color: #34d399 !important;
+      border-color: #059669 !important;
+    }
   }
 }

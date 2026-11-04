@@ -1175,3 +1175,233 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ========================================================
+   DARK MODE OVERRIDES FOR EXECUTIVE DASHBOARD
+   ======================================================== */
+:host-context(html.dark-mode),
+:host-context(body.dark-mode),
+:host-context(.dark-mode) {
+  // 1. Executive Topbar
+  .executive-topbar {
+    background: #111827;
+    border-color: #1f293d;
+
+    .system-status-pill {
+      background: #172133;
+      border-color: #2a374f;
+      color: #94a3b8;
+      strong { color: #f8fafc; }
+    }
+
+    .executive-title {
+      color: #f8fafc;
+    }
+
+    .executive-subtitle {
+      color: #94a3b8;
+    }
+
+    .btn-refresh {
+      background: #172133;
+      border-color: #2a374f;
+      color: #94a3b8;
+
+      &:hover {
+        background: #1f293d;
+        color: #f8fafc;
+      }
+    }
+  }
+
+  // 2. 4-Column KPI Cards (Visible, Bright & Clean in Dark Mode)
+  .kpi-grid {
+    .kpi-card {
+      background: #111827;
+      border-color: #1f293d;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+      &:hover {
+        background: #162032;
+        border-color: #2a374f;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .kpi-top {
+        .label-wrapper {
+          .kpi-tag {
+            color: #94a3b8;
+          }
+
+          .kpi-label {
+            color: #f8fafc;
+          }
+        }
+
+        .icon-disc {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      &.cyan-theme .icon-disc {
+        background: rgba(0, 173, 239, 0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(0, 173, 239, 0.3);
+      }
+
+      &.indigo-theme .icon-disc {
+        background: rgba(99, 102, 241, 0.15);
+        color: #818cf8;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+      }
+
+      &.emerald-theme .icon-disc {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      &.amber-theme .icon-disc {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      .kpi-body {
+        .number-display {
+          .number {
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          }
+
+          .subtext {
+            color: #cbd5e1;
+
+            &.highlight-emerald {
+              color: #34d399;
+            }
+
+            &.highlight-amber {
+              color: #fbbf24;
+            }
+          }
+        }
+      }
+
+      .card-link {
+        border-top-color: #1f293d;
+        color: #cbd5e1;
+
+        &:hover {
+          color: #38bdf8;
+        }
+
+        svg {
+          color: inherit;
+        }
+      }
+    }
+  }
+
+  // 3. Activity Feed Section & Table
+  .feed-card {
+    background: #111827;
+    border-color: #1f293d;
+
+    .feed-header {
+      border-bottom-color: #1f293d;
+
+      .feed-title {
+        color: #f8fafc;
+      }
+
+      .feed-subtitle {
+        color: #94a3b8;
+      }
+    }
+
+    .live-activity-table {
+      th {
+        background: #0d1424;
+        color: #94a3b8;
+        border-bottom-color: #1f293d;
+      }
+
+      td {
+        border-bottom-color: #1f293d;
+        color: #e2e8f0;
+      }
+
+      tbody tr:hover {
+        background: #162032;
+      }
+
+      .cust-cell {
+        .cust-avatar {
+          background: #1e293b;
+          color: #38bdf8;
+          border-color: #2a374f;
+        }
+
+        .cust-info {
+          .cust-title { color: #f8fafc; }
+          .cust-meta { color: #94a3b8; }
+        }
+      }
+
+      .job-badge-pill {
+        background: #172133;
+        color: #cbd5e1;
+        border-color: #2a374f;
+      }
+
+      .view-job-link {
+        color: #38bdf8;
+        &:hover { color: #7dd3fc; }
+      }
+    }
+  }
+
+  // 4. Sidebar Widgets
+  .sidebar-widget {
+    background: #111827;
+    border-color: #1f293d;
+
+    .widget-header {
+      border-bottom-color: #1f293d;
+
+      .widget-title { color: #f8fafc; }
+      .widget-subtitle { color: #94a3b8; }
+    }
+
+    .quick-links-list {
+      .quick-link-item {
+        background: #172133;
+        border-color: #1f293d;
+
+        &:hover {
+          background: #1e293b;
+          border-color: #2a374f;
+        }
+
+        .item-info {
+          strong { color: #f8fafc; }
+          span { color: #94a3b8; }
+        }
+
+        .arrow { color: #94a3b8; }
+      }
+    }
+
+    .telemetry-list {
+      .telemetry-row {
+        .telemetry-name { color: #cbd5e1; }
+      }
+    }
+
+    .telemetry-footer {
+      border-top-color: #1f293d;
+      color: #94a3b8;
+    }
+  }
+}

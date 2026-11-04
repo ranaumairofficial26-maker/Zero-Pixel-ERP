@@ -11,6 +11,7 @@ public class UnitOfWork : IUnitOfWork
     private IQuotationRepository? _quotations;
     private IPrintingOrderRepository? _printingOrders;
     private IProductionJobRepository? _productionJobs;
+    private IPrintingCalculatorRepository? _printingCalculator;
 
     public UnitOfWork(AppDbContext context)
     {
@@ -23,6 +24,7 @@ public class UnitOfWork : IUnitOfWork
     public IQuotationRepository Quotations => _quotations ??= new QuotationRepository(_context);
     public IPrintingOrderRepository PrintingOrders => _printingOrders ??= new PrintingOrderRepository(_context);
     public IProductionJobRepository ProductionJobs => _productionJobs ??= new ProductionJobRepository(_context);
+    public IPrintingCalculatorRepository PrintingCalculator => _printingCalculator ??= new PrintingCalculatorRepository(_context);
 
     public async Task<int> CompleteAsync()
     {

@@ -11,13 +11,10 @@ public class PrintingMaterial
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int MaterialId { get; set; }
 
+    [Column("material_name")]
     [Required]
     [MaxLength(150)]
-    [Column("material_name")]
     public string MaterialName { get; set; } = string.Empty;
-
-    [Column("is_active")]
-    public bool IsActive { get; set; } = true;
 
     [Column("default_length", TypeName = "numeric(10,3)")]
     public decimal? DefaultLength { get; set; }
@@ -36,6 +33,19 @@ public class PrintingMaterial
 
     [Column("default_conversion_factor", TypeName = "numeric(12,4)")]
     public decimal? DefaultConversionFactor { get; set; }
+
+    [Column("pricing_method")]
+    [MaxLength(50)]
+    public string? PricingMethod { get; set; } // RatePerKg, PacketPrice, DirectRimPrice, DirectSheetPrice, ManualRate
+
+    [Column("packet_price", TypeName = "numeric(18,4)")]
+    public decimal? PacketPrice { get; set; }
+
+    [Column("sheets_per_packet")]
+    public int? SheetsPerPacket { get; set; }
+
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

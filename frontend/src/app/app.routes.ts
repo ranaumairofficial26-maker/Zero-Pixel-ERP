@@ -41,12 +41,33 @@ export const routes: Routes = [
         loadComponent: () => import('./features/production/pages/outsourced-production/outsourced-production.component').then(m => m.OutsourcedProductionComponent)
       },
       {
-        path: 'printing-intelligence/sheet-calculator',
-        loadComponent: () => import('./features/printing-intelligence/pages/sheet-calculator/sheet-calculator.component').then(m => m.SheetCalculatorComponent)
+        path: 'printing-intelligence/printing-calculator',
+        loadComponent: () => import('./features/printing-intelligence/pages/printing-calculator/printing-calculator.component').then(m => m.PrintingCalculatorComponent)
+      },
+      {
+        path: 'printing-intelligence',
+        redirectTo: 'printing-intelligence/printing-calculator',
+        pathMatch: 'full'
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./features/settings/admin-settings.component').then(m => m.AdminSettingsComponent)
       }
     ]
   },
   // Top-level aliases for direct navigation or refresh
+  {
+    path: 'settings',
+    redirectTo: 'admin/settings'
+  },
+  {
+    path: 'printing-intelligence',
+    redirectTo: 'admin/printing-intelligence/printing-calculator'
+  },
+  {
+    path: 'printing-calculator',
+    redirectTo: 'admin/printing-intelligence/printing-calculator'
+  },
   {
     path: 'quotations',
     redirectTo: 'admin/quotations'
@@ -54,10 +75,6 @@ export const routes: Routes = [
   {
     path: 'production',
     redirectTo: 'admin/production/in-house'
-  },
-  {
-    path: 'printing-intelligence',
-    redirectTo: 'admin/printing-intelligence/sheet-calculator'
   },
   {
     path: 'customers',

@@ -20,9 +20,18 @@ public class AppDbContext : DbContext
     public DbSet<PrintingOrderItem> PrintingOrderItems => Set<PrintingOrderItem>();
     public DbSet<ProductionJob> ProductionJobs => Set<ProductionJob>();
     public DbSet<ProductionJobItem> ProductionJobItems => Set<ProductionJobItem>();
-    public DbSet<SheetCalculation> SheetCalculations => Set<SheetCalculation>();
+    public DbSet<PrintingCategory> PrintingCategories => Set<PrintingCategory>();
+    public DbSet<PrintingItem> PrintingItems => Set<PrintingItem>();
     public DbSet<PaperSize> PaperSizes => Set<PaperSize>();
+    public DbSet<PrintingSize> PrintingSizes => Set<PrintingSize>();
+    public DbSet<PrintingItemSize> PrintingItemSizes => Set<PrintingItemSize>();
     public DbSet<PrintingMaterial> PrintingMaterials => Set<PrintingMaterial>();
+    public DbSet<MaterialPriceProfile> MaterialPriceProfiles => Set<MaterialPriceProfile>();
+    public DbSet<CostCategory> CostCategories => Set<CostCategory>();
+    public DbSet<PrintingCostEstimate> PrintingCostEstimates => Set<PrintingCostEstimate>();
+    public DbSet<EstimateQuantity> EstimateQuantities => Set<EstimateQuantity>();
+    public DbSet<EstimateCostItem> EstimateCostItems => Set<EstimateCostItem>();
+    public DbSet<EstimateResult> EstimateResults => Set<EstimateResult>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -123,6 +132,12 @@ public class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                   .HasColumnName("created_at")
                   .HasColumnType("timestamptz")
+                  .IsRequired();
+
+            entity.Property(e => e.UpdatedAt)
+                  .HasColumnName("updated_at")
+                  .HasColumnType("timestamptz")
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP")
                   .IsRequired();
         });
 
@@ -512,51 +527,260 @@ public class AppDbContext : DbContext
                   .HasColumnType("timestamptz")
                   .IsRequired();
         });
-                // 8. Configure SheetCalculation entity
-        modelBuilder.Entity<SheetCalculation>(entity =>
+
+        // 8. Configure PrintingCategory entity
+        modelBuilder.Entity<PrintingCategory>(entity =>
         {
-            entity.ToTable("sheet_calculations");
-            entity.HasKey(e => e.CalculationId);
-            entity.Property(e => e.CalculationId)
-                  .HasColumnName("calculation_id")
-                  .UseIdentityAlwaysColumn();
-            entity.Property(e => e.Length)
-                  .HasColumnName("length")
-                  .HasColumnType("numeric(12,3)");
-            entity.Property(e => e.Width)
-                  .HasColumnName("width")
-                  .HasColumnType("numeric(12,3)");
-            entity.Property(e => e.Gsm)
-                  .HasColumnName("gsm")
-                  .HasColumnType("numeric(12,3)");
-            entity.Property(e => e.RatePerKg)
-                  .HasColumnName("rate_per_kg")
-                  .HasColumnType("numeric(18,4)");
-            entity.Property(e => e.SheetsPerRim)
-                  .HasColumnName("sheets_per_rim")
-                  .HasDefaultValue(500);
-            entity.Property(e => e.RequiredSheets)
-                  .HasColumnName("required_sheets")
-                  .HasDefaultValue(500);
-            entity.Property(e => e.ConversionFactor)
-                  .HasColumnName("conversion_factor")
-                  .HasColumnType("numeric(12,4)")
-                  .HasDefaultValue(3100m);
-            entity.Property(e => e.RimPrice)
-                  .HasColumnName("rim_price")
-                  .HasColumnType("numeric(18,4)");
-            entity.Property(e => e.PerSheetPrice)
-                  .HasColumnName("per_sheet_price")
-                  .HasColumnType("numeric(18,4)");
-            entity.Property(e => e.TotalPaperCost)
-                  .HasColumnName("total_paper_cost")
-                  .HasColumnType("numeric(18,4)");
-            entity.Property(e => e.Notes)
-                  .HasColumnName("notes")
-                  .HasColumnType("text");
-            entity.Property(e => e.CreatedAt)
-                  .HasColumnName("created_at")
-                  .HasColumnType("timestamptz");
+            entity.ToTable("printing_categories");
+            entity.HasKey(e => e.CategoryId);
+            entity.Property(e => e.CategoryId).HasColumnName("category_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.CategoryName).HasColumnName("category_name").HasMaxLength(150).IsRequired();
+            entity.HasIndex(e => e.CategoryName, "IX_printing_categories_name").IsUnique();
+            entity.Property(e => e.SourceCategoryName).HasColumnName("source_category_name").HasMaxLength(150);
+            entity.Property(e => e.ItemCount).HasColumnName("item_count").HasDefaultValue(0);
+            entity.Property(e => e.ItemNumberRange).HasColumnName("item_number_range").HasMaxLength(50);
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order").HasDefaultValue(0);
+            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+
+            entity.HasMany(e => e.Items)
+                  .WithOne(i => i.Category)
+                  .HasForeignKey(i => i.CategoryId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // 9. Configure PrintingItem entity
+        modelBuilder.Entity<PrintingItem>(entity =>
+        {
+            entity.ToTable("printing_items");
+            entity.HasKey(e => e.ItemId);
+            entity.Property(e => e.ItemId).HasColumnName("item_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.SourceItemNumber).HasColumnName("source_item_number");
+            entity.Property(e => e.ItemName).HasColumnName("item_name").HasMaxLength(250).IsRequired();
+            entity.Property(e => e.DefaultWidthMm).HasColumnName("default_width_mm").HasColumnType("numeric(10,2)");
+            entity.Property(e => e.DefaultHeightMm).HasColumnName("default_height_mm").HasColumnType("numeric(10,2)");
+            entity.Property(e => e.InchesStr).HasColumnName("inches_str").HasMaxLength(50);
+            entity.Property(e => e.CmStr).HasColumnName("cm_str").HasMaxLength(50);
+            entity.Property(e => e.MmStr).HasColumnName("mm_str").HasMaxLength(50);
+            entity.Property(e => e.SizingBasis).HasColumnName("sizing_basis").HasMaxLength(100);
+            entity.Property(e => e.SourceNotes).HasColumnName("source_notes").HasColumnType("text");
+            entity.Property(e => e.IsCustom).HasColumnName("is_custom").HasDefaultValue(false);
+            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+
+            entity.HasIndex(e => new { e.CategoryId, e.ItemName }, "IX_printing_items_category_name");
+        });
+
+        // 10. Configure PaperSize entity
+        modelBuilder.Entity<PaperSize>(entity =>
+        {
+            entity.ToTable("paper_sizes");
+            entity.HasKey(e => e.PaperSizeId);
+            entity.Property(e => e.PaperSizeId).HasColumnName("paper_size_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.SizeName).HasColumnName("size_name").HasMaxLength(100).IsRequired();
+            entity.HasIndex(e => e.SizeName, "IX_paper_sizes_size_name").IsUnique();
+            entity.Property(e => e.LengthInches).HasColumnName("length_inches").HasColumnType("numeric(10,3)");
+            entity.Property(e => e.WidthInches).HasColumnName("width_inches").HasColumnType("numeric(10,3)");
+            entity.Property(e => e.WidthMm).HasColumnName("width_mm").HasColumnType("numeric(10,2)");
+            entity.Property(e => e.HeightMm).HasColumnName("height_mm").HasColumnType("numeric(10,2)");
+            entity.Property(e => e.SizeType).HasColumnName("size_type").HasMaxLength(50).HasDefaultValue("StockPaper");
+            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+        });
+
+        // 11. Configure PrintingMaterial entity
+        modelBuilder.Entity<PrintingMaterial>(entity =>
+        {
+            entity.ToTable("printing_materials");
+            entity.HasKey(e => e.MaterialId);
+            entity.Property(e => e.MaterialId).HasColumnName("material_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.MaterialName).HasColumnName("material_name").HasMaxLength(150).IsRequired();
+            entity.HasIndex(e => e.MaterialName, "IX_printing_materials_name").IsUnique();
+            entity.Property(e => e.DefaultLength).HasColumnName("default_length").HasColumnType("numeric(10,3)");
+            entity.Property(e => e.DefaultWidth).HasColumnName("default_width").HasColumnType("numeric(10,3)");
+            entity.Property(e => e.DefaultGsm).HasColumnName("default_gsm").HasColumnType("numeric(10,3)");
+            entity.Property(e => e.DefaultRatePerKg).HasColumnName("default_rate_per_kg").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.DefaultSheetsPerRim).HasColumnName("default_sheets_per_rim").HasDefaultValue(500);
+            entity.Property(e => e.DefaultConversionFactor).HasColumnName("default_conversion_factor").HasColumnType("numeric(12,4)").HasDefaultValue(3100m);
+            entity.Property(e => e.PricingMethod).HasColumnName("pricing_method").HasMaxLength(50);
+            entity.Property(e => e.PacketPrice).HasColumnName("packet_price").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.SheetsPerPacket).HasColumnName("sheets_per_packet");
+            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+        });
+
+        // 12. Configure MaterialPriceProfile entity
+        modelBuilder.Entity<MaterialPriceProfile>(entity =>
+        {
+            entity.ToTable("material_price_profiles");
+            entity.HasKey(e => e.ProfileId);
+            entity.Property(e => e.ProfileId).HasColumnName("profile_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.MaterialId).HasColumnName("material_id");
+            entity.Property(e => e.PaperSizeId).HasColumnName("paper_size_id");
+            entity.Property(e => e.VariantName).HasColumnName("variant_name").HasMaxLength(150);
+            entity.Property(e => e.Gsm).HasColumnName("gsm").HasColumnType("numeric(10,3)");
+            entity.Property(e => e.PricingMethod).HasColumnName("pricing_method").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.RatePerKg).HasColumnName("rate_per_kg").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.ConversionFactor).HasColumnName("conversion_factor").HasColumnType("numeric(12,4)").HasDefaultValue(3100m);
+            entity.Property(e => e.PacketPrice).HasColumnName("packet_price").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.SheetsPerPacket).HasColumnName("sheets_per_packet");
+            entity.Property(e => e.DirectRimPrice).HasColumnName("direct_rim_price").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.SheetsPerRim).HasColumnName("sheets_per_rim").HasDefaultValue(500);
+            entity.Property(e => e.DirectSheetPrice).HasColumnName("direct_sheet_price").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.ComputedPerSheetPrice).HasColumnName("computed_per_sheet_price").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Material)
+                  .WithMany()
+                  .HasForeignKey(e => e.MaterialId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.PaperSize)
+                  .WithMany()
+                  .HasForeignKey(e => e.PaperSizeId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // 13. Configure CostCategory entity
+        modelBuilder.Entity<CostCategory>(entity =>
+        {
+            entity.ToTable("cost_categories");
+            entity.HasKey(e => e.CategoryId);
+            entity.Property(e => e.CategoryId).HasColumnName("category_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.CategoryName).HasColumnName("category_name").HasMaxLength(150).IsRequired();
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order").HasDefaultValue(0);
+            entity.Property(e => e.DefaultCalculationMethod).HasColumnName("default_calculation_method").HasMaxLength(50);
+            entity.Property(e => e.DefaultRate).HasColumnName("default_rate").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+        });
+
+        // 14. Configure PrintingCostEstimate entity
+        modelBuilder.Entity<PrintingCostEstimate>(entity =>
+        {
+            entity.ToTable("printing_cost_estimates");
+            entity.HasKey(e => e.EstimateId);
+            entity.Property(e => e.EstimateId).HasColumnName("estimate_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.EstimateNumber).HasColumnName("estimate_number").HasMaxLength(50).IsRequired();
+            entity.HasIndex(e => e.EstimateNumber, "IX_printing_cost_estimates_estimate_number").IsUnique();
+
+            entity.Property(e => e.JobTitle).HasColumnName("job_title").HasMaxLength(250).IsRequired();
+            entity.Property(e => e.ProductType).HasColumnName("product_type").HasMaxLength(100);
+            entity.Property(e => e.PrintingCategoryId).HasColumnName("printing_category_id");
+            entity.Property(e => e.PrintingItemId).HasColumnName("printing_item_id");
+            entity.Property(e => e.MaterialId).HasColumnName("material_id");
+            entity.Property(e => e.PaperSizeId).HasColumnName("paper_size_id");
+            entity.Property(e => e.PrintingSide).HasColumnName("printing_side").HasMaxLength(50);
+            entity.Property(e => e.ColorMode).HasColumnName("color_mode").HasMaxLength(50);
+            entity.Property(e => e.JobDescription).HasColumnName("job_description").HasColumnType("text");
+            entity.Property(e => e.Notes).HasColumnName("notes").HasColumnType("text");
+            entity.Property(e => e.SpecificationsSnapshot).HasColumnName("specifications_snapshot").HasColumnType("jsonb");
+            entity.Property(e => e.MaterialPricingSnapshot).HasColumnName("material_pricing_snapshot").HasColumnType("jsonb");
+            entity.Property(e => e.ProfitPercentage).HasColumnName("profit_percentage").HasColumnType("numeric(8,2)").HasDefaultValue(20m);
+            entity.Property(e => e.FixedProfitAmount).HasColumnName("fixed_profit_amount").HasColumnType("numeric(18,2)");
+            entity.Property(e => e.ProfitCalculationMethod).HasColumnName("profit_calculation_method").HasMaxLength(50).HasDefaultValue("Percentage");
+            entity.Property(e => e.TaxPercentage).HasColumnName("tax_percentage").HasColumnType("numeric(8,2)").HasDefaultValue(0m);
+            entity.Property(e => e.TaxCalculationMethod).HasColumnName("tax_calculation_method").HasMaxLength(50).HasDefaultValue("OnSubtotal");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(50).HasDefaultValue("Draft");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.PrintingCategory)
+                  .WithMany()
+                  .HasForeignKey(e => e.PrintingCategoryId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.PrintingItem)
+                  .WithMany()
+                  .HasForeignKey(e => e.PrintingItemId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.Material)
+                  .WithMany()
+                  .HasForeignKey(e => e.MaterialId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.PaperSize)
+                  .WithMany()
+                  .HasForeignKey(e => e.PaperSizeId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasMany(e => e.Quantities)
+                  .WithOne(q => q.Estimate)
+                  .HasForeignKey(q => q.EstimateId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // 15. Configure EstimateQuantity entity
+        modelBuilder.Entity<EstimateQuantity>(entity =>
+        {
+            entity.ToTable("estimate_quantities");
+            entity.HasKey(e => e.EstimateQuantityId);
+            entity.Property(e => e.EstimateQuantityId).HasColumnName("estimate_quantity_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.EstimateId).HasColumnName("estimate_id");
+            entity.Property(e => e.Quantity).HasColumnName("quantity");
+            entity.Property(e => e.SheetsRequired).HasColumnName("sheets_required").HasColumnType("numeric(12,2)");
+            entity.Property(e => e.WastagePercentage).HasColumnName("wastage_percentage").HasColumnType("numeric(8,2)").HasDefaultValue(0m);
+            entity.Property(e => e.PaperCost).HasColumnName("paper_cost").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order").HasDefaultValue(0);
+
+            entity.HasMany(e => e.CostItems)
+                  .WithOne(c => c.EstimateQuantity)
+                  .HasForeignKey(c => c.EstimateQuantityId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Result)
+                  .WithOne(r => r.EstimateQuantity)
+                  .HasForeignKey<EstimateResult>(r => r.EstimateQuantityId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // 16. Configure EstimateCostItem entity
+        modelBuilder.Entity<EstimateCostItem>(entity =>
+        {
+            entity.ToTable("estimate_cost_items");
+            entity.HasKey(e => e.CostItemId);
+            entity.Property(e => e.CostItemId).HasColumnName("cost_item_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.EstimateQuantityId).HasColumnName("estimate_quantity_id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.ExpenseNameSnapshot).HasColumnName("expense_name_snapshot").HasMaxLength(150).IsRequired();
+            entity.Property(e => e.CalculationMethod).HasColumnName("calculation_method").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.UnitRate).HasColumnName("unit_rate").HasColumnType("numeric(18,4)").HasDefaultValue(0m);
+            entity.Property(e => e.Units).HasColumnName("units").HasColumnType("numeric(12,3)").HasDefaultValue(1m);
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,4)").HasDefaultValue(0m);
+            entity.Property(e => e.Notes).HasColumnName("notes").HasColumnType("text");
+            entity.Property(e => e.SortOrder).HasColumnName("sort_order").HasDefaultValue(0);
+
+            entity.HasOne(e => e.Category)
+                  .WithMany()
+                  .HasForeignKey(e => e.CategoryId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // 17. Configure EstimateResult entity
+        modelBuilder.Entity<EstimateResult>(entity =>
+        {
+            entity.ToTable("estimate_results");
+            entity.HasKey(e => e.ResultId);
+            entity.Property(e => e.ResultId).HasColumnName("result_id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.EstimateQuantityId).HasColumnName("estimate_quantity_id");
+            entity.HasIndex(e => e.EstimateQuantityId, "IX_estimate_results_estimate_quantity_id").IsUnique();
+
+            entity.Property(e => e.PaperCost).HasColumnName("paper_cost").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.AdditionalExpenses).HasColumnName("additional_expenses").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.ProductionCost).HasColumnName("production_cost").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.ProfitAmount).HasColumnName("profit_amount").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.Subtotal).HasColumnName("subtotal").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.TaxAmount).HasColumnName("tax_amount").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.GrandTotal).HasColumnName("grand_total").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.PerPieceCost).HasColumnName("per_piece_cost").HasColumnType("numeric(18,4)");
+            entity.Property(e => e.CalculatedAt).HasColumnName("calculated_at").HasColumnType("timestamptz");
         });
     }
 }

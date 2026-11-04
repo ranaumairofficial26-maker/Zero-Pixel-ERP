@@ -20,8 +20,8 @@ export class LoginComponent {
   private toastService = inject(ToastService);
 
   loginForm: FormGroup = this.fb.group({
-    email: ['admin@zeropixel.com', [Validators.required, Validators.email]],
-    password: ['Admin@123456', [Validators.required, Validators.minLength(6)]]
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   isLoading = signal<boolean>(false);
@@ -49,13 +49,6 @@ export class LoginComponent {
         this.errorMessage.set(detail);
         this.toastService.error(detail, 'Authentication Failed');
       }
-    });
-  }
-
-  fillAdminCredentials(): void {
-    this.loginForm.patchValue({
-      email: 'admin@zeropixel.com',
-      password: 'Admin@123456'
     });
   }
 }
