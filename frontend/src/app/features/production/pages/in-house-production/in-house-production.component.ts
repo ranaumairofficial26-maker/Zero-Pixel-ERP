@@ -726,6 +726,186 @@ import { ToastService } from '../../../../core/services/toast.service';
       color: #fff;
       cursor: pointer;
     }
+
+    /* Dark Mode Support */
+    :host-context(.dark-mode),
+    :host-context(body.dark-mode) {
+      .page-header,
+      .kpi-card,
+      .toolbar-card,
+      .table-container,
+      .loading-state,
+      .empty-state,
+      .modal-dialog {
+        background: #111827;
+        border-color: #1f293d;
+      }
+
+      .title,
+      .kpi-val,
+      .modal-title {
+        color: #f8fafc;
+      }
+
+      .subtitle,
+      .breadcrumbs,
+      .kpi-label,
+      .modal-subtitle {
+        color: #94a3b8;
+      }
+
+      .search-box {
+        background: #172133;
+        border-color: #2a374f;
+        input {
+          background: transparent;
+          color: #f8fafc;
+          &::placeholder { color: #64748b; }
+        }
+        svg { stroke: #94a3b8; }
+      }
+
+      .tab-btn {
+        color: #94a3b8;
+        &:hover {
+          background: #172133;
+          color: #f8fafc;
+        }
+        &.active {
+          background: rgba(16, 185, 129, 0.15);
+          color: #34d399;
+          border-color: rgba(16, 185, 129, 0.3);
+        }
+      }
+
+      .data-table th {
+        background: #0d1424;
+        color: #94a3b8;
+        border-color: #1f293d;
+      }
+
+      .data-table td {
+        border-color: #1f293d;
+        color: #e2e8f0;
+      }
+
+      .data-table tbody tr:hover td {
+        background: #162032;
+      }
+
+      .job-code {
+        color: #4ade80;
+      }
+
+      .job-date {
+        color: #64748b;
+      }
+
+      .order-link {
+        color: #38bdf8;
+      }
+
+      .cust-name {
+        color: #cbd5e1;
+      }
+
+      .item-chip {
+        color: #cbd5e1;
+        .chip-qty {
+          background: #1e293b;
+          color: #38bdf8;
+          border: 1px solid #2a374f;
+        }
+        .chip-name {
+          color: #f8fafc;
+        }
+        .chip-spec {
+          color: #94a3b8;
+        }
+      }
+
+      .deadline-date {
+        color: #f8fafc;
+      }
+
+      .deadline-tag.on-track {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+      }
+
+      .deadline-tag.overdue {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.35);
+      }
+
+      .status-quick-select {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+
+        &.st-queued {
+          background: #2a1f0a;
+          color: #fbbf24;
+          border-color: #78350f;
+        }
+        &.st-printing {
+          background: #082f49;
+          color: #38bdf8;
+          border-color: #0369a1;
+        }
+        &.st-completed {
+          background: #064e3b;
+          color: #34d399;
+          border-color: #059669;
+        }
+      }
+
+      .btn-action.edit {
+        background: #172133;
+        border-color: #2a374f;
+        color: #cbd5e1;
+        &:hover {
+          background: #1f293d;
+          color: #ffffff;
+        }
+      }
+
+      .modal-header,
+      .modal-footer {
+        border-color: #1f293d;
+      }
+
+      .modal-footer {
+        background: #0f172a;
+      }
+
+      .form-label {
+        color: #cbd5e1;
+      }
+
+      .form-input,
+      .form-select,
+      .form-textarea {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+        &:focus {
+          border-color: #0284c7;
+        }
+      }
+
+      .btn-cancel {
+        background: #172133;
+        border-color: #2a374f;
+        color: #cbd5e1;
+        &:hover {
+          background: #1f293d;
+          color: #f8fafc;
+        }
+      }
+    }
   `]
 })
 export class InHouseProductionComponent implements OnInit, OnDestroy {

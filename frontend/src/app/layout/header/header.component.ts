@@ -24,6 +24,9 @@ export class HeaderComponent {
     if (url.includes('/admin/customers')) {
       return 'Sales / Customers';
     }
+    if (url.includes('/admin/settings')) {
+      return 'Settings';
+    }
     return 'Console';
   }
 

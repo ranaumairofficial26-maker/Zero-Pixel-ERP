@@ -3,7 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, AdminUser } from './auth.model';
+import {
+  AuthResponse,
+  LoginRequest,
+  AdminUser,
+  AdminProfileResponse,
+  UpdateAdminProfileRequest,
+  ChangeAdminPasswordRequest,
+  ChangePasswordResponse
+} from './auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +37,33 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.baseUrl}/auth/login`, credentials).pipe(
       tap(res => {
         this.setSession(res);
+      })
+    );
+  }
+
+  getAdminProfile(): Observable<AdminProfileResponse> {
+    return this.http.get<AdminProfileResponse>(`${this.baseUrl}/admin/settings/profile`).pipe(
+      tap(profile => {
+        this.syncUserFromProfile(profile);
+      })
+    );
+  }
+
+  updateAdminProfile(payload: UpdateAdminProfileRequest): Observable<AdminProfileResponse> {
+    return this.http.put<AdminProfileResponse>(`${this.baseUrl}/admin/settings/profile`, payload).pipe(
+      tap(profile => {
+        this.syncUserFromProfile(profile);
+      })
+    );
+  }
+
+  changeAdminPassword(payload: ChangeAdminPasswordRequest): Observable<ChangePasswordResponse> {
+    return this.http.post<ChangePasswordResponse>(`${this.baseUrl}/admin/settings/change-password`, payload).pipe(
+      tap(res => {
+        if (res.token) {
+          localStorage.setItem(this.TOKEN_KEY, res.token);
+          this.token.set(res.token);
+        }
       })
     );
   }
@@ -61,6 +96,20 @@ export class AuthService {
     this.currentUser.set(user);
   }
 
+  private syncUserFromProfile(profile: AdminProfileResponse): void {
+    if (profile.token) {
+      localStorage.setItem(this.TOKEN_KEY, profile.token);
+      this.token.set(profile.token);
+    }
+    const updatedUser: AdminUser = {
+      email: profile.email,
+      fullName: profile.adminName || profile.fullName,
+      role: profile.role || 'Admin'
+    };
+    localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
+    this.currentUser.set(updatedUser);
+  }
+
   private getStoredToken(): string | null {
     if (typeof localStorage === 'undefined') return null;
     return localStorage.getItem(this.TOKEN_KEY);
@@ -82,4 +131,3 @@ export class AuthService {
     }
   }
 }
-

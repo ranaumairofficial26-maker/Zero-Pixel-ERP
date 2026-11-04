@@ -1,0 +1,92 @@
+[
+  {
+    "name": "A6",
+    "dimensionsMm": "105 × 148",
+    "dimensionsCm": "10.5 × 14.8",
+    "dimensionsInches": "4.13 × 5.83"
+  },
+  {
+    "name": "A5",
+    "dimensionsMm": "148 × 210",
+    "dimensionsCm": "14.8 × 21",
+    "dimensionsInches": "5.83 × 8.27"
+  },
+  {
+    "name": "A4",
+    "dimensionsMm": "210 × 297",
+    "dimensionsCm": "21 × 29.7",
+    "dimensionsInches": "8.27 × 11.69"
+  },
+  {
+    "name": "A3",
+    "dimensionsMm": "297 × 420",
+    "dimensionsCm": "29.7 × 42",
+    "dimensionsInches": "11.69 × 16.54"
+  },
+  {
+    "name": "A2",
+    "dimensionsMm": "420 × 594",
+    "dimensionsCm": "42 × 59.4",
+    "dimensionsInches": "16.54 × 23.39"
+  },
+  {
+    "name": "A1",
+    "dimensionsMm": "594 × 841",
+    "dimensionsCm": "59.4 × 84.1",
+    "dimensionsInches": "23.39 × 33.11"
+  },
+  {
+    "name": "DL finished",
+    "dimensionsMm": "99 × 210",
+    "dimensionsCm": "9.9 × 21",
+    "dimensionsInches": "3.90 × 8.27"
+  },
+  {
+    "name": "C5 envelope",
+    "dimensionsMm": "229 × 162",
+    "dimensionsCm": "22.9 × 16.2",
+    "dimensionsInches": "9.02 × 6.38"
+  },
+  {
+    "name": "C4 envelope",
+    "dimensionsMm": "324 × 229",
+    "dimensionsCm": "32.4 × 22.9",
+    "dimensionsInches": "12.76 × 9.02"
+  },
+  {
+    "name": "CR80 ID card",
+    "dimensionsMm": "85.6 × 54",
+    "dimensionsCm": "8.56 × 5.4",
+    "dimensionsInches": "3.37 × 2.13"
+  },
+  {
+    "name": "Common 3×6 ft banner",
+    "dimensionsMm": "914.4 × 1828.8",
+    "dimensionsCm": "91.44 × 182.88",
+    "dimensionsInches": "36.00 × 72.00"
+  },
+  {
+    "name": "Common 8×4 ft board",
+    "dimensionsMm": "2438.4 × 1219.2",
+    "dimensionsCm": "243.84 × 121.92",
+    "dimensionsInches": "96.00 × 48.00"
+  },
+  {
+    "name": "Common roll-up",
+    "dimensionsMm": "850 × 2000",
+    "dimensionsCm": "85 × 200",
+    "dimensionsInches": "33.46 × 78.74"
+  },
+  {
+    "name": "Units",
+    "dimensionsMm": "All printed dimensions show Width × Height, in the listed orientation.",
+    "dimensionsCm": "",
+    "dimensionsInches": ""
+  },
+  {
+    "name": "Boxes and bags",
+    "dimensionsMm": "2D size is indicative front panel only; full order requires L × W × H / gusset and dieline.",
+    "dimensionsCm": "",
+    "dimensionsInches": ""
+  }
+]

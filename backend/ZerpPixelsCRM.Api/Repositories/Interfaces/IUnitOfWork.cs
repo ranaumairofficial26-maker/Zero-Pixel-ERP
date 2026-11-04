@@ -10,5 +10,6 @@ public interface IUnitOfWork : IDisposable
     IQuotationRepository Quotations { get; }
     IPrintingOrderRepository PrintingOrders { get; }
     IProductionJobRepository ProductionJobs { get; }
+    IPrintingCalculatorRepository PrintingCalculator { get; }
     Task<int> CompleteAsync();
 }

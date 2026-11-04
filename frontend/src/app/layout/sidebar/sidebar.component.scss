@@ -94,7 +94,14 @@
   .nav-tree {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 0.3rem;
+
+    .nav-bottom-section {
+      margin-top: auto;
+      padding-top: 0.65rem;
+      border-top: 1px solid rgba(148, 163, 184, 0.16);
+    }
 
     /* Single link (e.g. Dashboard) */
     .nav-item-link {
@@ -146,7 +153,7 @@
       }
     }
 
-    /* Dropdown Group (Sales) */
+    /* Dropdown Groups (Sales, Production) */
     .nav-group {
       display: flex;
       flex-direction: column;
@@ -155,10 +162,19 @@
 
       &.group-active {
         .nav-group-header {
-          color: #0f172a;
+          color: #00ADEF;
           font-weight: 700;
 
+          .item-label {
+            color: #0284c7;
+            font-weight: 700;
+          }
+
           .item-icon {
+            color: #00ADEF;
+          }
+
+          .dropdown-chevron {
             color: #00ADEF;
           }
         }
@@ -195,6 +211,7 @@
 
         .item-label {
           flex: 1;
+          color: inherit;
         }
 
         .dropdown-chevron {
@@ -288,6 +305,7 @@
             color: #00ADEF;
             font-weight: 700;
             background: #f0f9ff;
+            border: 1px solid rgba(0, 173, 239, 0.2);
 
             .submenu-bullet {
               background: #00ADEF;
@@ -295,6 +313,10 @@
             }
             .submenu-icon {
               color: #00ADEF;
+            }
+            .submenu-label {
+              color: #00ADEF;
+              font-weight: 700;
             }
           }
         }
@@ -340,5 +362,185 @@
     border: 1px solid #e2e8f0;
     padding: 0.08rem 0.35rem;
     border-radius: 5px;
+  }
+}
+
+/* =========================================================
+   4. Explicit Dark Mode Overrides (Guaranteed Visibility)
+   ========================================================= */
+:host-context(body.dark-mode),
+:host-context(html.dark-mode),
+:host-context(.dark-mode),
+:host-context([data-theme="dark"]),
+:host(.dark-sidebar),
+.sidebar-wrapper.dark-sidebar {
+  background: #111827 !important;
+  border-right-color: #1f293d !important;
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.4) !important;
+
+  .brand-top {
+    background: #111827 !important;
+    border-bottom-color: #1f293d !important;
+
+    .brand-name {
+      color: #f8fafc !important;
+    }
+    .brand-tagline {
+      color: #94a3b8 !important;
+    }
+  }
+
+  .nav-container {
+    .nav-section-title {
+      color: #64748b !important;
+    }
+
+    .nav-item-link {
+      color: #94a3b8 !important;
+
+      .item-icon {
+        color: #64748b !important;
+      }
+
+      &:hover {
+        background: #172133 !important;
+        color: #38bdf8 !important;
+
+        .item-icon {
+          color: #38bdf8 !important;
+        }
+      }
+
+      &.active {
+        background: rgba(0, 173, 239, 0.18) !important;
+        color: #38bdf8 !important;
+        border-left: 3px solid #00ADEF !important;
+
+        .item-icon {
+          color: #00ADEF !important;
+        }
+      }
+    }
+
+    .nav-group {
+      .nav-group-header {
+        color: #94a3b8 !important;
+
+        .item-label {
+          color: #94a3b8 !important;
+        }
+
+        .item-icon {
+          color: #64748b !important;
+        }
+
+        .dropdown-chevron {
+          color: #64748b !important;
+        }
+
+        &:hover {
+          background: #172133 !important;
+          color: #f8fafc !important;
+
+          .item-label {
+            color: #f8fafc !important;
+          }
+          .item-icon {
+            color: #38bdf8 !important;
+          }
+          .dropdown-chevron {
+            color: #38bdf8 !important;
+          }
+        }
+      }
+
+      &.group-active {
+        .nav-group-header {
+          color: #ffffff !important;
+          background: rgba(255, 255, 255, 0.04) !important;
+
+          .item-label {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+          }
+
+          .item-icon {
+            color: #38bdf8 !important;
+          }
+
+          .dropdown-chevron {
+            color: #38bdf8 !important;
+          }
+        }
+      }
+
+      .nav-submenu {
+        border-left-color: #1f293d !important;
+
+        .submenu-link {
+          color: #94a3b8 !important;
+          background: transparent !important;
+
+          .submenu-bullet {
+            background: #334155 !important;
+          }
+
+          .submenu-icon {
+            color: #64748b !important;
+          }
+
+          .submenu-label {
+            color: #94a3b8 !important;
+          }
+
+          &:hover {
+            background: #172133 !important;
+            color: #38bdf8 !important;
+
+            .submenu-bullet {
+              background: #38bdf8 !important;
+            }
+            .submenu-icon {
+              color: #38bdf8 !important;
+            }
+            .submenu-label {
+              color: #38bdf8 !important;
+            }
+          }
+
+          &.sub-active {
+            background: rgba(0, 173, 239, 0.16) !important;
+            color: #38bdf8 !important;
+            border: 1px solid rgba(0, 173, 239, 0.35) !important;
+
+            .submenu-bullet {
+              background: #38bdf8 !important;
+            }
+            .submenu-icon {
+              color: #38bdf8 !important;
+            }
+            .submenu-label {
+              color: #38bdf8 !important;
+              font-weight: 700 !important;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    background: #111827 !important;
+    border-top-color: #1f293d !important;
+
+    .status-text {
+      color: #94a3b8 !important;
+    }
+
+    .version-tag {
+      background: #172133 !important;
+      border-color: #1f293d !important;
+      color: #94a3b8 !important;
+    }
   }
 }

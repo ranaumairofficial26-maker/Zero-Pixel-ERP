@@ -11,24 +11,34 @@ public class PaperSize
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int PaperSizeId { get; set; }
 
+    [Column("size_name")]
     [Required]
     [MaxLength(100)]
-    [Column("size_name")]
     public string SizeName { get; set; } = string.Empty;
 
     [Column("length_inches", TypeName = "numeric(10,3)")]
-    public decimal LengthInches { get; set; }
+    public decimal? LengthInches { get; set; }
 
     [Column("width_inches", TypeName = "numeric(10,3)")]
-    public decimal WidthInches { get; set; }
+    public decimal? WidthInches { get; set; }
+
+    [Column("width_mm", TypeName = "numeric(10,2)")]
+    public decimal? WidthMm { get; set; }
+
+    [Column("height_mm", TypeName = "numeric(10,2)")]
+    public decimal? HeightMm { get; set; }
+
+    [Column("size_type")]
+    [MaxLength(50)]
+    public string SizeType { get; set; } = "StockPaper"; // StockPaper, FinishedProduct, SizeGuide
 
     [Column("is_active")]
     public bool IsActive { get; set; } = true;
 
-    [Column("created_at", TypeName = "timestamptz")]
+    [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [Column("updated_at", TypeName = "timestamptz")]
+    [Column("updated_at")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 

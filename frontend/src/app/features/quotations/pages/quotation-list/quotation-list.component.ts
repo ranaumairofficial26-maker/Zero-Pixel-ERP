@@ -821,6 +821,223 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
         grid-template-columns: repeat(3, 1fr);
       }
     }
+
+    /* ========================================================
+       DARK MODE OVERRIDES (FULL COMPREHENSIVE COVERAGE)
+       ======================================================== */
+    :host-context(html.dark-mode),
+    :host-context(body.dark-mode),
+    :host-context(.dark-mode) {
+      .page-header {
+        background: #111827;
+        border-color: #1f293d;
+      }
+      .page-title {
+        color: #f8fafc;
+      }
+      .page-subtitle {
+        color: #94a3b8;
+      }
+
+      .summary-card {
+        background: #111827;
+        border-color: #1f293d;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      }
+      .summary-card:hover {
+        background: #162032;
+        border-color: #2a374f;
+      }
+      .card-count {
+        color: #ffffff;
+      }
+      .card-label {
+        color: #94a3b8;
+      }
+
+      .card-icon.total { background: rgba(2, 132, 199, 0.15); color: #38bdf8; }
+      .card-icon.draft { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+      .card-icon.finalized { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+      .card-icon.approved { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+      .card-icon.expired { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+      .toolbar-section {
+        background: #111827;
+        border-color: #1f293d;
+      }
+      .toolbar-search-input {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+      }
+      .toolbar-search-input:focus {
+        border-color: #00adef;
+      }
+      .filter-select {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+      }
+
+      .table-card {
+        background: #111827;
+        border-color: #1f293d;
+      }
+      .data-table th {
+        background: #0d1424;
+        color: #94a3b8;
+        border-bottom-color: #1f293d;
+      }
+      .data-table th:hover {
+        color: #38bdf8;
+      }
+      .data-table td {
+        color: #e2e8f0;
+        border-bottom-color: #1f293d;
+      }
+      .table-row {
+        border-bottom-color: #1f293d;
+      }
+      .table-row:hover {
+        background: #162032;
+      }
+
+      .quote-link {
+        color: #38bdf8;
+        font-weight: 700;
+      }
+      .quote-link:hover {
+        color: #7dd3fc;
+      }
+
+      .rev-badge {
+        background: #1e293b;
+        color: #cbd5e1;
+        border: 1px solid #2a374f;
+      }
+
+      .type-badge.printing {
+        background: rgba(139, 92, 246, 0.2);
+        color: #c4b5fd;
+        border: 1px solid rgba(139, 92, 246, 0.4);
+      }
+      .type-badge.service {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fcd34d;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+      }
+
+      .primary-date {
+        color: #f8fafc;
+      }
+      .sub-date {
+        color: #94a3b8;
+      }
+
+      .customer-name {
+        color: #f8fafc;
+        font-weight: 700;
+      }
+      .customer-phone {
+        color: #94a3b8;
+      }
+
+      .product-text {
+        color: #cbd5e1;
+      }
+
+      .amount-val {
+        color: #38bdf8;
+        font-weight: 800;
+      }
+
+      .status-pill.draft {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.4);
+      }
+      .status-pill.finalized {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+      }
+
+      .sending-pill {
+        background: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #2a374f;
+      }
+      .sending-pill.sent {
+        background: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+        border: 1px solid rgba(99, 102, 241, 0.4);
+      }
+
+      .approval-pill.pending {
+        background: rgba(234, 179, 8, 0.2);
+        color: #fde047;
+        border: 1px solid rgba(234, 179, 8, 0.4);
+      }
+      .approval-pill.approved {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+      }
+      .approval-pill.rejected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+      }
+      .approval-pill.revision {
+        background: rgba(249, 115, 22, 0.2);
+        color: #fdba74;
+        border: 1px solid rgba(249, 115, 22, 0.4);
+      }
+
+      .btn-action {
+        background: #172133;
+        border-color: #2a374f;
+        color: #94a3b8;
+      }
+      .btn-action:hover {
+        background: #00adef;
+        border-color: #00adef;
+        color: #ffffff;
+      }
+      .btn-action.delete:hover {
+        background: #ef4444;
+        border-color: #ef4444;
+        color: #ffffff;
+      }
+
+      .pagination-footer {
+        background: #0d1424;
+        border-top-color: #1f293d;
+        color: #94a3b8;
+      }
+      .page-select {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+      }
+      .btn-page {
+        background: #172133;
+        border-color: #2a374f;
+        color: #f8fafc;
+      }
+      .btn-page:hover:not(:disabled) {
+        background: #1e293b;
+      }
+      .page-current {
+        color: #f8fafc;
+      }
+      .empty-state h3 {
+        color: #f8fafc;
+      }
+      .empty-state p {
+        color: #94a3b8;
+      }
+    }
   `]
 })
 export class QuotationListComponent implements OnInit, OnDestroy {

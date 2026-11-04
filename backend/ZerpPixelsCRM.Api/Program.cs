@@ -39,16 +39,19 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
 builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
+builder.Services.AddScoped<IPrintingOrderRepository, PrintingOrderRepository>();
+builder.Services.AddScoped<IProductionJobRepository, ProductionJobRepository>();
+builder.Services.AddScoped<IPrintingCalculatorRepository, PrintingCalculatorRepository>();
 
 // 4. Dependency Injection for Business Services
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPrintingOrderRepository, PrintingOrderRepository>();
-builder.Services.AddScoped<IProductionJobRepository, ProductionJobRepository>();
 builder.Services.AddScoped<IPrintingOrderService, PrintingOrderService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<IPrintingCalculatorService, PrintingCalculatorService>();
 builder.Services.AddSingleton<QuotationPdfService>();
+builder.Services.AddScoped<PrintingIntelligenceSeeder>();
 
 // 4. JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "ZeroPixel_SuperSecure_Secret_JWT_Key_2026_Development_Only!";
@@ -145,8 +148,9 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<AppDbContext>();
         context.Database.Migrate();
 
-        // Ensure Digital Marketing columns exist safely on quotation_items
+        // Ensure Digital Marketing columns exist safely on quotation_items and updated_at on admin_users
         await context.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP; " +
             "ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS service_category VARCHAR(50); " +
             "ALTER TABLE quotation_items ADD COLUMN IF NOT EXISTS service_details TEXT; " +
             "ALTER TABLE quotation_revisions ADD COLUMN IF NOT EXISTS production_type VARCHAR(50) DEFAULT 'IN_HOUSE'; " +
@@ -224,86 +228,13 @@ using (var scope = app.Services.CreateScope())
             CREATE INDEX IF NOT EXISTS IX_printing_orders_status ON printing_orders(status);
             CREATE INDEX IF NOT EXISTS IX_printing_orders_quotation_id ON printing_orders(quotation_id);
             CREATE INDEX IF NOT EXISTS IX_production_jobs_status ON production_jobs(status);
-            CREATE INDEX IF NOT EXISTS IX_production_jobs_production_type ON production_jobs(production_type);
-            CREATE TABLE IF NOT EXISTS printing_materials (
-                material_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                material_name VARCHAR(150) NOT NULL UNIQUE,
-                is_active BOOLEAN NOT NULL DEFAULT TRUE,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE UNIQUE INDEX IF NOT EXISTS UQ_printing_materials_name ON printing_materials(LOWER(material_name));
-            INSERT INTO printing_materials (material_name, is_active, created_at, updated_at)
-            VALUES 
-                ('ART/MATT PAPER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('OFFSET PAPER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('ART CARD', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('Carbonless Paper', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('FLYING PAPER', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('Bleach Card', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('Box Board', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('Sticker', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ON CONFLICT (material_name) DO NOTHING;
-            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_length NUMERIC(10,3);
-            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_width NUMERIC(10,3);
-            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_gsm NUMERIC(10,3);
-            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_rate_per_kg NUMERIC(18,4);
-            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_sheets_per_rim INTEGER;
-            ALTER TABLE printing_materials ADD COLUMN IF NOT EXISTS default_conversion_factor NUMERIC(12,4);
-            UPDATE printing_materials
-            SET 
-                default_length = 23,
-                default_width = 36,
-                default_gsm = 100,
-                default_rate_per_kg = 680,
-                default_sheets_per_rim = 500,
-                default_conversion_factor = 3100,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE UPPER(TRIM(material_name)) = 'OFFSET PAPER';
-            ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_id CASCADE;
-            ALTER TABLE sheet_calculations DROP COLUMN IF EXISTS material_name_snapshot CASCADE;
-            CREATE TABLE IF NOT EXISTS sheet_calculations (
-                calculation_id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                length NUMERIC(12,3) NOT NULL,
-                width NUMERIC(12,3) NOT NULL,
-                gsm NUMERIC(12,3) NOT NULL,
-                rate_per_kg NUMERIC(18,4) NOT NULL,
-                sheets_per_rim INTEGER NOT NULL DEFAULT 500,
-                required_sheets INTEGER NOT NULL DEFAULT 500,
-                conversion_factor NUMERIC(12,4) NOT NULL DEFAULT 3100,
-                rim_price NUMERIC(18,4) NOT NULL,
-                per_sheet_price NUMERIC(18,4) NOT NULL,
-                total_paper_cost NUMERIC(18,4) NOT NULL,
-                notes TEXT,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE INDEX IF NOT EXISTS IX_sheet_calculations_created_at ON sheet_calculations(created_at DESC);
-            ALTER TABLE sheet_calculations ADD COLUMN IF NOT EXISTS paper_size_name VARCHAR(100);
-            ALTER TABLE sheet_calculations ADD COLUMN IF NOT EXISTS material_name VARCHAR(150);
-            CREATE TABLE IF NOT EXISTS paper_sizes (
-                paper_size_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                size_name VARCHAR(100) NOT NULL UNIQUE,
-                length_inches NUMERIC(10,3) NOT NULL,
-                width_inches NUMERIC(10,3) NOT NULL,
-                is_active BOOLEAN NOT NULL DEFAULT TRUE,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE UNIQUE INDEX IF NOT EXISTS UQ_paper_sizes_name ON paper_sizes(LOWER(size_name));
-            INSERT INTO paper_sizes (size_name, length_inches, width_inches, is_active, created_at, updated_at)
-            VALUES 
-                ('A4', 8.27, 11.679, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('A5', 5.7, 8.27, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('Letter', 8.5, 11, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('Legal', 8.5, 14, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-                ('7 × 9', 7, 9, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ON CONFLICT (size_name) DO UPDATE SET
-                length_inches = EXCLUDED.length_inches,
-                width_inches = EXCLUDED.width_inches,
-                updated_at = CURRENT_TIMESTAMP;");
+            CREATE INDEX IF NOT EXISTS IX_production_jobs_production_type ON production_jobs(production_type);");
 
         var authService = services.GetRequiredService<IAuthService>();
         await authService.SeedAdminUserAsync();
+
+        var printingSeeder = services.GetRequiredService<PrintingIntelligenceSeeder>();
+        await printingSeeder.SeedAllAsync();
     }
     catch (Exception ex)
     {

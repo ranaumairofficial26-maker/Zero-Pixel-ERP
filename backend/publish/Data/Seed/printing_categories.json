@@ -1,0 +1,62 @@
+[
+  {
+    "categoryName": "Flyers, Leaflets & Brochures",
+    "itemCount": 18,
+    "itemNumberRange": "1–18"
+  },
+  {
+    "categoryName": "Corporate Stationery",
+    "itemCount": 20,
+    "itemNumberRange": "19–38"
+  },
+  {
+    "categoryName": "Catalogues, Profiles & Publications",
+    "itemCount": 16,
+    "itemNumberRange": "39–54"
+  },
+  {
+    "categoryName": "Marketing & POS Materials",
+    "itemCount": 20,
+    "itemNumberRange": "55–74"
+  },
+  {
+    "categoryName": "Packaging & Label Printing",
+    "itemCount": 21,
+    "itemNumberRange": "75–95"
+  },
+  {
+    "categoryName": "Office Forms & Record Books",
+    "itemCount": 16,
+    "itemNumberRange": "96–111"
+  },
+  {
+    "categoryName": "Large Format & Outdoor Printing",
+    "itemCount": 14,
+    "itemNumberRange": "112–125"
+  },
+  {
+    "categoryName": "Corporate Gifts, Diaries & Calendars",
+    "itemCount": 14,
+    "itemNumberRange": "126–139"
+  },
+  {
+    "categoryName": "Event & Exhibition Printing",
+    "itemCount": 14,
+    "itemNumberRange": "140–153"
+  },
+  {
+    "categoryName": "Restaurant & Food Business Printing",
+    "itemCount": 13,
+    "itemNumberRange": "154–166"
+  },
+  {
+    "categoryName": "Pharmaceutical & Healthcare Printing",
+    "itemCount": 13,
+    "itemNumberRange": "167–179"
+  },
+  {
+    "categoryName": "Education, Real Estate & Industrial Printing",
+    "itemCount": 16,
+    "itemNumberRange": "180–195"
+  }
+]

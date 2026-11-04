@@ -1,0 +1,1307 @@
+<div class="calculator-page-container">
+  <!-- Top Navigation & Header -->
+  <div class="header-card">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <div class="title-icon-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+        </div>
+        <div class="title-texts-col">
+          <div class="title-row">
+            <h1 class="page-title">Printing Intelligence</h1>
+            <span class="badge-accent">Dynamic Printing Calculator</span>
+            <span class="badge-subtle">
+              <span class="pulse-dot"></span>
+              195 Items Loaded • 12 Categories
+            </span>
+          </div>
+          <p class="page-subtitle">
+            Dynamic multi-quantity estimation, multi-method paper costing, dynamic manual expenses matrix & Smart Quotations integration.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <!-- Tabs Switcher -->
+      <div class="tab-pill-group">
+        <button 
+          type="button" 
+          class="tab-pill" 
+          [class.active]="activeTab() === 'calculator'"
+          (click)="switchTab('calculator')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"/>
+            <line x1="8" y1="6" x2="16" y2="6"/>
+            <line x1="16" y1="14" x2="16" y2="18"/>
+            <path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/>
+            <path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>
+          </svg>
+          Job Costing Calculator
+        </button>
+
+        <button 
+          type="button" 
+          class="tab-pill" 
+          [class.active]="activeTab() === 'saved-estimates'"
+          (click)="switchTab('saved-estimates')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Saved Estimates
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons-group" *ngIf="activeTab() === 'calculator'">
+        <button type="button" class="btn-secondary" (click)="newEstimate()" title="Reset to default estimate">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+            <path d="M3 21v-5h5"/>
+          </svg>
+          New
+        </button>
+
+        <button type="button" class="btn-primary" (click)="saveEstimate()" [disabled]="calculating()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          {{ currentEstimateId ? 'Update Estimate' : 'Save Estimate' }}
+        </button>
+
+        <button type="button" class="btn-success" (click)="openLinkQuotationModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+          Smart Quotation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-overlay" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Loading Printing Intelligence Master Data...</span>
+  </div>
+
+  <!-- TAB 1: JOB COSTING CALCULATOR -->
+  <div class="calculator-workspace" *ngIf="activeTab() === 'calculator' && !loading()">
+    
+    <!-- Row 1: Products (Step 1) & Size Selection (Step 2) -->
+    <div class="grid-layout-top">
+      
+      <!-- STEP 1: PRINTING PRODUCT SELECTION -->
+      <div class="calc-card">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-num">1</span>
+            <div>
+              <h2 class="card-title">Printing Product Selection</h2>
+              <span class="section-desc">Select category and item preset from 195+ catalog specs</span>
+            </div>
+          </div>
+          <span class="badge-subtle-sm" *ngIf="selectedItem">
+            Item #{{ selectedItem.sourceItemNumber || selectedItem.itemId }}
+          </span>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- Step 1: Category Dropdown -->
+          <div class="form-group">
+            <label class="field-label">Printing Category (12 Categories)</label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedCategoryId" 
+              (ngModelChange)="onCategoryChange($event)"
+            >
+              <option *ngFor="let cat of categories" [ngValue]="cat.categoryId">
+                {{ cat.categoryName }} ({{ cat.itemCount }} items)
+              </option>
+            </select>
+          </div>
+
+          <!-- Step 1.1: Printing Item Dropdown -->
+          <div class="form-group">
+            <label class="field-label">Printing Item (Filtered by Category)</label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedItemId" 
+              (ngModelChange)="onItemSelect($event)"
+            >
+              <option *ngFor="let item of filteredItems" [ngValue]="item.itemId">
+                {{ item.sourceItemNumber ? '#' + item.sourceItemNumber + ' — ' : '' }}{{ item.itemName }} ({{ item.sizingBasis || 'Common' }})
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Selected Item Reference Info Box -->
+        <div class="item-reference-box" *ngIf="selectedItem">
+          <div class="ref-header">
+            <span class="ref-name">{{ selectedItem.itemName }}</span>
+            <span class="ref-badge" [class.badge-suggested]="selectedItem.sizingBasis?.includes('Suggested')">
+              {{ selectedItem.sizingBasis || 'Common size' }}
+            </span>
+          </div>
+
+          <div class="ref-dims-row">
+            <div class="dim-pill"><strong>Inches:</strong> {{ selectedItem.inchesStr || (finishedWidth + ' × ' + finishedHeight) }}</div>
+            <div class="dim-pill" *ngIf="selectedItem.mmStr"><strong>MM:</strong> {{ selectedItem.mmStr }}</div>
+            <div class="dim-pill" *ngIf="selectedItem.cmStr"><strong>CM:</strong> {{ selectedItem.cmStr }}</div>
+          </div>
+
+          <p class="ref-notes" *ngIf="selectedItem.sourceNotes">
+            <strong>Notes:</strong> {{ selectedItem.sourceNotes }}
+          </p>
+        </div>
+      </div>
+
+      <!-- STEP 2: SIZE SELECTION & MEASUREMENT UNIT -->
+      <div class="calc-card">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-num">2</span>
+            <div>
+              <h2 class="card-title">Select Printing Size & Dimensions</h2>
+              <span class="section-desc">Choose preset finished dimensions or enter custom W × H</span>
+            </div>
+          </div>
+          <span class="badge-accent" *ngIf="isCustomSize">Custom Dimensions</span>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- Step 2: Size Selection Dropdown -->
+          <div class="form-group">
+            <label class="field-label">
+              Select Printing Size
+              <span class="badge-subtle-sm" *ngIf="selectedItem">for {{ selectedItem.itemName }}</span>
+            </label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedSizeId" 
+              (ngModelChange)="onSizeSelect($event)"
+            >
+              <!-- 1. Recommended / Applicable Sizes for Selected Item -->
+              <optgroup label="⭐ Standard Item Dimensions" *ngIf="hasApplicableSizes()">
+                <option *ngFor="let s of applicableSizes" [ngValue]="s.sizeId">
+                  {{ s.sizeName }}{{ s.widthMm && s.heightMm ? ' (' + s.widthMm + ' × ' + s.heightMm + ' mm)' : '' }}
+                </option>
+              </optgroup>
+
+              <!-- 2. Other Standard Global Sizes -->
+              <optgroup label="Standard Global Sizes">
+                <option *ngFor="let s of otherSizes" [ngValue]="s.sizeId">
+                  {{ s.sizeName }}{{ s.widthMm && s.heightMm ? ' (' + s.widthMm + ' × ' + s.heightMm + ' mm)' : '' }}
+                </option>
+              </optgroup>
+
+              <!-- 3. Custom Size -->
+              <optgroup label="Custom Dimensions">
+                <option *ngFor="let s of customSizes" [ngValue]="s.sizeId">
+                  {{ s.sizeName }}
+                </option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- Step 2.1: Measurement Unit Dropdown -->
+          <div class="form-group">
+            <label class="field-label">Measurement Unit</label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedUnit" 
+              (ngModelChange)="onUnitChange($event)"
+            >
+              <option value="MM">MM (Millimetres)</option>
+              <option value="CM">CM (Centimetres)</option>
+              <option value="Inches">Inches</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 2.2: Compact Auto-Filled / Editable Dimensions -->
+        <div class="dimension-edit-panel mt-2" [class.custom-mode]="isCustomSize">
+          <div class="dimension-header-bar">
+            <div class="header-left">
+              <span class="status-indicator-dot" [class.is-custom]="isCustomSize"></span>
+              <span class="header-title">
+                {{ isCustomSize ? 'Custom Dimensions' : 'Standard Dimensions' }}
+              </span>
+              <span class="badge-status-pill" [class.badge-editable]="isCustomSize">
+                {{ isCustomSize ? '✓ Unlocked' : '🔒 Preset' }}
+              </span>
+            </div>
+
+            <div class="header-right">
+              <button 
+                type="button" 
+                class="btn-switch-custom" 
+                *ngIf="!isCustomSize" 
+                (click)="enableCustomDimensionsManual()"
+                title="Click to enter custom Width and Height"
+              >
+                ✏️ Edit Custom Size
+              </button>
+              <span class="unit-indicator-badge">{{ selectedUnit }}</span>
+            </div>
+          </div>
+
+          <!-- Compact Clean Form Inputs for Width & Height -->
+          <div class="dim-compact-row">
+            <div class="dim-input-group" [class.is-editable]="isCustomSize">
+              <span class="dim-addon">W</span>
+              <input 
+                type="number" 
+                step="any"
+                class="dim-input" 
+                [class.dim-input-editable]="isCustomSize"
+                [readOnly]="!isCustomSize"
+                [(ngModel)]="displayedWidth" 
+                (ngModelChange)="onCustomDimensionChange()"
+                placeholder="Width"
+              />
+              <span class="dim-unit-tag">{{ selectedUnit }}</span>
+            </div>
+
+            <span class="dim-cross">×</span>
+
+            <div class="dim-input-group" [class.is-editable]="isCustomSize">
+              <span class="dim-addon">H</span>
+              <input 
+                type="number" 
+                step="any"
+                class="dim-input" 
+                [class.dim-input-editable]="isCustomSize"
+                [readOnly]="!isCustomSize"
+                [(ngModel)]="displayedHeight" 
+                (ngModelChange)="onCustomDimensionChange()"
+                placeholder="Height"
+              />
+              <span class="dim-unit-tag">{{ selectedUnit }}</span>
+            </div>
+          </div>
+
+          <!-- Realtime Canonical & Multi-Unit Information Bar -->
+          <div class="canonical-info-row mt-2" *ngIf="canonicalWidthMm && canonicalHeightMm">
+            <span class="canonical-text">
+              <strong>{{ isCustomSize ? 'Custom Size:' : 'Standard Size:' }}</strong> {{ canonicalWidthMm }} × {{ canonicalHeightMm }} mm
+            </span>
+            <span class="canonical-text" *ngIf="selectedUnit !== 'Inches'">
+              • <strong>Inches:</strong> {{ finishedWidth }} × {{ finishedHeight }} in
+            </span>
+            <span class="canonical-text" *ngIf="selectedUnit !== 'CM'">
+              • <strong>CM:</strong> {{ (canonicalWidthMm / 10 | number:'1.2-2') }} × {{ (canonicalHeightMm / 10 | number:'1.2-2') }} cm
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Step 3 (Printing Color) & Step 4 (Material Selection) -->
+    <div class="grid-layout-top">
+      
+      <!-- STEP 3: PRINTING COLOR (1-10) -->
+      <div class="calc-card">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-num">3</span>
+            <div>
+              <h2 class="card-title">Printing Color</h2>
+              <span class="section-desc">Select exact printing colors (1 to 10 colors).</span>
+            </div>
+          </div>
+          <span class="badge-accent" *ngIf="printingColorCount.value !== null && printingColorCount.value !== undefined">
+            {{ printingColorCount.value === 0 ? 'No Printing Color (None)' : printingColorCount.value + ' Color' + (printingColorCount.value > 1 ? 's' : '') + ' Selected' }}
+          </span>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- 1. Printing Side Selection (Phle) -->
+          <div class="form-group">
+            <label class="field-label">Printing Side</label>
+            <select class="form-select" [(ngModel)]="printingSide">
+              <option value="Front Side">Front Side</option>
+              <option value="Backside">Backside</option>
+              <option value="Front and Backside">Front and Backside</option>
+              <option value="None">None</option>
+            </select>
+          </div>
+
+          <!-- 2. Printing Color Selection (Is ke bd) -->
+          <div class="form-group">
+            <label class="field-label">
+              Select Printing Color <span class="required-star">*</span>
+            </label>
+            <select 
+              class="form-select" 
+              [formControl]="printingColorCount"
+              (ngModelChange)="onPrintingColorChange($event)"
+            >
+              <option [ngValue]="null" disabled selected>-- Select Printing Color --</option>
+              <option [ngValue]="0">None (No Printing Color)</option>
+              <option *ngFor="let opt of printingColorOptions.slice(1)" [ngValue]="opt.count">
+                {{ opt.label }}
+              </option>
+            </select>
+            <div class="field-error-hint" *ngIf="printingColorCount.invalid && printingColorCount.touched">
+              Please select a valid printing color (None or 1–10).
+            </div>
+          </div>
+        </div>
+
+        <!-- Optional Per-Color Costing Configuration Box -->
+        <div class="per-color-config-box mt-3">
+          <div class="config-header">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                [ngModel]="applyPerColorFormula" 
+                (ngModelChange)="togglePerColorFormula($event)"
+              />
+              <span class="toggle-text">Configure Per-Color Printing Cost Formula</span>
+            </label>
+            <span class="formula-preview-badge" *ngIf="applyPerColorFormula && printingColorCount.value && ratePerColor">
+              {{ printingColorCount.value }} Colors × Rs. {{ ratePerColor }} = Rs. {{ (printingColorCount.value * ratePerColor) | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="form-grid-2 mt-2" *ngIf="applyPerColorFormula">
+            <div class="form-group">
+              <label class="field-label">Rate Per Color (PKR)</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="ratePerColor" 
+                (ngModelChange)="onRatePerColorChange()"
+                placeholder="e.g. 250"
+              />
+            </div>
+            <div class="computed-pill-box">
+              <span class="sub-title">Calculated Printing Charge</span>
+              <span class="big-price">
+                Rs. {{ (printingColorCount.value && ratePerColor ? (printingColorCount.value * ratePerColor) : 0) | number:'1.2-2' }}
+              </span>
+              <span class="formula-caption">Auto-synced to Printing production expense without double counting</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: MATERIAL SELECTION -->
+      <div class="calc-card">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-num">4</span>
+            <h2 class="card-title">Material Selection & Details</h2>
+          </div>
+          <button type="button" class="btn-ghost-sm" (click)="showCustomMaterialModal = true">
+            + Custom Material
+          </button>
+        </div>
+
+        <div class="form-grid-3">
+          <!-- Material Select -->
+          <div class="form-group">
+            <label class="field-label">Material Master</label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="selectedMaterialId" 
+              (change)="onMaterialSelect(selectedMaterialId)"
+            >
+              <option *ngFor="let mat of materials" [value]="mat.materialId">
+                {{ mat.materialName }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Pricing Method -->
+          <div class="form-group">
+            <label class="field-label">Pricing Method</label>
+            <select 
+              class="form-select" 
+              [(ngModel)]="pricingMethod" 
+              (change)="onPricingMethodChange()"
+            >
+              <option value="PacketPrice">Packet Price / Sheets per Packet</option>
+              <option value="RatePerKg">Rate per KG (Formula-Based)</option>
+              <option value="DirectRimPrice">Direct Rim Price</option>
+              <option value="DirectSheetPrice">Direct Per Sheet Price</option>
+              <option value="ManualMaterialCost">Manual Flat Material Cost</option>
+            </select>
+          </div>
+
+          <!-- GSM -->
+          <div class="form-group">
+            <label class="field-label">Paper GSM</label>
+            <input 
+              type="number" 
+              class="form-input" 
+              [(ngModel)]="gsm" 
+              (ngModelChange)="recalculateAll()"
+              placeholder="e.g. 300"
+            />
+          </div>
+        </div>
+
+        <!-- Dynamic Inputs based on Pricing Method -->
+        <div class="pricing-method-container">
+          
+          <!-- METHOD 1: Packet Price -->
+          <div class="form-grid-3" *ngIf="pricingMethod === 'PacketPrice'">
+            <div class="form-group">
+              <label class="field-label">Packet Price (PKR)</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="packetPrice" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Sheets per Packet</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="sheetsPerPacket" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="computed-pill-box">
+              <span class="sub-title">Per Sheet Price</span>
+              <span class="big-price">Rs. {{ computedPerSheetPrice | number:'1.2-4' }}</span>
+              <span class="formula-caption">Packet Price ÷ Sheets per Packet</span>
+            </div>
+          </div>
+
+          <!-- METHOD 2: Rate per KG -->
+          <div class="form-grid-4" *ngIf="pricingMethod === 'RatePerKg'">
+            <div class="form-group">
+              <label class="field-label">Rate per KG (PKR)</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="ratePerKg" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Sheets per Rim</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="sheetsPerRim" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Conversion Factor</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="conversionFactor" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="computed-pill-box">
+              <span class="sub-title">Per Sheet Price</span>
+              <span class="big-price">Rs. {{ computedPerSheetPrice | number:'1.2-4' }}</span>
+              <span class="formula-caption">(L×W×GSM÷3100)×Rate÷500</span>
+            </div>
+          </div>
+
+          <!-- METHOD 3: Direct Rim Price -->
+          <div class="form-grid-3" *ngIf="pricingMethod === 'DirectRimPrice'">
+            <div class="form-group">
+              <label class="field-label">Rim Price (PKR)</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="rimPrice" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="form-group">
+              <label class="field-label">Sheets per Rim</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="sheetsPerRim" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="computed-pill-box">
+              <span class="sub-title">Per Sheet Price</span>
+              <span class="big-price">Rs. {{ computedPerSheetPrice | number:'1.2-4' }}</span>
+              <span class="formula-caption">Rim Price ÷ Sheets per Rim</span>
+            </div>
+          </div>
+
+          <!-- METHOD 4: Direct Sheet Price -->
+          <div class="form-grid-2" *ngIf="pricingMethod === 'DirectSheetPrice'">
+            <div class="form-group">
+              <label class="field-label">Direct Per Sheet Price (PKR)</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="directSheetPrice" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="computed-pill-box">
+              <span class="sub-title">Active Sheet Price</span>
+              <span class="big-price">Rs. {{ computedPerSheetPrice | number:'1.2-4' }}</span>
+            </div>
+          </div>
+
+          <!-- METHOD 5: Manual Material Cost -->
+          <div class="form-grid-2" *ngIf="pricingMethod === 'ManualMaterialCost'">
+            <div class="form-group">
+              <label class="field-label">Flat Material Cost (PKR - For Signage/Flex/Gifts)</label>
+              <input 
+                type="number" 
+                class="form-input" 
+                [(ngModel)]="manualMaterialCost" 
+                (ngModelChange)="recalculateAll()"
+              />
+            </div>
+            <div class="computed-pill-box">
+              <span class="sub-title">Non-Sheet Cost</span>
+              <span class="big-price">Rs. {{ manualMaterialCost | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Stock Parent Paper & Job Specs -->
+    <div class="grid-layout-top">
+      
+      <!-- STEP 5: STOCK PARENT PAPER & SPECS -->
+      <div class="calc-card full-card">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-num">5</span>
+            <h2 class="card-title">Stock Paper Sheet & Job Specifications</h2>
+          </div>
+          <button type="button" class="btn-ghost-sm" (click)="showCustomPaperSizeModal = true">
+            + Custom Paper Size
+          </button>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- Stock Parent Paper -->
+          <div class="dim-box-half full-width-box">
+            <div class="dim-box-title">
+              <span class="dot-indicator blue"></span>
+              Stock Parent Paper Sheet (Raw Material Dimensions)
+            </div>
+            <div class="dim-inputs-row">
+              <select 
+                class="form-select-sm full-select" 
+                [(ngModel)]="stockPaperSizeId" 
+                (change)="onPaperSizePresetSelect(stockPaperSizeId!)"
+              >
+                <option *ngFor="let s of paperSizes" [value]="s.paperSizeId">
+                  {{ s.sizeName }} {{ s.lengthInches ? '(' + s.lengthInches + '×' + s.widthInches + ' in)' : '' }}
+                </option>
+              </select>
+              <div class="input-with-label">
+                <span class="unit-tag">L</span>
+                <input 
+                  type="number" 
+                  class="form-input-sm" 
+                  [(ngModel)]="stockPaperLength" 
+                  (ngModelChange)="recalculateAll()" 
+                />
+              </div>
+              <span class="times-sym">×</span>
+              <div class="input-with-label">
+                <span class="unit-tag">W</span>
+                <input 
+                  type="number" 
+                  class="form-input-sm" 
+                  [(ngModel)]="stockPaperWidth" 
+                  (ngModelChange)="recalculateAll()" 
+                />
+              </div>
+              <span class="unit-pill">Inches</span>
+            </div>
+          </div>
+
+          <!-- Job Title & Finishing Requirements -->
+          <div class="specs-box-compact">
+            <div class="form-group mb-2">
+              <label class="field-label">Job Title</label>
+              <input type="text" class="form-input" [(ngModel)]="jobTitle" placeholder="e.g. Standard Business Card"/>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="field-label">Finishing Requirements</label>
+                <input type="text" class="form-input" [(ngModel)]="finishingRequirements" placeholder="e.g. Matt Lamination, Die Cut"/>
+              </div>
+              <div class="form-group">
+                <label class="field-label">Internal Notes</label>
+                <input type="text" class="form-input" [(ngModel)]="adminNotes" placeholder="Costing or vendor notes"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: DYNAMIC QUANTITY & SHEETS REQUIRED -->
+    <div class="calc-card full-card">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <span class="step-num">6</span>
+          <div>
+            <h2 class="card-title">Dynamic Multi-Quantity & Sheets Required</h2>
+            <span class="section-desc">Add or edit target quantities. Sheets required dynamically compute raw paper cost.</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-primary-sm" (click)="addQuantity()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Quantity Option
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="costing-table">
+          <thead>
+            <tr>
+              <th style="width: 150px;">Target Quantity</th>
+              <th style="width: 170px;">Sheets Required</th>
+              <th style="width: 140px;">Wastage %</th>
+              <th style="width: 150px;">Wastage Sheets</th>
+              <th style="width: 150px;">Total Sheets</th>
+              <th style="width: 180px;">Paper Cost (PKR)</th>
+              <th style="width: 110px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let q of quantities; let i = index">
+              <td>
+                <div class="cell-input-wrapper">
+                  <input 
+                    type="number" 
+                    class="table-input bold-qty" 
+                    [(ngModel)]="q.quantity" 
+                    (ngModelChange)="recalculateAll()"
+                  />
+                  <span class="qty-unit">pcs</span>
+                </div>
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  class="table-input" 
+                  [(ngModel)]="q.sheetsRequired" 
+                  (ngModelChange)="recalculateAll()"
+                />
+              </td>
+              <td>
+                <div class="cell-input-wrapper">
+                  <input 
+                    type="number" 
+                    class="table-input" 
+                    [(ngModel)]="q.wastagePercent" 
+                    (ngModelChange)="q.wastageSheets = 0; recalculateAll()"
+                  />
+                  <span class="qty-unit">%</span>
+                </div>
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  class="table-input" 
+                  [(ngModel)]="q.wastageSheets" 
+                  (ngModelChange)="recalculateAll()"
+                />
+              </td>
+              <td>
+                <span class="total-sheets-badge">
+                  {{ q.totalSheets }} sheets
+                </span>
+              </td>
+              <td>
+                <span class="paper-cost-val">
+                  Rs. {{ (q.totalSheets * computedPerSheetPrice) | number:'1.2-2' }}
+                </span>
+              </td>
+              <td style="text-align: center;">
+                <div class="row-actions-group">
+                  <button type="button" class="btn-icon" (click)="duplicateQuantity(i)" title="Duplicate quantity">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect width="13" height="13" x="9" y="9" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn-icon text-danger" (click)="removeQuantity(i)" title="Remove quantity">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 7: DYNAMIC MANUAL PRINTING EXPENSES MATRIX -->
+    <div class="calc-card full-card">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <span class="step-num">7</span>
+          <div>
+            <h2 class="card-title">Dynamic Manual Printing Expenses Matrix</h2>
+            <span class="section-desc">Fixed, manual and rate-based production expenses. Amounts populate automatically across quantity columns.</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-ghost-sm" (click)="showCustomExpenseModal = true">
+          + Add Expense Item
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="costing-table matrix-table">
+          <thead>
+            <tr>
+              <th style="min-width: 220px;">Expense Description</th>
+              <th style="width: 170px;">Calculation Method</th>
+              <th style="width: 120px;">Unit Rate</th>
+              <!-- Dynamic Column for each Quantity -->
+              <th *ngFor="let q of quantities" style="min-width: 130px; text-align: right;">
+                <span class="matrix-qty-header">{{ q.quantity }} pcs</span>
+              </th>
+              <th style="width: 60px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of costItems; let itemIdx = index">
+              <td>
+                <span class="expense-name">{{ item.itemName }}</span>
+              </td>
+              <td>
+                <select 
+                  class="form-select-sm" 
+                  [(ngModel)]="item.calculationMethod" 
+                  (change)="onCostItemMethodChange(item)"
+                >
+                  <option value="FixedAmount">Fixed Amount</option>
+                  <option value="ManualAmount">Manual Amount</option>
+                  <option value="PerPiece">Rate × Qty (Per Piece)</option>
+                  <option value="PerSheet">Rate × Total Sheets</option>
+                </select>
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  class="table-input" 
+                  [(ngModel)]="item.unitRate" 
+                  (ngModelChange)="onCostItemMethodChange(item)"
+                  placeholder="0.00"
+                />
+              </td>
+
+              <!-- Value for each quantity -->
+              <td *ngFor="let q of quantities" style="text-align: right;">
+                <input 
+                  type="number" 
+                  class="table-input text-right" 
+                  [ngModel]="item.quantityAmounts[q.quantity]" 
+                  (ngModelChange)="onCostItemAmountChange(item, q.quantity, $event)"
+                  placeholder="0"
+                />
+              </td>
+
+              <td style="text-align: center;">
+                <button type="button" class="btn-icon text-muted" (click)="removeExpense(itemIdx)" title="Remove item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+
+            <!-- Total Expenses Row -->
+            <tr class="summary-subtotal-row">
+              <td colspan="3" class="text-bold">Total Additional Expenses</td>
+              <td *ngFor="let res of calculationResults" style="text-align: right;" class="text-bold">
+                Rs. {{ res.additionalExpenses | number:'1.2-2' }}
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 8: PROFIT, TAX & GRAND TOTALS -->
+    <div class="calc-card full-card profit-totals-card">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <span class="step-num">8</span>
+          <div>
+            <h2 class="card-title">Commercial Profit, Tax & Grand Total Comparison</h2>
+            <span class="section-desc">Review full profit margins, grand totals, and per-piece client pricing across all quantities.</span>
+          </div>
+        </div>
+
+        <!-- Profit & Tax Controls -->
+        <div class="rate-controls-group">
+          <div class="control-box">
+            <span class="control-label">Profit Margin:</span>
+            <div class="input-with-label">
+              <input 
+                type="number" 
+                class="form-input-sm rate-input" 
+                [(ngModel)]="profitPercentage" 
+                (ngModelChange)="recalculateAll()"
+              />
+              <span class="unit-tag">%</span>
+            </div>
+          </div>
+
+          <div class="control-box">
+            <span class="control-label">Tax / GST:</span>
+            <div class="input-with-label">
+              <input 
+                type="number" 
+                class="form-input-sm rate-input" 
+                [(ngModel)]="taxPercentage" 
+                (ngModelChange)="recalculateAll()"
+              />
+              <span class="unit-tag">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparative Summary Table -->
+      <div class="table-responsive">
+        <table class="costing-table totals-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Quantity</th>
+              <th style="width: 140px; text-align: right;">Raw Paper Cost</th>
+              <th style="width: 150px; text-align: right;">Production Expenses</th>
+              <th style="width: 160px; text-align: right;">Total Production Cost</th>
+              <th style="width: 140px; text-align: right;">Profit ({{ profitPercentage }}%)</th>
+              <th style="width: 150px; text-align: right;">Subtotal</th>
+              <th style="width: 130px; text-align: right;">Tax ({{ taxPercentage }}%)</th>
+              <th style="width: 170px; text-align: right;">Grand Total (PKR)</th>
+              <th style="width: 160px; text-align: right;">Per-Piece Price</th>
+              <th style="width: 180px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let res of calculationResults" class="result-row">
+              <td>
+                <span class="qty-pill">{{ res.quantity }} pcs</span>
+              </td>
+              <td style="text-align: right;">
+                Rs. {{ res.materialCost | number:'1.2-2' }}
+              </td>
+              <td style="text-align: right;">
+                Rs. {{ res.additionalExpenses | number:'1.2-2' }}
+              </td>
+              <td style="text-align: right;" class="text-bold">
+                Rs. {{ res.productionCost | number:'1.2-2' }}
+              </td>
+              <td style="text-align: right;" class="text-profit">
+                +Rs. {{ res.profitAmount | number:'1.2-2' }}
+              </td>
+              <td style="text-align: right;">
+                Rs. {{ res.subtotalBeforeTax | number:'1.2-2' }}
+              </td>
+              <td style="text-align: right;">
+                Rs. {{ res.taxAmount | number:'1.2-2' }}
+              </td>
+              <td style="text-align: right;">
+                <span class="grand-total-val">Rs. {{ res.grandTotal | number:'1.2-2' }}</span>
+              </td>
+              <td style="text-align: right;">
+                <span class="per-piece-badge">Rs. {{ res.perPiecePrice | number:'1.2-2' }}</span>
+              </td>
+              <td style="text-align: center;">
+                <div class="row-actions-group center-actions">
+                  <button type="button" class="btn-ghost-sm" (click)="viewBreakdown(res)" title="View breakdown">
+                    Breakdown
+                  </button>
+                  <button type="button" class="btn-success-sm" (click)="openLinkQuotationModal(res.quantity)" title="Transfer to Quotation">
+                    Quotation
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: SAVED ESTIMATES -->
+  <div class="saved-estimates-view" *ngIf="activeTab() === 'saved-estimates'">
+    <div class="calc-card full-card">
+      <div class="card-header-bar">
+        <div class="card-title-group">
+          <h2 class="card-title">Saved Printing Cost Estimates</h2>
+          <span class="section-desc">Reopen, duplicate, convert to smart quotation, or modify historical costing calculations.</span>
+        </div>
+
+        <div class="search-input-box">
+          <input 
+            type="text" 
+            class="form-input search-field" 
+            [ngModel]="estimateSearch()" 
+            (ngModelChange)="estimateSearch.set($event); loadSavedEstimatesList()"
+            placeholder="Search estimates by number or title..."
+          />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="costing-table">
+          <thead>
+            <tr>
+              <th style="width: 160px;">Estimate #</th>
+              <th>Job Title / Item</th>
+              <th>Category</th>
+              <th>Material</th>
+              <th style="width: 140px;">Quantities</th>
+              <th style="width: 150px; text-align: right;">Best Per-Piece</th>
+              <th style="width: 150px; text-align: right;">Grand Total Range</th>
+              <th style="width: 110px;">Status</th>
+              <th style="width: 120px;">Date</th>
+              <th style="width: 170px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let est of estimates">
+              <td>
+                <span class="est-code">{{ est.estimateNumber }}</span>
+              </td>
+              <td>
+                <strong class="job-name">{{ est.estimateTitle }}</strong>
+                <div class="sub-name" *ngIf="est.itemName">{{ est.itemName }}</div>
+              </td>
+              <td>{{ est.categoryName || '—' }}</td>
+              <td>{{ est.materialName || '—' }}</td>
+              <td>
+                <span class="badge-subtle">{{ est.quantitiesSummary || 'Standard' }}</span>
+              </td>
+              <td style="text-align: right;">
+                <span class="per-piece-badge">Rs. {{ est.bestPerPiecePrice | number:'1.2-2' }}</span>
+              </td>
+              <td style="text-align: right;" class="text-bold">
+                Rs. {{ est.minGrandTotal | number:'1.0-0' }} - {{ est.maxGrandTotal | number:'1.0-0' }}
+              </td>
+              <td>
+                <span class="status-pill status-draft">{{ est.status }}</span>
+              </td>
+              <td>{{ est.createdAt | date:'shortDate' }}</td>
+              <td style="text-align: center;">
+                <div class="row-actions-group center-actions">
+                  <button type="button" class="btn-ghost-sm" (click)="openSavedEstimate(est.estimateId)">
+                    Reopen
+                  </button>
+                  <button type="button" class="btn-icon" (click)="duplicateSavedEstimate(est.estimateId)" title="Duplicate">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect width="13" height="13" x="9" y="9" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="btn-icon text-danger" (click)="deleteSavedEstimate(est.estimateId)" title="Delete">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <tr *ngIf="estimates.length === 0">
+              <td colspan="10" class="text-center py-4 text-muted">
+                No saved estimates found. Go back to the calculator and click "Save Estimate".
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: VIEW COST BREAKDOWN -->
+  <div class="modal-backdrop" *ngIf="showBreakdownModal && activeBreakdownResult">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Production Cost Breakdown ({{ activeBreakdownResult.quantity }} pcs)</h3>
+        <button type="button" class="close-btn" (click)="closeBreakdown()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="breakdown-stat-grid">
+          <div class="b-stat">
+            <span class="b-label">Total Sheets</span>
+            <span class="b-val">{{ activeBreakdownResult.totalSheets }}</span>
+          </div>
+          <div class="b-stat">
+            <span class="b-label">Raw Material Cost</span>
+            <span class="b-val">Rs. {{ activeBreakdownResult.materialCost | number:'1.2-2' }}</span>
+          </div>
+          <div class="b-stat">
+            <span class="b-label">Production Cost</span>
+            <span class="b-val">Rs. {{ activeBreakdownResult.productionCost | number:'1.2-2' }}</span>
+          </div>
+          <div class="b-stat">
+            <span class="b-label">Per-Piece Price</span>
+            <span class="b-val highlight">Rs. {{ activeBreakdownResult.perPiecePrice | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <h4 class="b-section-heading">Expense Breakdown</h4>
+        <div class="breakdown-list">
+          <div class="breakdown-row" *ngFor="let entry of activeBreakdownResult.costItemBreakdown | keyvalue">
+            <span class="row-name">{{ entry.key }}</span>
+            <span class="row-price">Rs. {{ entry.value | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="breakdown-summary-box">
+          <div class="summary-line">
+            <span>Production Cost:</span>
+            <span>Rs. {{ activeBreakdownResult.productionCost | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-line text-profit">
+            <span>Profit Margin ({{ profitPercentage }}%):</span>
+            <span>+Rs. {{ activeBreakdownResult.profitAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-line" *ngIf="taxPercentage > 0">
+            <span>Tax ({{ taxPercentage }}%):</span>
+            <span>+Rs. {{ activeBreakdownResult.taxAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-line grand-line">
+            <span>Grand Total:</span>
+            <span>Rs. {{ activeBreakdownResult.grandTotal | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeBreakdown()">Close</button>
+        <button type="button" class="btn-success" (click)="closeBreakdown(); openLinkQuotationModal(activeBreakdownResult.quantity)">
+          Transfer to Smart Quotation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: LINK TO SMART QUOTATION -->
+  <div class="modal-backdrop" *ngIf="showLinkQuotationModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Link Estimate to Smart Quotation</h3>
+        <button type="button" class="close-btn" (click)="showLinkQuotationModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          Transfer costing specifications and per-piece pricing directly into a client quotation revision.
+        </p>
+
+        <div class="form-group">
+          <label class="field-label">Selected Quantity Tier</label>
+          <select class="form-select" [(ngModel)]="linkSelectedQuantity">
+            <option *ngFor="let q of quantities" [value]="q.quantity">
+              {{ q.quantity }} pcs (Selling Price: Rs. {{ calculationResults[0] ? (q.quantity === calculationResults[0].quantity ? calculationResults[0].grandTotal : '—') : '' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group mt-3">
+          <label class="field-label">Quotation Target</label>
+          <div class="radio-pill-group">
+            <label class="radio-pill" [class.selected]="linkMode === 'new'">
+              <input type="radio" name="linkMode" value="new" [(ngModel)]="linkMode" />
+              Create New Quotation
+            </label>
+            <label class="radio-pill" [class.selected]="linkMode === 'existing'">
+              <input type="radio" name="linkMode" value="existing" [(ngModel)]="linkMode" />
+              Add to Existing Quotation
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group mt-3" *ngIf="linkMode === 'new'">
+          <label class="field-label">Select Client</label>
+          <select class="form-select" [(ngModel)]="linkClientId">
+            <option [ngValue]="null">Walk-in / Cash Customer</option>
+            <option *ngFor="let c of clients" [value]="c.clientId">
+              {{ c.companyName }} ({{ c.phone }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group mt-3" *ngIf="linkMode === 'existing'">
+          <label class="field-label">Select Existing Quotation</label>
+          <select class="form-select" [(ngModel)]="linkExistingQuotationId">
+            <option *ngFor="let q of existingQuotations" [value]="q.quotationId">
+              {{ q.quotationNumber }} — {{ q.customerName }} (Rs. {{ q.grandTotal | number:'1.2-2' }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group mt-3">
+          <label class="field-label">Quotation Line Item Title</label>
+          <input type="text" class="form-input" [(ngModel)]="linkProductTitleOverride" />
+        </div>
+
+        <div class="form-group mt-3">
+          <label class="field-label">Line Item Description / Specs Snapshot</label>
+          <textarea rows="3" class="form-textarea" [(ngModel)]="linkDescriptionOverride"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="showLinkQuotationModal = false">Cancel</button>
+        <button type="button" class="btn-primary" (click)="submitLinkToQuotation()" [disabled]="calculating()">
+          Confirm & Add to Quotation
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: ADD CUSTOM MATERIAL -->
+  <div class="modal-backdrop" *ngIf="showCustomMaterialModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Custom Material</h3>
+        <button type="button" class="close-btn" (click)="showCustomMaterialModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="field-label">Material Name</label>
+          <input type="text" class="form-input" [(ngModel)]="newMaterialName" placeholder="e.g. Metallic Gold Card"/>
+        </div>
+        <div class="form-group mt-2">
+          <label class="field-label">Pricing Method</label>
+          <select class="form-select" [(ngModel)]="newMaterialMethod">
+            <option value="RatePerKg">Rate per KG</option>
+            <option value="PacketPrice">Packet Price</option>
+            <option value="DirectSheetPrice">Direct Per Sheet</option>
+          </select>
+        </div>
+        <div class="form-grid-2 mt-2">
+          <div class="form-group">
+            <label class="field-label">Default GSM</label>
+            <input type="number" class="form-input" [(ngModel)]="newMaterialGsm" placeholder="e.g. 300"/>
+          </div>
+          <div class="form-group" *ngIf="newMaterialMethod === 'RatePerKg'">
+            <label class="field-label">Rate / KG (PKR)</label>
+            <input type="number" class="form-input" [(ngModel)]="newMaterialRateKg" placeholder="e.g. 750"/>
+          </div>
+          <div class="form-group" *ngIf="newMaterialMethod === 'PacketPrice'">
+            <label class="field-label">Packet Price (PKR)</label>
+            <input type="number" class="form-input" [(ngModel)]="newMaterialPacketPrice" placeholder="e.g. 9500"/>
+          </div>
+          <div class="form-group" *ngIf="newMaterialMethod === 'PacketPrice'">
+            <label class="field-label">Sheets / Packet</label>
+            <input type="number" class="form-input" [(ngModel)]="newMaterialSheetsPacket" placeholder="e.g. 100"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="showCustomMaterialModal = false">Cancel</button>
+        <button type="button" class="btn-primary" (click)="submitCustomMaterial()">Add Material</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: ADD CUSTOM EXPENSE -->
+  <div class="modal-backdrop" *ngIf="showCustomExpenseModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Custom Production Expense</h3>
+        <button type="button" class="close-btn" (click)="showCustomExpenseModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="field-label">Expense Name</label>
+          <input type="text" class="form-input" [(ngModel)]="newExpenseName" placeholder="e.g. UV Varnish / Foil Stamping"/>
+        </div>
+        <div class="form-group mt-2">
+          <label class="field-label">Calculation Method</label>
+          <select class="form-select" [(ngModel)]="newExpenseMethod">
+            <option value="FixedAmount">Fixed Amount (Same across all quantities)</option>
+            <option value="ManualAmount">Manual Amount (Enter individually)</option>
+            <option value="PerPiece">Per Piece (Rate × Quantity)</option>
+            <option value="PerSheet">Per Sheet (Rate × Total Sheets)</option>
+          </select>
+        </div>
+        <div class="form-group mt-2">
+          <label class="field-label">Default Rate / Initial Amount (PKR)</label>
+          <input type="number" class="form-input" [(ngModel)]="newExpenseDefaultRate" placeholder="0.00"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="showCustomExpenseModal = false">Cancel</button>
+        <button type="button" class="btn-primary" (click)="addCustomExpense(newExpenseName, newExpenseMethod, newExpenseDefaultRate)">Add Expense</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: ADD CUSTOM PAPER SIZE -->
+  <div class="modal-backdrop" *ngIf="showCustomPaperSizeModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Custom Paper Size</h3>
+        <button type="button" class="close-btn" (click)="showCustomPaperSizeModal = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="field-label">Size Name / Label</label>
+          <input type="text" class="form-input" [(ngModel)]="newSizeName" placeholder="e.g. 28 × 40 in"/>
+        </div>
+        <div class="form-grid-2 mt-2">
+          <div class="form-group">
+            <label class="field-label">Length (Inches)</label>
+            <input type="number" class="form-input" [(ngModel)]="newSizeLength" placeholder="e.g. 28"/>
+          </div>
+          <div class="form-group">
+            <label class="field-label">Width (Inches)</label>
+            <input type="number" class="form-input" [(ngModel)]="newSizeWidth" placeholder="e.g. 40"/>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="showCustomPaperSizeModal = false">Cancel</button>
+        <button type="button" class="btn-primary" (click)="submitCustomPaperSize()">Save Paper Size</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
