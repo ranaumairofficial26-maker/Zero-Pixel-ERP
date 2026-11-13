@@ -17,7 +17,8 @@ import {
   SaveEstimateRequest,
   EstimateSummary,
   EstimateDetail,
-  LinkEstimateToQuotationRequest
+  LinkEstimateToQuotationRequest,
+  PrintingMachineRate
 } from '../models/printing-calculator.model';
 
 @Injectable({
@@ -26,10 +27,6 @@ import {
 export class PrintingCalculatorService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/printing-calculator`;
-
-  getImportStatus(): Observable<any> {
-    return this.http.get(`${this.baseUrl}/import-status`);
-  }
 
   getCategories(): Observable<PrintingCategory[]> {
     return this.http.get<PrintingCategory[]>(`${this.baseUrl}/categories`);
@@ -77,6 +74,10 @@ export class PrintingCalculatorService {
 
   getCostCategories(): Observable<CostCategory[]> {
     return this.http.get<CostCategory[]>(`${this.baseUrl}/cost-categories`);
+  }
+
+  getMachineRates(): Observable<PrintingMachineRate[]> {
+    return this.http.get<PrintingMachineRate[]>(`${this.baseUrl}/machine-rates`);
   }
 
   calculate(req: CalculateEstimateRequest): Observable<CalculateEstimateResponse> {

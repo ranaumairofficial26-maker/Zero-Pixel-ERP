@@ -1,0 +1,151 @@
+<div class="aging-page">
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-left">
+      <button type="button" class="btn btn-back" (click)="backToList()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Bills
+      </button>
+      <div>
+        <h1 class="page-title">Supplier Bills Aging Report</h1>
+        <p class="page-subtitle">Track overdue exposures and unpaid supplier invoices across aging buckets.</p>
+      </div>
+    </div>
+
+    <div class="header-total">
+      <span class="lbl">Total Outstanding Payables</span>
+      <span class="val mono strong">PKR {{ formatCurrency(report.totalOutstanding) }}</span>
+    </div>
+  </header>
+
+  <!-- BUCKET CARDS -->
+  <section class="buckets-grid">
+    <div
+      class="bucket-card"
+      [class.active]="selectedCategory === 'All'"
+      (click)="setCategory('All')"
+    >
+      <div class="b-lbl">All Outstanding</div>
+      <div class="b-val mono">{{ formatCurrency(report.totalOutstanding) }}</div>
+      <div class="b-count">{{ report.items.length }} bills</div>
+    </div>
+
+    <div
+      class="bucket-card"
+      [class.active]="selectedCategory === 'Not Yet Due'"
+      (click)="setCategory('Not Yet Due')"
+    >
+      <div class="b-lbl">Not Yet Due</div>
+      <div class="b-val mono text-safe">{{ formatCurrency(report.totalNotYetDue) }}</div>
+      <div class="b-sub">Due in future</div>
+    </div>
+
+    <div
+      class="bucket-card"
+      [class.active]="selectedCategory === '1–30 Days Overdue'"
+      (click)="setCategory('1–30 Days Overdue')"
+    >
+      <div class="b-lbl">1–30 Days</div>
+      <div class="b-val mono text-warning">{{ formatCurrency(report.total1To30Days) }}</div>
+      <div class="b-sub">Short overdue</div>
+    </div>
+
+    <div
+      class="bucket-card"
+      [class.active]="selectedCategory === '31–60 Days Overdue'"
+      (click)="setCategory('31–60 Days Overdue')"
+    >
+      <div class="b-lbl">31–60 Days</div>
+      <div class="b-val mono text-danger">{{ formatCurrency(report.total31To60Days) }}</div>
+      <div class="b-sub">Moderate overdue</div>
+    </div>
+
+    <div
+      class="bucket-card"
+      [class.active]="selectedCategory === '61–90 Days Overdue'"
+      (click)="setCategory('61–90 Days Overdue')"
+    >
+      <div class="b-lbl">61–90 Days</div>
+      <div class="b-val mono text-danger">{{ formatCurrency(report.total61To90Days) }}</div>
+      <div class="b-sub">High overdue</div>
+    </div>
+
+    <div
+      class="bucket-card"
+      [class.active]="selectedCategory === 'Over 90 Days Overdue'"
+      (click)="setCategory('Over 90 Days Overdue')"
+    >
+      <div class="b-lbl">Over 90 Days</div>
+      <div class="b-val mono text-critical">{{ formatCurrency(report.totalOver90Days) }}</div>
+      <div class="b-sub">Critical overdue</div>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- TABLE -->
+  <section class="table-card">
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Loading aging report...</span>
+    </div>
+
+    <table class="aging-table" *ngIf="!isLoading && filteredItems.length > 0">
+      <thead>
+        <tr>
+          <th>Supplier</th>
+          <th>Bill / Invoice #</th>
+          <th>Bill Date</th>
+          <th>Due Date</th>
+          <th class="num">Days Overdue</th>
+          <th>Aging Category</th>
+          <th class="num">Outstanding Balance</th>
+          <th class="act">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let itm of filteredItems">
+          <td class="strong">{{ itm.supplierName }}</td>
+          <td>
+            <div class="bill-col">
+              <span class="mono strong">{{ itm.internalBillNumber }}</span>
+              <span class="inv-num">Inv: {{ itm.supplierInvoiceNumber }}</span>
+            </div>
+          </td>
+          <td>{{ formatDate(itm.billDate) }}</td>
+          <td>{{ formatDate(itm.dueDate) }}</td>
+          <td class="num">
+            <span
+              class="overdue-days-pill"
+              [class.future]="itm.daysOverdue === 0"
+              [class.warning]="itm.daysOverdue > 0 && itm.daysOverdue <= 30"
+              [class.danger]="itm.daysOverdue > 30"
+            >
+              {{ itm.daysOverdue === 0 ? 'Current' : itm.daysOverdue + ' days' }}
+            </span>
+          </td>
+          <td>
+            <span class="cat-pill">{{ itm.agingCategory }}</span>
+          </td>
+          <td class="num strong mono" [class.overdue-amt]="itm.daysOverdue > 0">
+            PKR {{ formatCurrency(itm.balance) }}
+          </td>
+          <td class="act">
+            <button type="button" class="btn-view" (click)="viewBill(itm.billId)">
+              View
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="!isLoading && filteredItems.length === 0">
+      <p>No unpaid supplier bills found in this aging category.</p>
+    </div>
+  </section>
+</div>
+

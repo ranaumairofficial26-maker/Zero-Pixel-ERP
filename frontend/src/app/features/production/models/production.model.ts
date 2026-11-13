@@ -29,14 +29,19 @@ export interface ProductionJob {
 }
 
 export interface ProductionJobItem {
-  jobItemId: number;
-  jobId: number;
+  jobItemId?: number;
+  jobId?: number;
   orderItemId: number;
   productName: string;
+  description?: string;
   sizeDimensions?: string;
   material?: string;
+  gsm?: string;
+  printingColor?: string;
+  finishing?: string;
   quantity: number;
   unit: string;
+  notes?: string;
 }
 
 export interface UpdateProductionJobRequest {

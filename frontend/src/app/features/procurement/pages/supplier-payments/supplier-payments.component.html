@@ -1,0 +1,194 @@
+<div class="supplier-payments-page">
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-title-row">
+        <div class="header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="page-title">Supplier Payments</h1>
+          <p class="page-subtitle">Record and manage payments made to suppliers.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn btn-primary" (click)="goToRecordPayment()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Record Payment
+      </button>
+    </div>
+  </header>
+
+  <!-- ALERTS -->
+  <div class="alert alert-success" *ngIf="actionMessage">{{ actionMessage }}</div>
+  <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- SEARCH BAR -->
+  <section class="filter-card">
+    <div class="search-input-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search Supplier..."
+      />
+    </div>
+    <div class="total-badge" *ngIf="!isLoading">
+      Total Payments: <strong>{{ totalCount }}</strong>
+    </div>
+  </section>
+
+  <!-- PAYMENTS TABLE CARD -->
+  <section class="table-card">
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Loading supplier payments...</span>
+    </div>
+
+    <table class="payments-table" *ngIf="!isLoading && payments.length > 0">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Supplier &amp; Bill</th>
+          <th>Method &amp; Account</th>
+          <th class="num">Amount (PKR)</th>
+          <th class="act">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of payments" [class.reversed-row]="p.status === 'Reversed'">
+          <td>
+            <div class="date-col">
+              <span class="strong">{{ formatDate(p.paymentDate) }}</span>
+              <span class="pay-num mono">{{ p.paymentNumber }}</span>
+              <span class="status-pill" [class.posted]="p.status === 'Posted'" [class.reversed]="p.status === 'Reversed'">
+                {{ p.status }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="supplier-bill-col">
+              <span class="supplier-name strong">{{ p.supplierName }}</span>
+              <span class="bill-ref">
+                Bill: <span class="mono">{{ p.internalBillNumber }}</span> (Inv: {{ p.supplierInvoiceNumber }})
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="method-col">
+              <span class="method-name strong">{{ p.paymentMethod }}</span>
+              <span class="account-ref" *ngIf="p.paymentAccountReference">{{ p.paymentAccountReference }}</span>
+              <span class="tx-ref" *ngIf="p.transactionReference">Ref: {{ p.transactionReference }}</span>
+            </div>
+          </td>
+          <td class="num strong mono" [class.reversed-amt]="p.status === 'Reversed'">
+            {{ formatCurrency(p.amount) }}
+          </td>
+          <td class="act">
+            <div class="actions-group">
+              <button type="button" class="action-btn" (click)="viewPayment(p.id)">
+                View
+              </button>
+              <button
+                *ngIf="p.status === 'Posted'"
+                type="button"
+                class="action-btn danger"
+                (click)="openReverseModal(p)"
+              >
+                Reverse
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="!isLoading && payments.length === 0">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+      </div>
+      <h3>No Supplier Payments Found</h3>
+      <p>No supplier payments have been recorded yet.</p>
+      <button type="button" class="btn btn-primary" (click)="goToRecordPayment()">
+        + Record Payment
+      </button>
+    </div>
+
+    <!-- PAGINATION -->
+    <footer class="table-footer" *ngIf="totalPages > 1">
+      <span class="total-info">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to
+        {{ currentPage * pageSize > totalCount ? totalCount : currentPage * pageSize }} of
+        {{ totalCount }} payments
+      </span>
+      <div class="pagination">
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          Previous
+        </button>
+        <span class="current-page-text">{{ currentPage }} / {{ totalPages }}</span>
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<!-- REVERSE CONFIRMATION MODAL -->
+<div class="modal-backdrop" *ngIf="showReverseModal" (click)="closeReverseModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Reverse Supplier Payment</h3>
+    <p>
+      Reversing payment <strong class="mono">{{ paymentToReverse?.paymentNumber }}</strong>
+      (PKR {{ formatCurrency(paymentToReverse?.amount || 0) }}) will restore the outstanding balance on bill
+      <strong class="mono">{{ paymentToReverse?.internalBillNumber }}</strong>. The payment record will be preserved as
+      <strong>Reversed</strong>.
+    </p>
+
+    <div class="modal-field">
+      <label class="field-label required">Reversal Reason</label>
+      <textarea
+        rows="3"
+        class="form-control"
+        [(ngModel)]="reversalReason"
+        placeholder="Enter the reason for reversing this payment..."
+      ></textarea>
+      <span class="field-error" *ngIf="reversalError">{{ reversalError }}</span>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" [disabled]="isReversing" (click)="closeReverseModal()">
+        Keep Payment
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="isReversing" (click)="confirmReverse()">
+        {{ isReversing ? 'Reversing...' : 'Confirm Reversal' }}
+      </button>
+    </div>
+  </div>
+</div>

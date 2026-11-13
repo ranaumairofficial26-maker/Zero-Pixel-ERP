@@ -29,8 +29,8 @@ public class PrintingIntelligenceSeeder
             await SeedPaperSizesAsync();
             await SeedPrintingSizesAsync();
             await SeedMaterialsAsync();
-            await SeedMaterialProfilesAsync();
             await SeedCostCategoriesAsync();
+            await SeedMachineRatesAsync();
         }
         catch (Exception ex)
         {
@@ -267,61 +267,6 @@ public class PrintingIntelligenceSeeder
         _logger.LogInformation("Seeded 8 default printing materials successfully");
     }
 
-    private async Task SeedMaterialProfilesAsync()
-    {
-        if (await _context.MaterialPriceProfiles.AnyAsync()) return;
-
-        var artCard = await _context.PrintingMaterials.FirstOrDefaultAsync(m => m.MaterialName == "ART CARD");
-        var offsetPaper = await _context.PrintingMaterials.FirstOrDefaultAsync(m => m.MaterialName == "OFFSET PAPER");
-        var size25x36 = await _context.PaperSizes.FirstOrDefaultAsync(s => s.SizeName == "25 × 36");
-        var size23x36 = await _context.PaperSizes.FirstOrDefaultAsync(s => s.SizeName == "23 × 36");
-
-        var profiles = new List<MaterialPriceProfile>();
-
-        if (artCard != null)
-        {
-            profiles.Add(new MaterialPriceProfile
-            {
-                MaterialId = artCard.MaterialId,
-                PaperSizeId = size25x36?.PaperSizeId,
-                VariantName = "Art Card 300 GSM (25×36)",
-                Gsm = 300m,
-                PricingMethod = "PacketPrice",
-                PacketPrice = 8100m,
-                SheetsPerPacket = 100,
-                SheetsPerRim = 500,
-                ConversionFactor = 3100m,
-                ComputedPerSheetPrice = 81.0000m,
-                IsActive = true
-            });
-        }
-
-        if (offsetPaper != null)
-        {
-            // (23 * 36 * 100 * 680) / 3100 = 18162.5806; per sheet / 500 = 36.3252
-            profiles.Add(new MaterialPriceProfile
-            {
-                MaterialId = offsetPaper.MaterialId,
-                PaperSizeId = size23x36?.PaperSizeId,
-                VariantName = "Offset Paper 100 GSM (23×36)",
-                Gsm = 100m,
-                PricingMethod = "RatePerKg",
-                RatePerKg = 680m,
-                ConversionFactor = 3100m,
-                SheetsPerRim = 500,
-                ComputedPerSheetPrice = 36.3252m,
-                IsActive = true
-            });
-        }
-
-        if (profiles.Count > 0)
-        {
-            _context.MaterialPriceProfiles.AddRange(profiles);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Seeded initial material price profiles successfully");
-        }
-    }
-
     private async Task SeedCostCategoriesAsync()
     {
         if (await _context.CostCategories.AnyAsync()) return;
@@ -343,5 +288,53 @@ public class PrintingIntelligenceSeeder
         _context.CostCategories.AddRange(categories);
         await _context.SaveChangesAsync();
         _logger.LogInformation("Seeded 10 default cost categories successfully");
+    }
+
+    private async Task SeedMachineRatesAsync()
+    {
+        // 4 User-Confirmed Machines with exact rates
+        var confirmedMachines = new List<(string Name, decimal PrintPerPlate, decimal PrintPerSet, decimal PrintingPlate, decimal PlatePerSet, int Order)>
+        {
+            ("GTO 46", 350m, 1400m, 500m, 2000m, 1),
+            ("GTO 52", 375m, 1600m, 550m, 2200m, 2),
+            ("Solna 125", 550m, 2200m, 800m, 3200m, 3),
+            ("Heidelberg", 1000m, 4000m, 1500m, 6000m, 4)
+        };
+
+        foreach (var item in confirmedMachines)
+        {
+            var existing = await _context.PrintingMachineRates
+                .FirstOrDefaultAsync(m => m.MachineName.ToLower() == item.Name.ToLower());
+
+            if (existing == null)
+            {
+                _context.PrintingMachineRates.Add(new PrintingMachineRate
+                {
+                    MachineName = item.Name,
+                    PrintPerPlate = item.PrintPerPlate,
+                    PrintPerSet = item.PrintPerSet,
+                    PrintingPlate = item.PrintingPlate,
+                    PlatePerSet = item.PlatePerSet,
+                    DisplayOrder = item.Order,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                existing.MachineName = item.Name;
+                existing.PrintPerPlate = item.PrintPerPlate;
+                existing.PrintPerSet = item.PrintPerSet;
+                existing.PrintingPlate = item.PrintingPlate;
+                existing.PlatePerSet = item.PlatePerSet;
+                existing.DisplayOrder = item.Order;
+                existing.IsActive = true;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Seeded 4 confirmed printing machines and rates successfully");
     }
 }

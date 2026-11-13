@@ -1,0 +1,225 @@
+<div class="invoice-view-wrapper">
+  
+  <!-- TOP CONTROLS BAR (Hidden during printing) -->
+  <div class="top-actions-bar no-print">
+    <div class="actions-left">
+      <a routerLink="/admin/invoices" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Invoices
+      </a>
+      <span class="view-status-pill" *ngIf="invoice">
+        {{ invoice.invoiceNumber }}
+      </span>
+    </div>
+
+    <div class="actions-right" *ngIf="invoice">
+      <a [routerLink]="['/admin/invoices/edit', invoice.id]" class="btn-edit-header">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+        Edit Invoice
+      </a>
+
+      <!-- SHARE BUTTON -->
+      <button type="button" class="btn-share-header" (click)="openShareModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"></circle>
+          <circle cx="6" cy="12" r="3"></circle>
+          <circle cx="18" cy="19" r="3"></circle>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+        </svg>
+        Share
+      </button>
+
+      <!-- DOWNLOAD PDF BUTTON -->
+      <button type="button" class="btn-pdf-header" (click)="downloadPdf()" [disabled]="isDownloadingPdf">
+        <svg *ngIf="!isDownloadingPdf" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span *ngIf="isDownloadingPdf" class="btn-spinner"></span>
+        {{ isDownloadingPdf ? 'Downloading PDF...' : 'Download PDF' }}
+      </button>
+
+      <!-- PRINT INVOICE BUTTON -->
+      <button type="button" class="btn-print-primary" (click)="printInvoice()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Print (A4)
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-box no-print" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading Invoice Statement...</span>
+  </div>
+
+  <!-- Error Alert with Retry -->
+  <div class="alert-box-danger no-print" *ngIf="errorMessage && !loading">
+    <div class="error-msg-wrap">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+    <button *ngIf="currentIdOrNumber" type="button" class="btn-retry" (click)="loadInvoice(currentIdOrNumber)">
+      Retry
+    </button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- A4 PRINTABLE INVOICE SHEET (Pure Professional White Design for Print) -->
+  <!-- ========================================================================= -->
+  <div class="a4-sheet-container" *ngIf="invoice && !loading">
+    <div class="invoice-sheet">
+      
+      <!-- HEADER -->
+      <div class="sheet-header">
+        <div class="brand-col">
+          <img src="/zeropixel_logo.png?v=3" alt="Zero Pixel" class="sheet-logo-img" />
+        </div>
+
+        <div class="invoice-meta-col">
+          <h1 class="invoice-banner-title">INVOICE</h1>
+          <div class="meta-data-table">
+            <div class="meta-row">
+              <span class="meta-label">Invoice No:</span>
+              <strong class="meta-val invoice-code">{{ invoice.invoiceNumber }}</strong>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Date#:</span>
+              <strong class="meta-val">{{ invoice.invoiceDate | date:'mediumDate' }}</strong>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">NTN#:</span>
+              <strong class="meta-val">{{ invoice.ntnNumber || '' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <!-- CUSTOMER SNAPSHOT BOX -->
+      <div class="customer-section-box">
+        <div class="billed-to-header">
+          <span class="billed-to-title">CUSTOMER:</span>
+        </div>
+        <div class="customer-content-grid">
+          <div class="cust-main-col">
+            <div class="cust-primary-name">{{ invoice.customerName }}</div>
+            <div class="cust-company-name" *ngIf="invoice.companyName && invoice.companyName !== invoice.customerName">
+              {{ invoice.companyName }}
+            </div>
+            <div class="cust-address" *ngIf="invoice.billingAddress">
+              {{ invoice.billingAddress }}
+            </div>
+          </div>
+          <div class="cust-contact-col">
+            <div class="contact-line">
+              <span class="c-lbl">Client' PO#:</span>
+              <strong class="c-val">{{ invoice.clientPoNumber || '' }}</strong>
+            </div>
+            <div class="contact-line" *ngIf="invoice.contactNumber">
+              <span class="c-lbl">Phone:</span>
+              <strong class="c-val">{{ invoice.contactNumber }}</strong>
+            </div>
+            <div class="contact-line" *ngIf="invoice.email">
+              <span class="c-lbl">Email:</span>
+              <span class="c-val">{{ invoice.email }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITEMS TABLE -->
+      <div class="sheet-items-table-wrap">
+        <table class="sheet-items-table">
+          <thead>
+            <tr>
+              <th style="width: 65px; text-align: center; white-space: nowrap;">Sr No</th>
+              <th style="width: 110px; text-align: left;">GR No</th>
+              <th style="text-align: left;">Description</th>
+              <th style="width: 100px; text-align: right;">Quantity</th>
+              <th style="width: 110px; text-align: right;">Rate (PKR)</th>
+              <th style="width: 130px; text-align: right;">Amount (PKR)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let it of invoice.items; let i = index">
+              <td style="text-align: center;" class="sr-cell">{{ i + 1 }}</td>
+              <td style="text-align: left;" class="gr-cell">{{ it.grNumber || '—' }}</td>
+              <td style="text-align: left;" class="desc-cell">{{ it.description }}</td>
+              <td style="text-align: right;" class="qty-cell">{{ it.quantity | number }}</td>
+              <td style="text-align: right;" class="rate-cell">{{ it.rate | number:'1.2-2' }}</td>
+              <td style="text-align: right;" class="amount-cell">{{ it.amount | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TOTALS & NOTES -->
+      <div class="sheet-bottom-section">
+        
+        <!-- Notes / Instructions -->
+        <div class="sheet-notes-col">
+          <div class="notes-heading">Payment Terms & Notes:</div>
+          <p class="notes-body" style="white-space: pre-line;" *ngIf="invoice.notes && invoice.notes !== 'Test commercial printing invoice with GR numbers.' && invoice.notes !== 'Bank Details: Title Name: ZEROPIXEL Bank: Bank Islami IBAN:PK16BKIP0201515856490001 Account # 201515856490001'; else defaultTerms">
+            {{ invoice.notes }}
+          </p>
+          <ng-template #defaultTerms>
+            <p class="notes-body">1. Please clear the remaining balance within 15 days of invoice date.<br>2. Any discrepancy in quantity or quality must be reported within 48 hours of delivery.</p>
+          </ng-template>
+        </div>
+
+        <!-- Math Totals Box -->
+        <div class="sheet-totals-box">
+          <div class="s-totals-row total-row">
+            <span class="s-label">TOTAL:</span>
+            <span class="s-val">Rs. {{ invoice.total | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="s-totals-row advance-row">
+            <span class="s-label">{{ getAdjustmentLabel(invoice) }}</span>
+            <span class="s-val">Rs. {{ invoice.advance | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="s-totals-row balance-row">
+            <span class="s-label">BALANCE:</span>
+            <strong class="s-val balance-text">Rs. {{ invoice.balance | number:'1.2-2' }}</strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIGN-OFF & FOOTER -->
+      <div class="sheet-bottom-footer">
+        <img src="/zeropixel_stamp_bank.png" alt="ZEROPIXEL Stamp & Bank Details" class="stamp-bank-img" />
+        <div class="sheet-signature-disclaimer">
+          <strong>This signature is valid for this digitally generated invoice only and is not authorized for any other use.</strong>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SHARE MODAL -->
+  <app-invoice-share-modal
+    [invoice]="showShareModal ? invoice : null"
+    (close)="closeShareModal()"
+  ></app-invoice-share-modal>
+
+</div>

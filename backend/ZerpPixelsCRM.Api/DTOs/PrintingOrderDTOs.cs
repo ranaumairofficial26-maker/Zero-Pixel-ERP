@@ -50,18 +50,6 @@ public class PrintingOrderItemDto
     public string? Notes { get; set; }
 }
 
-public class ConvertQuotationToOrderRequest
-{
-    public long RevisionId { get; set; }
-    public string? Notes { get; set; }
-}
-
-public class UpdateOrderItemsProductionTypeRequest
-{
-    public string? OverallProductionType { get; set; }
-    public List<OrderItemProductionTypeUpdate> Items { get; set; } = new();
-}
-
 public class OrderItemProductionTypeUpdate
 {
     public long OrderItemId { get; set; }

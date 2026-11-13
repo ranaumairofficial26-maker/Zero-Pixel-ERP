@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -11,16 +11,21 @@ import { ThemeService } from '../../core/services/theme.service';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   host: {
-    '[class.dark-sidebar]': 'themeService.isDarkMode()'
+    '[class.dark-sidebar]': 'themeService.isDarkMode()',
+    '[class.mobile-open]': 'isOpen'
   }
 })
 export class SidebarComponent implements OnInit {
   private router = inject(Router);
   public themeService = inject(ThemeService);
 
+  @Input() isOpen: boolean = false;
+  @Output() closeRequested = new EventEmitter<void>();
+
   salesExpanded = signal<boolean>(false);
   productionExpanded = signal<boolean>(false);
   printingIntelligenceExpanded = signal<boolean>(false);
+  procurementExpanded = signal<boolean>(false);
 
   ngOnInit(): void {
     this.syncActiveDropdowns();
@@ -41,6 +46,9 @@ export class SidebarComponent implements OnInit {
     if (this.isPrintingIntelligenceRouteActive()) {
       this.printingIntelligenceExpanded.set(true);
     }
+    if (this.isProcurementRouteActive()) {
+      this.procurementExpanded.set(true);
+    }
   }
 
   toggleSales(): void {
@@ -55,17 +63,26 @@ export class SidebarComponent implements OnInit {
     this.printingIntelligenceExpanded.update(v => !v);
   }
 
+  toggleProcurement(): void {
+    this.procurementExpanded.update(v => !v);
+  }
+
   isSalesRouteActive(): boolean {
     return this.router.url.startsWith('/admin/customers') || 
            this.router.url.startsWith('/admin/quotations');
   }
 
   isProductionRouteActive(): boolean {
-    return this.router.url.startsWith('/admin/production');
+    return this.router.url.startsWith('/admin/production/in-house') || 
+           this.router.url.startsWith('/admin/production/outsourced');
   }
 
   isPrintingIntelligenceRouteActive(): boolean {
     return this.router.url.startsWith('/admin/printing-intelligence');
+  }
+
+  isProcurementRouteActive(): boolean {
+    return this.router.url.startsWith('/admin/procurement');
   }
 
   isRouteActive(routePath: string): boolean {

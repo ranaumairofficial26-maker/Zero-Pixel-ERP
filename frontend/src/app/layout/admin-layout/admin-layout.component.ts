@@ -19,11 +19,13 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit {
   private router = inject(Router);
 
   @ViewChild('pageContainer') pageContainer?: ElementRef<HTMLElement>;
+  sidebarOpen: boolean = false;
 
   ngOnInit(): void {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
+      this.sidebarOpen = false;
       this.scrollToTop();
       if (event?.urlAfterRedirects && !event.urlAfterRedirects.includes('/login')) {
         try {
@@ -35,6 +37,14 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.scrollToTop();
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
   }
 
   scrollToTop(): void {

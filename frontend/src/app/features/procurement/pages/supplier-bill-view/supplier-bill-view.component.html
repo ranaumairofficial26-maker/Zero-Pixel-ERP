@@ -1,0 +1,201 @@
+<div class="bill-view-page">
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button type="button" class="btn btn-back" (click)="backToList()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to Supplier Bills
+    </button>
+
+    <div class="action-buttons" *ngIf="bill">
+      <button
+        *ngIf="bill.status !== 'Cancelled' && bill.paidAmount === 0"
+        type="button"
+        class="btn btn-outline"
+        [disabled]="isProcessing"
+        (click)="editBill()"
+      >
+        Edit Bill
+      </button>
+
+      <button
+        *ngIf="bill.status !== 'Cancelled' && bill.paidAmount === 0"
+        type="button"
+        class="btn btn-danger-outline"
+        [disabled]="isProcessing"
+        (click)="openCancelModal()"
+      >
+        Cancel Bill
+      </button>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alert alert-success" *ngIf="actionMessage">{{ actionMessage }}</div>
+  <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- LOADING -->
+  <div class="loading-box" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <span>Loading Supplier Bill...</span>
+  </div>
+
+  <!-- BILL SHEET -->
+  <div class="bill-sheet" *ngIf="!isLoading && bill">
+    <!-- SHEET HEADER -->
+    <header class="sheet-header">
+      <div class="brand-block">
+        <img src="/zeropixel_logo.png" alt="Zero Pixel ERP" class="brand-logo" />
+        <div class="brand-text">
+          <h2>Zero Pixel</h2>
+          <p>Procurement &amp; Supplier Payables</p>
+        </div>
+      </div>
+
+      <div class="doc-title-block">
+        <h1>SUPPLIER BILL</h1>
+        <div class="doc-meta">
+          <div class="meta-row">
+            <span class="meta-label">Internal Bill #:</span>
+            <span class="meta-value strong mono">{{ bill.internalBillNumber }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Supplier Invoice #:</span>
+            <span class="meta-value strong">{{ bill.supplierInvoiceNumber }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Bill Date:</span>
+            <span class="meta-value">{{ formatDate(bill.billDate) }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Due Date:</span>
+            <span class="meta-value">{{ formatDate(bill.dueDate) }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Status:</span>
+            <span
+              class="status-pill"
+              [class.unpaid]="bill.status === 'Unpaid'"
+              [class.overdue]="bill.status === 'Overdue'"
+              [class.partially-paid]="bill.status === 'Partially Paid'"
+              [class.paid]="bill.status === 'Paid'"
+              [class.cancelled]="bill.status === 'Cancelled'"
+            >
+              {{ bill.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <!-- INFO CARDS GRID -->
+    <section class="info-grid">
+      <div class="info-card">
+        <h3>Supplier Details</h3>
+        <div class="supplier-name">{{ bill.supplierName }}</div>
+        <div class="info-line" *ngIf="bill.supplierContactPerson">
+          <span class="lbl">Contact Person:</span> {{ bill.supplierContactPerson }}
+        </div>
+        <div class="info-line" *ngIf="bill.supplierPhone">
+          <span class="lbl">Phone:</span> {{ bill.supplierPhone }}
+        </div>
+        <div class="info-line" *ngIf="bill.supplierEmail">
+          <span class="lbl">Email:</span> {{ bill.supplierEmail }}
+        </div>
+        <div class="info-line" *ngIf="bill.supplierAddress">
+          <span class="lbl">Address:</span> {{ bill.supplierAddress }}
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>References &amp; Description</h3>
+        <div class="info-line">
+          <span class="lbl">Purchase Order:</span>
+          <span *ngIf="bill.purchaseOrderNumber">{{ bill.purchaseOrderNumber }}</span>
+          <span *ngIf="!bill.purchaseOrderNumber" class="muted">No PO Reference</span>
+        </div>
+        <div class="info-line" *ngIf="bill.description">
+          <span class="lbl">Description:</span>
+          <span>{{ bill.description }}</span>
+        </div>
+        <div class="info-line" *ngIf="bill.cancelledAt">
+          <span class="lbl">Cancelled On:</span>
+          <span>{{ formatDate(bill.cancelledAt) }}</span>
+        </div>
+        <div class="info-note">
+          <strong>Payment Integration Notice:</strong> Actual payments will be recorded when
+          Page 5 (Supplier Payments) is activated. Newly saved bills remain unpaid.
+        </div>
+      </div>
+    </section>
+
+    <!-- ITEMS TABLE -->
+    <section class="items-section">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th class="col-sr">#</th>
+            <th class="col-desc">Item Description</th>
+            <th class="col-num">Quantity</th>
+            <th class="col-num">Rate (PKR)</th>
+            <th class="col-num">Amount (PKR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of bill.items; let i = index">
+            <td class="col-sr">{{ item.serialNumber || i + 1 }}</td>
+            <td class="col-desc">{{ item.description }}</td>
+            <td class="col-num">{{ item.quantity | number: '1.0-2' }}</td>
+            <td class="col-num">{{ formatCurrency(item.rate) }}</td>
+            <td class="col-num strong">{{ formatCurrency(item.amount) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- TOTAL & FINANCIAL SUMMARY -->
+    <section class="financial-summary-block">
+      <div class="summary-breakdown">
+        <div class="summary-line">
+          <span class="s-lbl">Total Bill Amount:</span>
+          <span class="s-val strong mono">PKR {{ formatCurrency(bill.totalAmount) }}</span>
+        </div>
+        <div class="summary-line">
+          <span class="s-lbl">Paid Amount:</span>
+          <span class="s-val mono">PKR {{ formatCurrency(bill.paidAmount) }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-line highlight" [class.overdue-balance]="bill.status === 'Overdue'">
+          <span class="s-lbl">Outstanding Balance:</span>
+          <span class="s-val strong mono">PKR {{ formatCurrency(bill.balance) }}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- CANCEL MODAL -->
+<div class="modal-backdrop" *ngIf="showCancelModal" (click)="closeCancelModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Cancel Supplier Bill</h3>
+    <p>
+      Are you sure you want to cancel bill
+      <strong>{{ bill?.internalBillNumber }}</strong> (Invoice:
+      <strong>{{ bill?.supplierInvoiceNumber }}</strong>)? This will exclude it from active
+      payables.
+    </p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" [disabled]="isProcessing" (click)="closeCancelModal()">
+        Keep Bill
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="isProcessing" (click)="confirmCancel()">
+        {{ isProcessing ? 'Cancelling...' : 'Yes, Cancel Bill' }}
+      </button>
+    </div>
+  </div>
+</div>
+

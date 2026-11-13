@@ -20,18 +20,30 @@ public class AppDbContext : DbContext
     public DbSet<PrintingOrderItem> PrintingOrderItems => Set<PrintingOrderItem>();
     public DbSet<ProductionJob> ProductionJobs => Set<ProductionJob>();
     public DbSet<ProductionJobItem> ProductionJobItems => Set<ProductionJobItem>();
+    public DbSet<ProductionJobSheet> ProductionJobSheets => Set<ProductionJobSheet>();
     public DbSet<PrintingCategory> PrintingCategories => Set<PrintingCategory>();
     public DbSet<PrintingItem> PrintingItems => Set<PrintingItem>();
     public DbSet<PaperSize> PaperSizes => Set<PaperSize>();
     public DbSet<PrintingSize> PrintingSizes => Set<PrintingSize>();
     public DbSet<PrintingItemSize> PrintingItemSizes => Set<PrintingItemSize>();
     public DbSet<PrintingMaterial> PrintingMaterials => Set<PrintingMaterial>();
-    public DbSet<MaterialPriceProfile> MaterialPriceProfiles => Set<MaterialPriceProfile>();
     public DbSet<CostCategory> CostCategories => Set<CostCategory>();
+    public DbSet<PrintingMachineRate> PrintingMachineRates => Set<PrintingMachineRate>();
     public DbSet<PrintingCostEstimate> PrintingCostEstimates => Set<PrintingCostEstimate>();
     public DbSet<EstimateQuantity> EstimateQuantities => Set<EstimateQuantity>();
     public DbSet<EstimateCostItem> EstimateCostItems => Set<EstimateCostItem>();
     public DbSet<EstimateResult> EstimateResults => Set<EstimateResult>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<SupplierServiceItem> SupplierServices => Set<SupplierServiceItem>();
+    public DbSet<SupplierQuote> SupplierQuotes => Set<SupplierQuote>();
+    public DbSet<SupplierQuoteItem> SupplierQuoteItems => Set<SupplierQuoteItem>();
+    public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
+    public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
+    public DbSet<SupplierBill> SupplierBills => Set<SupplierBill>();
+    public DbSet<SupplierBillItem> SupplierBillItems => Set<SupplierBillItem>();
+    public DbSet<SupplierPayment> SupplierPayments => Set<SupplierPayment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -612,41 +624,7 @@ public class AppDbContext : DbContext
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
         });
 
-        // 12. Configure MaterialPriceProfile entity
-        modelBuilder.Entity<MaterialPriceProfile>(entity =>
-        {
-            entity.ToTable("material_price_profiles");
-            entity.HasKey(e => e.ProfileId);
-            entity.Property(e => e.ProfileId).HasColumnName("profile_id").UseIdentityAlwaysColumn();
-            entity.Property(e => e.MaterialId).HasColumnName("material_id");
-            entity.Property(e => e.PaperSizeId).HasColumnName("paper_size_id");
-            entity.Property(e => e.VariantName).HasColumnName("variant_name").HasMaxLength(150);
-            entity.Property(e => e.Gsm).HasColumnName("gsm").HasColumnType("numeric(10,3)");
-            entity.Property(e => e.PricingMethod).HasColumnName("pricing_method").HasMaxLength(50).IsRequired();
-            entity.Property(e => e.RatePerKg).HasColumnName("rate_per_kg").HasColumnType("numeric(18,4)");
-            entity.Property(e => e.ConversionFactor).HasColumnName("conversion_factor").HasColumnType("numeric(12,4)").HasDefaultValue(3100m);
-            entity.Property(e => e.PacketPrice).HasColumnName("packet_price").HasColumnType("numeric(18,4)");
-            entity.Property(e => e.SheetsPerPacket).HasColumnName("sheets_per_packet");
-            entity.Property(e => e.DirectRimPrice).HasColumnName("direct_rim_price").HasColumnType("numeric(18,4)");
-            entity.Property(e => e.SheetsPerRim).HasColumnName("sheets_per_rim").HasDefaultValue(500);
-            entity.Property(e => e.DirectSheetPrice).HasColumnName("direct_sheet_price").HasColumnType("numeric(18,4)");
-            entity.Property(e => e.ComputedPerSheetPrice).HasColumnName("computed_per_sheet_price").HasColumnType("numeric(18,4)");
-            entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
-            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
-            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
-
-            entity.HasOne(e => e.Material)
-                  .WithMany()
-                  .HasForeignKey(e => e.MaterialId)
-                  .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.PaperSize)
-                  .WithMany()
-                  .HasForeignKey(e => e.PaperSizeId)
-                  .OnDelete(DeleteBehavior.SetNull);
-        });
-
-        // 13. Configure CostCategory entity
+        // 12. Configure CostCategory entity
         modelBuilder.Entity<CostCategory>(entity =>
         {
             entity.ToTable("cost_categories");
@@ -781,6 +759,345 @@ public class AppDbContext : DbContext
             entity.Property(e => e.GrandTotal).HasColumnName("grand_total").HasColumnType("numeric(18,4)");
             entity.Property(e => e.PerPieceCost).HasColumnName("per_piece_cost").HasColumnType("numeric(18,4)");
             entity.Property(e => e.CalculatedAt).HasColumnName("calculated_at").HasColumnType("timestamptz");
+        });
+
+        // 18. Configure ProductionJobSheet entity
+        modelBuilder.Entity<ProductionJobSheet>(entity =>
+        {
+            entity.ToTable("production_job_sheets");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.JobCardNumber).HasColumnName("job_card_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.JobDate).HasColumnName("job_date").HasColumnType("timestamptz");
+            entity.Property(e => e.CustomerName).HasColumnName("customer_name").HasMaxLength(150).IsRequired();
+            entity.Property(e => e.JobName).HasColumnName("job_name").HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Quantity).HasColumnName("quantity").IsRequired();
+            entity.Property(e => e.PaperSize).HasColumnName("paper_size").HasMaxLength(100);
+            entity.Property(e => e.PaperType).HasColumnName("paper_type").HasMaxLength(100);
+            entity.Property(e => e.Gsm).HasColumnName("gsm");
+            entity.Property(e => e.PrintingSheetSize).HasColumnName("printing_sheet_size").HasMaxLength(100);
+            entity.Property(e => e.PrintingColors).HasColumnName("printing_colors").HasMaxLength(50);
+            entity.Property(e => e.PrintingSide).HasColumnName("printing_side").HasMaxLength(50);
+            entity.Property(e => e.PrintingMethod).HasColumnName("printing_method").HasMaxLength(50);
+            entity.Property(e => e.PrintingMethodOther).HasColumnName("printing_method_other").HasMaxLength(100);
+            entity.Property(e => e.PrintingMachine).HasColumnName("printing_machine").HasMaxLength(100);
+            entity.Property(e => e.PrintingOperator).HasColumnName("printing_operator").HasMaxLength(100);
+            entity.Property(e => e.PrintingStartDate).HasColumnName("printing_start_date").HasColumnType("timestamptz");
+            entity.Property(e => e.PrintingCompletionDate).HasColumnName("printing_completion_date").HasColumnType("timestamptz");
+            entity.Property(e => e.Lamination).HasColumnName("lamination").HasMaxLength(50);
+            entity.Property(e => e.LaminationOther).HasColumnName("lamination_other").HasMaxLength(100);
+            entity.Property(e => e.DieCutting).HasColumnName("die_cutting").HasMaxLength(50);
+            entity.Property(e => e.Binding).HasColumnName("binding").HasMaxLength(50);
+            entity.Property(e => e.BindingOther).HasColumnName("binding_other").HasMaxLength(100);
+            entity.Property(e => e.UvCoating).HasColumnName("uv_coating").HasMaxLength(50);
+            entity.Property(e => e.Packing).HasColumnName("packing").HasMaxLength(50);
+            entity.Property(e => e.PackingInstructions).HasColumnName("packing_instructions").HasMaxLength(500);
+            entity.Property(e => e.SpecialInstructions).HasColumnName("special_instructions").HasColumnType("text");
+            entity.Property(e => e.ProductionSupervisor).HasColumnName("production_supervisor").HasMaxLength(100);
+            entity.Property(e => e.AuthorizedBy).HasColumnName("authorized_by").HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+        });
+
+        // 19. Configure Invoice entity
+        modelBuilder.Entity<Invoice>(entity =>
+        {
+            entity.ToTable("invoices");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.InvoiceNumber).HasColumnName("invoice_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.InvoiceDate).HasColumnName("invoice_date").HasColumnType("timestamptz");
+            entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+            entity.Property(e => e.CustomerName).HasColumnName("customer_name").HasMaxLength(200).IsRequired();
+            entity.Property(e => e.CompanyName).HasColumnName("company_name").HasMaxLength(200);
+            entity.Property(e => e.ContactNumber).HasColumnName("contact_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(200);
+            entity.Property(e => e.BillingAddress).HasColumnName("billing_address").HasColumnType("text");
+            entity.Property(e => e.Total).HasColumnName("total").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Advance).HasColumnName("advance").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Balance).HasColumnName("balance").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Notes).HasColumnName("notes").HasColumnType("text");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Customer)
+                  .WithMany()
+                  .HasForeignKey(e => e.CustomerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Items)
+                  .WithOne(i => i.Invoice)
+                  .HasForeignKey(i => i.InvoiceId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.InvoiceNumber).IsUnique();
+            entity.HasIndex(e => e.CustomerId);
+            entity.HasIndex(e => e.InvoiceDate);
+        });
+
+        // 20. Configure InvoiceItem entity
+        modelBuilder.Entity<InvoiceItem>(entity =>
+        {
+            entity.ToTable("invoice_items");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.InvoiceId).HasColumnName("invoice_id").IsRequired();
+            entity.Property(e => e.SerialNumber).HasColumnName("serial_number").IsRequired();
+            entity.Property(e => e.GrNumber).HasColumnName("gr_number").HasMaxLength(50);
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Quantity).HasColumnName("quantity").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Rate).HasColumnName("rate").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+
+            entity.HasIndex(e => e.InvoiceId);
+        });
+
+        // 21. Configure Supplier entity
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.ToTable("suppliers");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.SupplierName).HasColumnName("supplier_name").HasMaxLength(200).IsRequired();
+            entity.Property(e => e.ContactPerson).HasColumnName("contact_person").HasMaxLength(150);
+            entity.Property(e => e.PhoneNumber).HasColumnName("phone_number").HasMaxLength(30);
+            entity.Property(e => e.Email).HasColumnName("email").HasMaxLength(200);
+            entity.Property(e => e.Address).HasColumnName("address").HasColumnType("text");
+            entity.Property(e => e.LeadTimeWorkingDays).HasColumnName("lead_time_working_days");
+            entity.Property(e => e.BankName).HasColumnName("bank_name").HasMaxLength(150);
+            entity.Property(e => e.AccountName).HasColumnName("account_name").HasMaxLength(200);
+            entity.Property(e => e.AccountNumberOrIban).HasColumnName("account_number_or_iban").HasMaxLength(100);
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(30).HasDefaultValue("Active").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+
+            entity.HasMany(e => e.Services)
+                  .WithOne(s => s.Supplier)
+                  .HasForeignKey(s => s.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.SupplierName, "IX_suppliers_supplier_name");
+            entity.HasIndex(e => e.Status, "IX_suppliers_status");
+        });
+
+        // 22. Configure SupplierServiceItem entity
+        modelBuilder.Entity<SupplierServiceItem>(entity =>
+        {
+            entity.ToTable("supplier_services");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id").IsRequired();
+            entity.Property(e => e.ServiceName).HasColumnName("service_name").HasMaxLength(250).IsRequired();
+
+            entity.HasIndex(e => e.SupplierId, "IX_supplier_services_supplier_id");
+        });
+
+        // 23. Configure SupplierQuote entity
+        modelBuilder.Entity<SupplierQuote>(entity =>
+        {
+            entity.ToTable("supplier_quotes");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.QuoteNumber).HasColumnName("quote_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id").IsRequired();
+            entity.Property(e => e.SupplierReferenceNumber).HasColumnName("supplier_reference_number").HasMaxLength(100);
+            entity.Property(e => e.QuoteDate).HasColumnName("quote_date").HasColumnType("timestamptz");
+            entity.Property(e => e.Description).HasColumnName("description").HasColumnType("text");
+            entity.Property(e => e.TotalAmount).HasColumnName("total_amount").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(30).HasDefaultValue("Recorded").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Items)
+                  .WithOne(i => i.SupplierQuote)
+                  .HasForeignKey(i => i.SupplierQuoteId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.QuoteNumber).IsUnique();
+            entity.HasIndex(e => e.SupplierId);
+            entity.HasIndex(e => e.QuoteDate);
+        });
+
+        // 24. Configure SupplierQuoteItem entity
+        modelBuilder.Entity<SupplierQuoteItem>(entity =>
+        {
+            entity.ToTable("supplier_quote_items");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.SupplierQuoteId).HasColumnName("supplier_quote_id").IsRequired();
+            entity.Property(e => e.SerialNumber).HasColumnName("serial_number").IsRequired();
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Quantity).HasColumnName("quantity").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Rate).HasColumnName("rate").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)").IsRequired();
+
+            entity.HasIndex(e => e.SupplierQuoteId);
+        });
+
+        // 25. Configure PurchaseOrder entity
+        modelBuilder.Entity<PurchaseOrder>(entity =>
+        {
+            entity.ToTable("purchase_orders");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.PoNumber).HasColumnName("po_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id").IsRequired();
+            entity.Property(e => e.SupplierQuoteId).HasColumnName("supplier_quote_id");
+            entity.Property(e => e.ProjectJobId).HasColumnName("project_job_id");
+            entity.Property(e => e.PoDate).HasColumnName("po_date").HasColumnType("timestamptz");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(30).HasDefaultValue("Draft").IsRequired();
+            entity.Property(e => e.TotalAmount).HasColumnName("total_amount").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.IssuedAt).HasColumnName("issued_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CancelledAt).HasColumnName("cancelled_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.SupplierQuote)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierQuoteId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.ProjectJob)
+                  .WithMany()
+                  .HasForeignKey(e => e.ProjectJobId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Items)
+                  .WithOne(i => i.PurchaseOrder)
+                  .HasForeignKey(i => i.PurchaseOrderId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.PoNumber).IsUnique();
+            entity.HasIndex(e => e.SupplierId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.PoDate);
+        });
+
+        // 26. Configure PurchaseOrderItem entity
+        modelBuilder.Entity<PurchaseOrderItem>(entity =>
+        {
+            entity.ToTable("purchase_order_items");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.PurchaseOrderId).HasColumnName("purchase_order_id").IsRequired();
+            entity.Property(e => e.SerialNumber).HasColumnName("serial_number").IsRequired();
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Quantity).HasColumnName("quantity").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Rate).HasColumnName("rate").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)").IsRequired();
+
+            entity.HasIndex(e => e.PurchaseOrderId);
+        });
+
+        // 27. Configure SupplierBill entity
+        modelBuilder.Entity<SupplierBill>(entity =>
+        {
+            entity.ToTable("supplier_bills");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.InternalBillNumber).HasColumnName("internal_bill_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.SupplierInvoiceNumber).HasColumnName("supplier_invoice_number").HasMaxLength(100).IsRequired();
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id").IsRequired();
+            entity.Property(e => e.PurchaseOrderId).HasColumnName("purchase_order_id");
+            entity.Property(e => e.BillDate).HasColumnName("bill_date").HasColumnType("timestamptz");
+            entity.Property(e => e.DueDate).HasColumnName("due_date").HasColumnType("timestamptz");
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(1000);
+            entity.Property(e => e.TotalAmount).HasColumnName("total_amount").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.PaidAmount).HasColumnName("paid_amount").HasColumnType("numeric(18,2)").HasDefaultValue(0m).IsRequired();
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(30).HasDefaultValue("Unpaid").IsRequired();
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+            entity.Property(e => e.CancelledAt).HasColumnName("cancelled_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.PurchaseOrder)
+                  .WithMany()
+                  .HasForeignKey(e => e.PurchaseOrderId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(e => e.Items)
+                  .WithOne(i => i.SupplierBill)
+                  .HasForeignKey(i => i.SupplierBillId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.InternalBillNumber).IsUnique();
+            entity.HasIndex(e => e.SupplierId);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.DueDate);
+            entity.HasIndex(e => new { e.SupplierId, e.SupplierInvoiceNumber });
+        });
+
+        // 28. Configure SupplierBillItem entity
+        modelBuilder.Entity<SupplierBillItem>(entity =>
+        {
+            entity.ToTable("supplier_bill_items");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.SupplierBillId).HasColumnName("supplier_bill_id").IsRequired();
+            entity.Property(e => e.SerialNumber).HasColumnName("serial_number").IsRequired();
+            entity.Property(e => e.Description).HasColumnName("description").HasMaxLength(500).IsRequired();
+            entity.Property(e => e.Quantity).HasColumnName("quantity").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Rate).HasColumnName("rate").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)").IsRequired();
+
+            entity.HasIndex(e => e.SupplierBillId);
+        });
+
+        // 29. Configure SupplierPayment entity
+        modelBuilder.Entity<SupplierPayment>(entity =>
+        {
+            entity.ToTable("supplier_payments");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id").UseIdentityAlwaysColumn();
+            entity.Property(e => e.PaymentNumber).HasColumnName("payment_number").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.SupplierId).HasColumnName("supplier_id").IsRequired();
+            entity.Property(e => e.SupplierBillId).HasColumnName("supplier_bill_id").IsRequired();
+            entity.Property(e => e.PaymentDate).HasColumnName("payment_date").HasColumnType("timestamptz");
+            entity.Property(e => e.Amount).HasColumnName("amount").HasColumnType("numeric(18,2)").IsRequired();
+            entity.Property(e => e.PaymentMethod).HasColumnName("payment_method").HasMaxLength(50).IsRequired();
+            entity.Property(e => e.PaymentAccountReference).HasColumnName("payment_account_reference").HasMaxLength(150);
+            entity.Property(e => e.TransactionReference).HasColumnName("transaction_reference").HasMaxLength(150);
+            entity.Property(e => e.Notes).HasColumnName("notes").HasMaxLength(1000);
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(30).HasDefaultValue("Posted").IsRequired();
+            entity.Property(e => e.ReversalReason).HasColumnName("reversal_reason").HasMaxLength(500);
+            entity.Property(e => e.ReversedAt).HasColumnName("reversed_at").HasColumnType("timestamptz");
+            entity.Property(e => e.ReversedBy).HasColumnName("reversed_by").HasMaxLength(150);
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(150);
+            entity.Property(e => e.IdempotencyKey).HasColumnName("idempotency_key").HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasColumnType("timestamptz");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at").HasColumnType("timestamptz");
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.SupplierBill)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierBillId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.PaymentNumber).IsUnique();
+            entity.HasIndex(e => e.SupplierId);
+            entity.HasIndex(e => e.SupplierBillId);
+            entity.HasIndex(e => e.PaymentDate);
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.IdempotencyKey).IsUnique();
         });
     }
 }

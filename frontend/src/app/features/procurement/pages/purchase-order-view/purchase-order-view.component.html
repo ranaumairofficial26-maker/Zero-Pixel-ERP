@@ -1,0 +1,213 @@
+<div class="po-view-page">
+  <!-- Action Bar (Hidden when printing) -->
+  <div class="action-bar no-print">
+    <button type="button" class="btn btn-back" (click)="backToList()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to Purchase Orders
+    </button>
+
+    <div class="action-buttons" *ngIf="po">
+      <button
+        *ngIf="po.status === 'Draft'"
+        type="button"
+        class="btn btn-outline"
+        [disabled]="isProcessing"
+        (click)="editPo()"
+      >
+        Edit PO
+      </button>
+
+      <button
+        *ngIf="po.status === 'Draft'"
+        type="button"
+        class="btn btn-success"
+        [disabled]="isProcessing"
+        (click)="issuePo()"
+      >
+        {{ isProcessing ? 'Processing...' : 'Issue PO' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="isProcessing"
+        (click)="printPo()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Print PO
+      </button>
+
+      <button
+        *ngIf="po.status !== 'Cancelled'"
+        type="button"
+        class="btn btn-danger-outline"
+        [disabled]="isProcessing"
+        (click)="openCancelModal()"
+      >
+        Cancel PO
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert alert-success no-print" *ngIf="actionMessage">{{ actionMessage }}</div>
+  <div class="alert alert-error no-print" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Loading -->
+  <div class="loading-box no-print" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <span>Loading Purchase Order...</span>
+  </div>
+
+  <!-- Printable Document Sheet -->
+  <div class="po-sheet" *ngIf="!isLoading && po">
+    <!-- Document Header -->
+    <header class="sheet-header">
+      <div class="brand-block">
+        <img src="/zeropixel_logo.png" alt="Zero Pixel ERP" class="brand-logo" />
+        <div class="brand-text">
+          <h2>Zero Pixel</h2>
+          <p>Procurement &amp; Printing Operations</p>
+        </div>
+      </div>
+
+      <div class="doc-title-block">
+        <h1>PURCHASE ORDER</h1>
+        <div class="doc-meta">
+          <div class="meta-row">
+            <span class="meta-label">PO Number:</span>
+            <span class="meta-value strong">{{ po.poNumber }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">PO Date:</span>
+            <span class="meta-value">{{ formatDate(po.poDate) }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Status:</span>
+            <span
+              class="status-badge"
+              [class.status-draft]="po.status === 'Draft'"
+              [class.status-issued]="po.status === 'Issued'"
+              [class.status-cancelled]="po.status === 'Cancelled'"
+            >
+              {{ po.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <!-- Supplier & Reference Grid -->
+    <section class="info-grid">
+      <div class="info-card">
+        <h3>Supplier Details</h3>
+        <div class="supplier-name">{{ po.supplierName }}</div>
+        <div class="info-line" *ngIf="po.supplierContactPerson">
+          <span class="lbl">Contact Person:</span> {{ po.supplierContactPerson }}
+        </div>
+        <div class="info-line" *ngIf="po.supplierPhone">
+          <span class="lbl">Phone:</span> {{ po.supplierPhone }}
+        </div>
+        <div class="info-line" *ngIf="po.supplierEmail">
+          <span class="lbl">Email:</span> {{ po.supplierEmail }}
+        </div>
+        <div class="info-line" *ngIf="po.supplierAddress">
+          <span class="lbl">Address:</span> {{ po.supplierAddress }}
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Order References</h3>
+        <div class="info-line">
+          <span class="lbl">Supplier Quote:</span>
+          <span>{{ po.supplierQuoteNumber || 'N/A' }}</span>
+        </div>
+        <div class="info-line">
+          <span class="lbl">Project / Job:</span>
+          <span>{{ po.projectJobLabel || po.projectJobNumber || 'General / Non-Job Purchase' }}</span>
+        </div>
+        <div class="info-line" *ngIf="po.issuedAt">
+          <span class="lbl">Issued On:</span>
+          <span>{{ formatDate(po.issuedAt) }}</span>
+        </div>
+        <div class="info-line" *ngIf="po.cancelledAt">
+          <span class="lbl">Cancelled On:</span>
+          <span>{{ formatDate(po.cancelledAt) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Items Table -->
+    <section class="items-section">
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th class="col-sr">#</th>
+            <th class="col-desc">Item Description</th>
+            <th class="col-num">Quantity</th>
+            <th class="col-num">Rate (PKR)</th>
+            <th class="col-num">Amount (PKR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of po.items; let i = index">
+            <td class="col-sr">{{ item.serialNumber || i + 1 }}</td>
+            <td class="col-desc">{{ item.description }}</td>
+            <td class="col-num">{{ item.quantity | number: '1.0-2' }}</td>
+            <td class="col-num">{{ formatCurrency(item.rate) }}</td>
+            <td class="col-num strong">{{ formatCurrency(item.amount) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Total Summary -->
+    <section class="totals-section">
+      <div class="total-box">
+        <span class="total-label">Total Purchase Order Amount</span>
+        <span class="total-value">PKR {{ formatCurrency(po.totalAmount) }}</span>
+      </div>
+    </section>
+
+    <!-- Signature Footer -->
+    <footer class="sheet-footer">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <span>Prepared By</span>
+      </div>
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <span>Authorized Signature</span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal-backdrop no-print" *ngIf="showCancelModal" (click)="closeCancelModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Cancel Purchase Order</h3>
+    <p>
+      Are you sure you want to cancel Purchase Order
+      <strong>{{ po?.poNumber }}</strong>? This action cannot be undone.
+    </p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" [disabled]="isProcessing" (click)="closeCancelModal()">
+        Keep PO
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="isProcessing" (click)="confirmCancelPo()">
+        {{ isProcessing ? 'Cancelling...' : 'Yes, Cancel PO' }}
+      </button>
+    </div>
+  </div>
+</div>
+

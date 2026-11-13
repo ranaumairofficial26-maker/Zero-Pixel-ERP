@@ -1,15 +1,24 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  align-self: flex-start;
+  z-index: 40;
+}
+
 .sidebar-wrapper {
-  width: 230px;
-  min-width: 230px;
-  zoom: 0.935; /* Scaled down by 6.5% as requested */
+  width: 205px;
+  min-width: 205px;
+  zoom: 0.92;
   background: #ffffff;
   border-right: 1px solid #edf2f7;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  height: 100%;
-  position: sticky;
-  top: 0;
+  height: calc(100vh / 0.92);
+  max-height: calc(100vh / 0.92);
+  overflow: hidden;
   box-shadow: 1px 0 8px rgba(15, 23, 42, 0.02);
   z-index: 40;
   user-select: none;
@@ -17,50 +26,38 @@
 
 /* 1. Brand Top Section */
 .brand-top {
-  padding: 1.25rem 1rem 1.15rem;
+  position: relative;
+  padding: 1.1rem 0.9rem;
   border-bottom: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   background: #ffffff;
 
-  .brand-info {
-    display: flex;
-    flex-direction: column;
+  .brand-logo-img {
+    width: 100%;
+    max-width: 168px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  .btn-sidebar-close {
+    display: none;
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
     align-items: center;
-    gap: 0.25rem;
-
-    .title-row {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-
-      .brand-name {
-        font-size: 1.05rem;
-        font-weight: 900;
-        color: #0f172a;
-        letter-spacing: -0.3px;
-      }
-
-      .brand-badge {
-        font-size: 0.7rem;
-        font-weight: 800;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        background: #00ADEF;
-        color: #ffffff;
-        padding: 0.15rem 0.5rem;
-        border-radius: 12px;
-      }
-    }
-
-    .brand-tagline {
-      font-size: 0.72rem;
-      color: #64748b;
-      font-weight: 600;
-      letter-spacing: -0.1px;
-    }
+    justify-content: center;
+    cursor: pointer;
   }
 }
 
@@ -99,7 +96,7 @@
 
     .nav-bottom-section {
       margin-top: auto;
-      padding-top: 0.65rem;
+      padding-top: 0.55rem;
       border-top: 1px solid rgba(148, 163, 184, 0.16);
     }
 
@@ -382,11 +379,10 @@
     background: #111827 !important;
     border-bottom-color: #1f293d !important;
 
-    .brand-name {
-      color: #f8fafc !important;
-    }
-    .brand-tagline {
-      color: #94a3b8 !important;
+    .brand-logo-img {
+      background: #ffffff;
+      padding: 0.45rem 0.6rem;
+      border-radius: 8px;
     }
   }
 
@@ -541,6 +537,39 @@
       background: #172133 !important;
       border-color: #1f293d !important;
       color: #94a3b8 !important;
+    }
+  }
+}
+
+@media (max-width: 991px) {
+  :host {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  :host(.mobile-open) {
+    transform: translateX(0);
+  }
+
+  .sidebar-wrapper {
+    width: 250px;
+    min-width: 250px;
+    zoom: 1;
+    height: 100vh;
+    max-height: 100vh;
+    box-shadow: 8px 0 30px rgba(15, 23, 42, 0.18);
+  }
+
+  .brand-top {
+    padding-right: 2.5rem;
+
+    .btn-sidebar-close {
+      display: inline-flex;
     }
   }
 }

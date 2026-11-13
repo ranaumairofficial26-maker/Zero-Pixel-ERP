@@ -57,6 +57,10 @@ export class CustomerFormComponent implements OnInit {
         this.customerToEdit?.address || '',
         [Validators.maxLength(1000)]
       ],
+      ntnNumber: [
+        this.customerToEdit?.ntnNumber || '',
+        [Validators.maxLength(100)]
+      ],
       isActive: [
         this.customerToEdit ? this.customerToEdit.isActive : true
       ]
@@ -79,6 +83,7 @@ export class CustomerFormComponent implements OnInit {
       phone: formValue.phone.trim(),
       email: formValue.email ? formValue.email.trim() : null,
       address: formValue.address ? formValue.address.trim() : null,
+      ntnNumber: formValue.ntnNumber ? formValue.ntnNumber.trim() : null,
       isActive: formValue.isActive
     };
 

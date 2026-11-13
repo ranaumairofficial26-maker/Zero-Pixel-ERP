@@ -1,10 +1,13 @@
 <div class="admin-shell">
-  <!-- Persistent Sidebar -->
-  <app-sidebar></app-sidebar>
+  <!-- Mobile Drawer Backdrop -->
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()"></div>
+
+  <!-- Persistent / Responsive Drawer Sidebar -->
+  <app-sidebar [isOpen]="sidebarOpen" (closeRequested)="closeSidebar()"></app-sidebar>
 
   <!-- Right Content Area -->
   <div class="content-wrapper">
-    <app-header></app-header>
+    <app-header (menuToggle)="toggleSidebar()"></app-header>
 
     <main class="page-container" #pageContainer>
       <router-outlet></router-outlet>

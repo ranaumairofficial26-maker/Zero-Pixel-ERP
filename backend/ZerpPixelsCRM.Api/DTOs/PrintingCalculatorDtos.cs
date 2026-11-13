@@ -116,27 +116,6 @@ public class CreateCustomMaterialRequest
     public decimal? DirectSheetPrice { get; set; }
 }
 
-public class MaterialPriceProfileDto
-{
-    public int ProfileId { get; set; }
-    public int MaterialId { get; set; }
-    public string MaterialName { get; set; } = string.Empty;
-    public int? PaperSizeId { get; set; }
-    public string? PaperSizeName { get; set; }
-    public string VariantName { get; set; } = string.Empty;
-    public decimal? Gsm { get; set; }
-    public string PricingMethod { get; set; } = "RatePerKg";
-    public decimal? RatePerKg { get; set; }
-    public decimal? PacketPrice { get; set; }
-    public int? SheetsPerPacket { get; set; }
-    public decimal? RimPrice { get; set; }
-    public int SheetsPerRim { get; set; } = 500;
-    public decimal ConversionFactor { get; set; } = 3100m;
-    public decimal? DirectSheetPrice { get; set; }
-    public decimal ComputedPerSheetPrice { get; set; }
-    public bool IsActive { get; set; }
-}
-
 public class CostCategoryDto
 {
     public int CostCategoryId { get; set; }
@@ -144,6 +123,18 @@ public class CostCategoryDto
     public int DisplayOrder { get; set; }
     public string DefaultCalculationMethod { get; set; } = "FixedAmount";
     public decimal? DefaultRate { get; set; }
+    public bool IsActive { get; set; }
+}
+
+public class PrintingMachineRateDto
+{
+    public int Id { get; set; }
+    public string MachineName { get; set; } = string.Empty;
+    public decimal PrintPerPlate { get; set; }
+    public decimal PrintPerSet { get; set; }
+    public decimal PrintingPlate { get; set; }
+    public decimal PlatePerSet { get; set; }
+    public int DisplayOrder { get; set; }
     public bool IsActive { get; set; }
 }
 
@@ -189,6 +180,53 @@ public class CalculateEstimateRequest
 
     public decimal ProfitPercentage { get; set; } = 20m;
     public decimal TaxPercentage { get; set; } = 0m;
+
+    // Step 4: Plate / CTP & Prepress
+    public string? PlateMakingMethod { get; set; }
+    public string? SelectedPlateSizeId { get; set; }
+    public string? SelectedPlateSizeName { get; set; }
+    public string? PlateCode { get; set; }
+    public string? FilmType { get; set; }
+    public int? PlateQuantity { get; set; }
+    public bool? IsPlateQuantityManual { get; set; }
+    public string? PlatePricingMethod { get; set; }
+    public int? PlatesPerSet { get; set; }
+    public decimal? SinglePlateRate { get; set; }
+    public decimal? SetPlateRate { get; set; }
+    public decimal? ManualPlateCost { get; set; }
+    public int? FilmQuantity { get; set; }
+    public decimal? RatePerFilm { get; set; }
+    public decimal? OtherPrepressCharges { get; set; }
+    public decimal? ComputedPlateCost { get; set; }
+    public decimal? ComputedFilmCost { get; set; }
+    public decimal? ComputedPrepressCost { get; set; }
+
+    // Step 5: Printing Cost (Color & Machine Wise)
+    public string? PrintingMachine { get; set; }
+    public string? CustomPrintingMachine { get; set; }
+    public decimal? PrintingQuantity { get; set; }
+    public string? PrintingCostMethod { get; set; }
+    public string? PerColorRateScope { get; set; }
+    public decimal? PrintingRate { get; set; }
+    public decimal? ManualPrintingAmount { get; set; }
+    public decimal? MachineSetupCharge { get; set; }
+    public decimal? AdditionalRunCharge { get; set; }
+    public decimal? OtherPrintingCharges { get; set; }
+    public bool? ApplyPerColorFormula { get; set; }
+    public decimal? ComputedMachinePrintingCost { get; set; }
+
+    // Step 6: Lamination (Glossy / Matte)
+    public string? LaminationType { get; set; }
+    public string? LaminationSides { get; set; }
+    public string? LaminationCostMethod { get; set; }
+    public decimal? LaminationQuantity { get; set; }
+    public decimal? GlossyLaminationRate { get; set; }
+    public decimal? MatteLaminationRate { get; set; }
+    public decimal? LaminationSheetWidthInches { get; set; }
+    public decimal? LaminationSheetHeightInches { get; set; }
+    public bool? ApplyLaminationSideMultiplier { get; set; }
+    public decimal? ManualLaminationAmount { get; set; }
+    public decimal? ComputedLaminationCost { get; set; }
 
     public List<EstimateQuantityInputDto> Quantities { get; set; } = new();
     public List<EstimateCostItemInputDto> CostItems { get; set; } = new();
@@ -268,6 +306,53 @@ public class SaveEstimateRequest
 
     public decimal ProfitPercentage { get; set; } = 20m;
     public decimal TaxPercentage { get; set; } = 0m;
+
+    // Step 4: Plate / CTP & Prepress
+    public string? PlateMakingMethod { get; set; }
+    public string? SelectedPlateSizeId { get; set; }
+    public string? SelectedPlateSizeName { get; set; }
+    public string? PlateCode { get; set; }
+    public string? FilmType { get; set; }
+    public int? PlateQuantity { get; set; }
+    public bool? IsPlateQuantityManual { get; set; }
+    public string? PlatePricingMethod { get; set; }
+    public int? PlatesPerSet { get; set; }
+    public decimal? SinglePlateRate { get; set; }
+    public decimal? SetPlateRate { get; set; }
+    public decimal? ManualPlateCost { get; set; }
+    public int? FilmQuantity { get; set; }
+    public decimal? RatePerFilm { get; set; }
+    public decimal? OtherPrepressCharges { get; set; }
+    public decimal? ComputedPlateCost { get; set; }
+    public decimal? ComputedFilmCost { get; set; }
+    public decimal? ComputedPrepressCost { get; set; }
+
+    // Step 5: Printing Cost (Color & Machine Wise)
+    public string? PrintingMachine { get; set; }
+    public string? CustomPrintingMachine { get; set; }
+    public decimal? PrintingQuantity { get; set; }
+    public string? PrintingCostMethod { get; set; }
+    public string? PerColorRateScope { get; set; }
+    public decimal? PrintingRate { get; set; }
+    public decimal? ManualPrintingAmount { get; set; }
+    public decimal? MachineSetupCharge { get; set; }
+    public decimal? AdditionalRunCharge { get; set; }
+    public decimal? OtherPrintingCharges { get; set; }
+    public bool? ApplyPerColorFormula { get; set; }
+    public decimal? ComputedMachinePrintingCost { get; set; }
+
+    // Step 6: Lamination (Glossy / Matte)
+    public string? LaminationType { get; set; }
+    public string? LaminationSides { get; set; }
+    public string? LaminationCostMethod { get; set; }
+    public decimal? LaminationQuantity { get; set; }
+    public decimal? GlossyLaminationRate { get; set; }
+    public decimal? MatteLaminationRate { get; set; }
+    public decimal? LaminationSheetWidthInches { get; set; }
+    public decimal? LaminationSheetHeightInches { get; set; }
+    public bool? ApplyLaminationSideMultiplier { get; set; }
+    public decimal? ManualLaminationAmount { get; set; }
+    public decimal? ComputedLaminationCost { get; set; }
 
     public List<EstimateQuantityInputDto> Quantities { get; set; } = new();
     public List<EstimateCostItemInputDto> CostItems { get; set; } = new();

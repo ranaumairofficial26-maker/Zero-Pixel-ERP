@@ -1,0 +1,355 @@
+<div class="supplier-profile-container">
+  <!-- Loading -->
+  <div class="loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading Supplier Profile...</span>
+  </div>
+
+  <!-- Error -->
+  <div class="alert-box-danger" *ngIf="errorMessage && !loading">
+    <span>{{ errorMessage }}</span>
+    <a routerLink="/admin/procurement/suppliers-directory" class="btn-back-link">Back to Suppliers</a>
+  </div>
+
+  <ng-container *ngIf="supplier && !loading">
+    <!-- PROFILE HEADER -->
+    <div class="profile-header-card">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a routerLink="/admin/procurement/suppliers-directory">Suppliers</a>
+          <span>&gt;</span>
+          <span>Supplier Profile</span>
+        </div>
+        <div class="title-row">
+          <h1 class="supplier-title">{{ supplier.supplierName }}</h1>
+          <span class="status-badge" [class.status-active]="supplier.status === 'Active'" [class.status-inactive]="supplier.status !== 'Active'">
+            {{ supplier.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a [routerLink]="['/admin/procurement/suppliers-directory/edit', supplier.id]" class="btn-edit-profile">
+          Edit Profile
+        </a>
+        <button
+          type="button"
+          class="btn-create-po"
+          disabled
+          title="Purchase Orders module is not implemented yet"
+        >
+          Create PO (Unavailable)
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN 2-COLUMN PROFILE GRID -->
+    <div class="profile-grid">
+      <!-- LEFT COLUMN -->
+      <div class="profile-main-col">
+        <!-- SECTION A: BUSINESS IDENTITY CARD -->
+        <div class="profile-card">
+          <h2 class="card-title">Business Identity</h2>
+          <div class="identity-grid">
+            <div class="info-item">
+              <span class="info-label">Primary Contact</span>
+              <strong class="info-val">{{ supplier.contactPerson || 'N/A' }}</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone Number</span>
+              <strong class="info-val mono">{{ supplier.phoneNumber || 'N/A' }}</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Official Email</span>
+              <strong class="info-val">{{ supplier.email || 'N/A' }}</strong>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Lead Time</span>
+              <strong class="info-val">
+                {{ supplier.leadTimeWorkingDays !== null && supplier.leadTimeWorkingDays !== undefined ? supplier.leadTimeWorkingDays + ' Working Days' : 'N/A' }}
+              </strong>
+            </div>
+            <div class="info-item full-span">
+              <span class="info-label">Registered Address</span>
+              <strong class="info-val">{{ supplier.address || 'N/A' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE TABS -->
+        <div class="profile-card tabs-card">
+          <div class="tabs-header" role="tablist">
+            <button type="button" class="tab-btn" [class.active]="activeTab === 'services'" (click)="setTab('services')">
+              Services
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 'purchase-orders'" (click)="setTab('purchase-orders')">
+              Purchase Orders
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 'bills'" (click)="setTab('bills')">
+              Bills
+            </button>
+            <button type="button" class="tab-btn" [class.active]="activeTab === 'payment-history'" (click)="setTab('payment-history')">
+              Payment History
+            </button>
+          </div>
+
+          <div class="tab-body">
+            <!-- TAB 1: SERVICES -->
+            <ng-container *ngIf="activeTab === 'services'">
+              <div class="services-tags" *ngIf="supplier.services && supplier.services.length > 0; else noServices">
+                <span class="service-tag" *ngFor="let svc of supplier.services">{{ svc }}</span>
+              </div>
+              <ng-template #noServices>
+                <p class="no-services-text">No specific services defined.</p>
+              </ng-template>
+            </ng-container>
+
+            <!-- TAB 2: PURCHASE ORDERS -->
+            <ng-container *ngIf="activeTab === 'purchase-orders'">
+              <div class="po-tab-loading" *ngIf="loadingPurchaseOrders">
+                <span>Loading purchase orders...</span>
+              </div>
+
+              <div class="po-table-wrap" *ngIf="!loadingPurchaseOrders && purchaseOrders.length > 0">
+                <table class="po-table">
+                  <thead>
+                    <tr>
+                      <th>PO Number</th>
+                      <th>Date</th>
+                      <th>Status</th>
+                      <th class="num">Amount (PKR)</th>
+                      <th class="act">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let po of purchaseOrders">
+                      <td class="mono strong">{{ po.poNumber }}</td>
+                      <td>{{ po.poDate | date:'mediumDate' }}</td>
+                      <td>
+                        <span
+                          class="po-status-badge"
+                          [class.draft]="po.status === 'Draft'"
+                          [class.issued]="po.status === 'Issued'"
+                          [class.cancelled]="po.status === 'Cancelled'"
+                        >
+                          {{ po.status }}
+                        </span>
+                      </td>
+                      <td class="num strong">{{ formatCurrency(po.totalAmount) }}</td>
+                      <td class="act">
+                        <a
+                          class="btn-view-po"
+                          [routerLink]="['/admin/procurement/purchase-orders', po.id]"
+                        >
+                          View
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="no-po-box" *ngIf="!loadingPurchaseOrders && purchaseOrders.length === 0">
+                No Purchase Orders Found
+              </div>
+            </ng-container>
+
+            <!-- TAB 3: BILLS -->
+            <ng-container *ngIf="activeTab === 'bills'">
+              <div class="po-tab-loading" *ngIf="loadingBills">
+                <span>Loading supplier bills...</span>
+              </div>
+
+              <div class="po-table-wrap" *ngIf="!loadingBills && supplierBills.length > 0">
+                <table class="po-table">
+                  <thead>
+                    <tr>
+                      <th>Bill #</th>
+                      <th>Date</th>
+                      <th class="num">Amount (PKR)</th>
+                      <th class="num">Balance (PKR)</th>
+                      <th>Status</th>
+                      <th class="act">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let bill of supplierBills">
+                      <td>
+                        <div class="mono strong">{{ bill.internalBillNumber }}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Inv: {{ bill.supplierInvoiceNumber }}</div>
+                      </td>
+                      <td>{{ bill.billDate | date:'mediumDate' }}</td>
+                      <td class="num strong">{{ formatCurrency(bill.totalAmount) }}</td>
+                      <td class="num strong" [style.color]="bill.status === 'Overdue' ? '#dc2626' : 'inherit'">
+                        {{ formatCurrency(bill.balance) }}
+                      </td>
+                      <td>
+                        <span
+                          class="po-status-badge"
+                          [class.draft]="bill.status === 'Unpaid'"
+                          [class.issued]="bill.status === 'Paid'"
+                          [class.cancelled]="bill.status === 'Cancelled' || bill.status === 'Overdue'"
+                        >
+                          {{ bill.status }}
+                        </span>
+                      </td>
+                      <td class="act">
+                        <a
+                          class="btn-view-po"
+                          [routerLink]="['/admin/procurement/supplier-bills', bill.id]"
+                        >
+                          View
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="no-po-box" *ngIf="!loadingBills && supplierBills.length === 0">
+                No Supplier Bills Found
+              </div>
+            </ng-container>
+
+            <!-- TAB 4: PAYMENT HISTORY -->
+            <ng-container *ngIf="activeTab === 'payment-history'">
+              <div class="po-tab-loading" *ngIf="loadingPayments">
+                <span>Loading payment history...</span>
+              </div>
+
+              <div class="po-table-wrap" *ngIf="!loadingPayments && supplierPayments.length > 0">
+                <table class="po-table">
+                  <thead>
+                    <tr>
+                      <th>Payment Date</th>
+                      <th>Payment #</th>
+                      <th>Bill Reference</th>
+                      <th>Method</th>
+                      <th class="num">Amount (PKR)</th>
+                      <th>Status</th>
+                      <th class="act">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let pay of supplierPayments">
+                      <td>{{ pay.paymentDate | date:'mediumDate' }}</td>
+                      <td class="mono strong">{{ pay.paymentNumber }}</td>
+                      <td>
+                        <span class="mono">{{ pay.internalBillNumber }}</span>
+                      </td>
+                      <td>{{ pay.paymentMethod }}</td>
+                      <td class="num strong">{{ formatCurrency(pay.amount) }}</td>
+                      <td>
+                        <span
+                          class="po-status-badge"
+                          [class.issued]="pay.status === 'Posted'"
+                          [class.cancelled]="pay.status === 'Reversed'"
+                        >
+                          {{ pay.status }}
+                        </span>
+                      </td>
+                      <td class="act">
+                        <a
+                          class="btn-view-po"
+                          [routerLink]="['/admin/procurement/supplier-payments', pay.id]"
+                        >
+                          View
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="no-po-box" *ngIf="!loadingPayments && supplierPayments.length === 0">
+                No Supplier Payments Found
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="profile-side-col">
+        <!-- SECTION B: SUPPLIER SUMMARY CARD -->
+        <div class="profile-card">
+          <h2 class="card-title">Supplier Summary</h2>
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span class="s-lbl">Supplier Name</span>
+              <strong class="s-val">{{ supplier.supplierName }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Supplier ID</span>
+              <strong class="s-val mono">#{{ supplier.id }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Supplier Status</span>
+              <span class="status-badge" [class.status-active]="supplier.status === 'Active'" [class.status-inactive]="supplier.status !== 'Active'">
+                {{ supplier.status }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Registered Date</span>
+              <strong class="s-val">{{ supplier.createdAt | date:'mediumDate' }}</strong>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row">
+              <span class="s-lbl">Outstanding</span>
+              <strong class="s-val" *ngIf="!loadingBills">PKR {{ formatCurrency(supplierOutstanding) }}</strong>
+              <span class="s-unavailable" *ngIf="loadingBills">Loading...</span>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Total Paid</span>
+              <strong class="s-val" *ngIf="!loadingPayments">PKR {{ formatCurrency(supplierTotalPaid) }}</strong>
+              <span class="s-unavailable" *ngIf="loadingPayments">Loading...</span>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Open POs</span>
+              <strong class="s-val" *ngIf="!loadingPurchaseOrders">{{ openPosCount }}</strong>
+              <span class="s-unavailable" *ngIf="loadingPurchaseOrders">Loading...</span>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Total Bills</span>
+              <strong class="s-val" *ngIf="!loadingBills">{{ totalBillsCount }}</strong>
+              <span class="s-unavailable" *ngIf="loadingBills">Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAYMENT DETAILS CARD -->
+        <div class="profile-card">
+          <h2 class="card-title">Payment Details</h2>
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span class="s-lbl">Bank Name</span>
+              <strong class="s-val">{{ supplier.bankName || 'N/A' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Account Name</span>
+              <strong class="s-val">{{ supplier.accountName || 'N/A' }}</strong>
+            </div>
+            <div class="summary-row">
+              <span class="s-lbl">Account Number / IBAN</span>
+              <strong class="s-val mono">{{ supplier.accountNumberOrIban || 'N/A' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- RELIABILITY SCORE CARD -->
+        <div class="profile-card">
+          <h2 class="card-title">Reliability Score</h2>
+          <div class="reliability-box">
+            <div class="stars-row" aria-label="Not Rated">
+              <svg *ngFor="let s of stars" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <span class="not-rated-badge">Not Rated</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+

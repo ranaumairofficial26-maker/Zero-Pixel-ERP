@@ -1,0 +1,219 @@
+<div class="supplier-form-container">
+  <!-- Header -->
+  <div class="page-header-bar">
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/admin/procurement/suppliers-directory">Suppliers Directory</a>
+        <span>/</span>
+        <span>{{ isEditMode ? 'Edit Supplier' : 'Add New Supplier' }}</span>
+      </div>
+      <h1 class="page-title">{{ isEditMode ? 'Edit Supplier' : 'Add New Supplier' }}</h1>
+    </div>
+
+    <a routerLink="/admin/procurement/suppliers-directory" class="btn-back">
+      Back to Directory
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading Supplier Details...</span>
+  </div>
+
+  <!-- Error Banner -->
+  <div class="alert-box-danger" *ngIf="errorMessage && !loading">
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form [formGroup]="supplierForm" (ngSubmit)="onSubmit()" *ngIf="!loading" novalidate>
+    <!-- SECTION A: BUSINESS IDENTITY -->
+    <div class="card-section">
+      <div class="section-header">
+        <span class="section-badge">A</span>
+        <div>
+          <h2 class="section-title">Business Identity</h2>
+          <p class="section-subtitle">Core supplier business profile, contact details, and operational status.</p>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="field-label" for="supplierName">Supplier / Company Name <span class="req">*</span></label>
+          <input
+            id="supplierName"
+            type="text"
+            class="form-control"
+            formControlName="supplierName"
+            placeholder="Enter supplier business name"
+            [class.is-invalid]="supplierForm.get('supplierName')?.invalid && supplierForm.get('supplierName')?.touched"
+          />
+          <span class="field-error" *ngIf="supplierForm.get('supplierName')?.invalid && supplierForm.get('supplierName')?.touched">
+            Supplier / Company Name is required.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="contactPerson">Primary Contact Person</label>
+          <input
+            id="contactPerson"
+            type="text"
+            class="form-control"
+            formControlName="contactPerson"
+            placeholder="Enter contact person name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="phoneNumber">Phone Number</label>
+          <input
+            id="phoneNumber"
+            type="text"
+            class="form-control"
+            formControlName="phoneNumber"
+            placeholder="e.g. 0300-1234567"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="email">Official Email</label>
+          <input
+            id="email"
+            type="email"
+            class="form-control"
+            formControlName="email"
+            placeholder="e.g. sales@supplier.com"
+            [class.is-invalid]="supplierForm.get('email')?.invalid && supplierForm.get('email')?.touched"
+          />
+          <span class="field-error" *ngIf="supplierForm.get('email')?.invalid && supplierForm.get('email')?.touched">
+            Please enter a valid email address.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="leadTimeWorkingDays">Lead Time (Working Days)</label>
+          <input
+            id="leadTimeWorkingDays"
+            type="number"
+            min="0"
+            class="form-control"
+            formControlName="leadTimeWorkingDays"
+            placeholder="e.g. 5"
+            [class.is-invalid]="supplierForm.get('leadTimeWorkingDays')?.invalid && supplierForm.get('leadTimeWorkingDays')?.touched"
+          />
+          <span class="field-error" *ngIf="supplierForm.get('leadTimeWorkingDays')?.invalid && supplierForm.get('leadTimeWorkingDays')?.touched">
+            Lead time must not be negative.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="status">Supplier Status</label>
+          <select id="status" class="form-control" formControlName="status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div class="form-group full-span">
+          <label class="field-label" for="address">Registered Address</label>
+          <textarea
+            id="address"
+            rows="3"
+            class="form-control textarea"
+            formControlName="address"
+            placeholder="Enter registered business address..."
+          ></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION B: SERVICES -->
+    <div class="card-section">
+      <div class="section-header flex-between">
+        <div class="header-left-group">
+          <span class="section-badge">B</span>
+          <div>
+            <h2 class="section-title">Services</h2>
+            <p class="section-subtitle">Add services or materials provided by this supplier.</p>
+          </div>
+        </div>
+        <button type="button" class="btn-add-service" (click)="addService()">
+          + Add Service
+        </button>
+      </div>
+
+      <div class="services-list" formArrayName="services" *ngIf="services.length > 0">
+        <div class="service-row" *ngFor="let ctrl of services.controls; let i = index">
+          <input
+            type="text"
+            class="form-control"
+            [formControlName]="i"
+            [placeholder]="getServicePlaceholder(i)"
+          />
+          <button type="button" class="btn-remove-service" (click)="removeService(i)" title="Remove Service">
+            Remove
+          </button>
+        </div>
+      </div>
+
+      <p class="empty-services-hint" *ngIf="services.length === 0">
+        No services added yet. Click <strong>+ Add Service</strong> to enter a service or material name.
+      </p>
+    </div>
+
+    <!-- SECTION C: PAYMENT DETAILS -->
+    <div class="card-section">
+      <div class="section-header">
+        <span class="section-badge">C</span>
+        <div>
+          <h2 class="section-title">Payment Details</h2>
+          <p class="section-subtitle">Optional supplier banking information for authorized accounting use.</p>
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="field-label" for="bankName">Bank Name</label>
+          <input
+            id="bankName"
+            type="text"
+            class="form-control"
+            formControlName="bankName"
+            placeholder="Enter bank name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="accountName">Account Name</label>
+          <input
+            id="accountName"
+            type="text"
+            class="form-control"
+            formControlName="accountName"
+            placeholder="Enter account title"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="accountNumberOrIban">Account Number / IBAN</label>
+          <input
+            id="accountNumberOrIban"
+            type="text"
+            class="form-control"
+            formControlName="accountNumberOrIban"
+            placeholder="Enter account number or IBAN"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM ACTIONS -->
+    <div class="form-actions-bar">
+      <a routerLink="/admin/procurement/suppliers-directory" class="btn-cancel">Cancel</a>
+      <button type="submit" class="btn-save" [disabled]="saving">
+        {{ saving ? 'Saving...' : (isEditMode ? 'Update Supplier' : 'Save Supplier') }}
+      </button>
+    </div>
+  </form>
+</div>
+

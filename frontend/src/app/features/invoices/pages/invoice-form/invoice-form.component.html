@@ -1,0 +1,488 @@
+<div class="invoice-form-page">
+  <!-- Top Navigation & Header -->
+  <div class="form-header-card">
+    <div class="header-left">
+      <div class="breadcrumb-row">
+        <a routerLink="/admin/invoices" class="breadcrumb-link">Invoices</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-active">{{ isEditMode ? 'Edit Invoice' : 'Create Invoice' }}</span>
+      </div>
+      <div class="title-with-badge">
+        <h1 class="page-title">{{ isEditMode ? 'Edit Invoice' : 'Create Invoice' }}</h1>
+        <span class="invoice-num-badge">{{ previewInvoiceNumber }}</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a routerLink="/admin/invoices" class="btn-cancel">
+        Cancel
+      </a>
+      <a *ngIf="isEditMode && invoiceId" [routerLink]="['/admin/invoices/view', invoiceId]" class="btn-view-preview">
+        View & Print
+      </a>
+      <button 
+        type="button" 
+        class="btn-save-invoice" 
+        (click)="onSubmit()" 
+        [disabled]="saving || isAdvanceInvalid"
+      >
+        <span class="spinner-sm" *ngIf="saving"></span>
+        {{ saving ? 'Saving...' : (isEditMode ? 'Update Invoice' : 'Save Invoice') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Global Error Alert -->
+  <div class="alert-box-danger" *ngIf="errorMessage">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()" class="form-layout">
+    
+    <!-- SECTION 1: INVOICE & CUSTOMER HEADER -->
+    <div class="card-section">
+      <div class="section-header-bar">
+        <div class="section-title-wrap">
+          <span class="section-num">1</span>
+          <div>
+            <h2 class="section-title">Invoice Details & Customer Selection</h2>
+            <span class="section-subtitle">Select existing customer from Customer Master. Available details will auto-fill.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <!-- Invoice Number (Readonly) -->
+        <div class="form-group">
+          <label class="field-label">Invoice Number</label>
+          <div class="readonly-input-badge">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+            </svg>
+            <span>{{ previewInvoiceNumber }}</span>
+          </div>
+          <span class="field-hint">Automatically assigned & tracked by system.</span>
+        </div>
+
+        <!-- Invoice Date -->
+        <div class="form-group">
+          <label class="field-label">Invoice Date *</label>
+          <input 
+            type="date" 
+            class="form-control" 
+            formControlName="invoiceDate"
+            [class.is-invalid]="invoiceForm.get('invoiceDate')?.invalid && invoiceForm.get('invoiceDate')?.touched"
+          />
+        </div>
+
+        <!-- Customer Dropdown (Existing Master) -->
+        <div class="form-group">
+          <label class="field-label">Select Customer *</label>
+          <select 
+            class="form-control select-customer" 
+            formControlName="customerId" 
+            (change)="onCustomerChange($event)"
+            [class.is-invalid]="invoiceForm.get('customerId')?.invalid && invoiceForm.get('customerId')?.touched"
+          >
+            <option [ngValue]="null">-- Select Customer from Master --</option>
+            <option *ngFor="let cust of customersList" [ngValue]="cust.clientId">
+              {{ cust.companyName }} {{ cust.contactPerson ? '(' + cust.contactPerson + ')' : '' }} - {{ cust.phone }}
+            </option>
+          </select>
+          <span class="field-hint">Connected to Zero Pixel Customer Master.</span>
+        </div>
+
+        <!-- NTN# -->
+        <div class="form-group">
+          <label class="field-label">NTN#</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            formControlName="ntnNumber"
+            placeholder="Enter NTN#"
+          />
+        </div>
+
+        <!-- Client' PO# -->
+        <div class="form-group">
+          <label class="field-label">Client' PO#</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            formControlName="clientPoNumber"
+            placeholder="Enter Client' PO#"
+          />
+        </div>
+      </div>
+
+      <!-- AUTO-FILLED CUSTOMER DETAILS CARD -->
+      <div class="customer-autofill-card" *ngIf="selectedCustomer">
+        <div class="autofill-header">
+          <div class="cust-badge-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div>
+            <span class="autofill-title">Customer Snapshot (Auto-Retrieved)</span>
+            <span class="autofill-subtitle">Saved automatically with the invoice for permanent historical record.</span>
+          </div>
+        </div>
+
+        <div class="autofill-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Customer / Company:</span>
+            <strong class="detail-val">{{ selectedCustomer.companyName }}</strong>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedCustomer.contactPerson">
+            <span class="detail-label">Contact Person:</span>
+            <span class="detail-val">{{ selectedCustomer.contactPerson }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Phone / Contact:</span>
+            <strong class="detail-val">{{ selectedCustomer.phone }}</strong>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedCustomer.email">
+            <span class="detail-label">Email Address:</span>
+            <span class="detail-val">{{ selectedCustomer.email }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedCustomer.ntnNumber">
+            <span class="detail-label">NTN #:</span>
+            <strong class="detail-val">{{ selectedCustomer.ntnNumber }}</strong>
+          </div>
+
+          <div class="detail-item full-span" *ngIf="selectedCustomer.address">
+            <span class="detail-label">Billing Address:</span>
+            <span class="detail-val">{{ selectedCustomer.address }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: PRINTING INVOICE ITEMS TABLE -->
+    <div class="card-section">
+      <div class="section-header-bar flex-between">
+        <div class="section-title-wrap">
+          <span class="section-num">2</span>
+          <div>
+            <h2 class="section-title">Printing Invoice Items</h2>
+            <span class="section-subtitle">Enter printing items, quantities, rates and GR Numbers.</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-add-item" (click)="addItem()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add Item
+        </button>
+      </div>
+
+      <div class="table-responsive items-table-wrapper">
+        <table class="items-form-table">
+          <thead>
+            <tr>
+              <th style="width: 70px; text-align: center;">Sr No</th>
+              <th style="width: 140px;">GR No</th>
+              <th>Description *</th>
+              <th style="width: 140px;">Quantity *</th>
+              <th style="width: 150px;">Rate (PKR) *</th>
+              <th style="width: 160px; text-align: right;">Amount (PKR)</th>
+              <th style="width: 70px; text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="items">
+            <tr *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
+              <td style="text-align: center;">
+                <span class="sr-badge">{{ i + 1 }}</span>
+              </td>
+              <td>
+                <input 
+                  type="text" 
+                  class="table-input" 
+                  formControlName="grNumber" 
+                  placeholder="e.g. GR-102"
+                />
+              </td>
+              <td>
+                <input 
+                  type="text" 
+                  class="table-input desc-input" 
+                  formControlName="description" 
+                  placeholder="Enter printing job description (e.g. Mono Flyer, Letterhead...)"
+                  [class.is-invalid]="item.get('description')?.invalid && item.get('description')?.touched"
+                />
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  class="table-input num-input" 
+                  formControlName="quantity" 
+                  min="0.0001"
+                  step="1"
+                  placeholder="1,000"
+                  [class.is-invalid]="item.get('quantity')?.invalid && item.get('quantity')?.touched"
+                />
+              </td>
+              <td>
+                <input 
+                  type="number" 
+                  class="table-input num-input" 
+                  formControlName="rate" 
+                  min="0"
+                  step="0.01"
+                  placeholder="2.50"
+                  [class.is-invalid]="item.get('rate')?.invalid && item.get('rate')?.touched"
+                />
+              </td>
+              <td style="text-align: right;">
+                <span class="amount-val">
+                  Rs. {{ (item.get('amount')?.value || 0) | number:'1.2-2' }}
+                </span>
+              </td>
+              <td style="text-align: center;">
+                <button 
+                  type="button" 
+                  class="btn-row-remove" 
+                  (click)="removeItem(i)" 
+                  [disabled]="items.length <= 1"
+                  title="Remove Item"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECTION 3: INVOICE TOTALS & ADVANCE -->
+    <div class="card-section totals-card-section">
+      <div class="totals-layout-grid">
+        
+        <!-- Left: Notes / Terms -->
+        <div class="form-group notes-col">
+          <label class="field-label">Special Notes / Payment Terms</label>
+          <textarea 
+            class="form-control notes-textarea" 
+            formControlName="notes" 
+            rows="4" 
+            placeholder="Enter any specific terms, payment instructions or delivery notes for the invoice..."
+          ></textarea>
+        </div>
+
+        <!-- Right: Mathematical Totals (Total, Advance, Balance) -->
+        <div class="totals-calculation-box">
+          
+          <!-- TOTAL -->
+          <div class="totals-row total-row">
+            <span class="totals-label">TOTAL (PKR):</span>
+            <span class="totals-val">Rs. {{ total | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- ADJUSTMENT INPUT (ADVANCE / TAX / % OFF) -->
+          <div class="totals-row advance-row">
+            <select
+              id="adjustmentTypeSelect"
+              class="adjustment-type-select"
+              formControlName="adjustmentType"
+              aria-label="Adjustment Type"
+            >
+              <option value="advance">ADVANCE (PKR):</option>
+              <option value="tax_amount">TAX (PKR):</option>
+              <option value="tax_percent">TAX (%):</option>
+              <option value="percent_off">% OFF (DISCOUNT):</option>
+            </select>
+            <div class="advance-input-col">
+              <div class="advance-input-wrap">
+                <span class="input-currency">{{ isPercentageMode ? '%' : 'Rs.' }}</span>
+                <input 
+                  id="advanceInput"
+                  type="number" 
+                  class="advance-input" 
+                  formControlName="advance" 
+                  min="0"
+                  [attr.max]="adjustmentType === 'percent_off' ? 100 : null"
+                  step="0.01"
+                  placeholder="0.00"
+                  [class.input-error]="isAdvanceInvalid"
+                />
+              </div>
+              <span class="computed-pkr-hint" *ngIf="isPercentageMode">
+                = Rs. {{ calculatedAdjustmentAmount | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Advance Validation Warning -->
+          <div class="advance-error-alert" *ngIf="isAdvanceInvalid">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ adjustmentErrorMessage }}</span>
+          </div>
+
+          <!-- BALANCE -->
+          <div class="totals-row balance-row" [class.balance-cleared]="balance === 0">
+            <span class="totals-label">BALANCE DUE (PKR):</span>
+            <span class="totals-val balance-val">Rs. {{ balance | number:'1.2-2' }}</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Bottom Submit Bar -->
+      <div class="form-submit-footer">
+        <a routerLink="/admin/invoices" class="btn-cancel">
+          Cancel
+        </a>
+
+        <div class="submit-actions-right">
+          <!-- SAVE & DOWNLOAD PDF BUTTON -->
+          <button 
+            type="button" 
+            class="btn-save-pdf btn-large" 
+            (click)="onSubmit(true)" 
+            [disabled]="saving || savingAndDownloading || isAdvanceInvalid"
+          >
+            <span class="spinner-sm" *ngIf="savingAndDownloading"></span>
+            <svg *ngIf="!savingAndDownloading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            {{ savingAndDownloading ? 'Saving & Generating PDF...' : (isEditMode ? 'Update & Download PDF' : 'Save & Download PDF') }}
+          </button>
+
+          <!-- SAVE INVOICE BUTTON -->
+          <button 
+            type="button" 
+            class="btn-save-invoice btn-large" 
+            (click)="onSubmit(false)" 
+            [disabled]="saving || savingAndDownloading || isAdvanceInvalid"
+          >
+            <span class="spinner-sm" *ngIf="saving"></span>
+            {{ saving ? 'Saving Invoice...' : (isEditMode ? 'Update Invoice' : 'Create & Save Invoice') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- ========================================================================= -->
+  <!-- SAVE SUCCESS DIALOG (Direct PDF Download & Action Selection) -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" *ngIf="showSuccessModal && savedInvoice">
+    <div class="modal-card">
+      <div class="modal-icon-wrap">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+
+      <h3 class="modal-title">Invoice Saved Successfully!</h3>
+      <p class="modal-subtitle">
+        Invoice <strong>{{ savedInvoice.invoiceNumber }}</strong> has been recorded for 
+        <strong>{{ savedInvoice.customerName }}</strong>.
+      </p>
+
+      <div class="modal-meta-pill">
+        <div class="meta-item">
+          <span class="m-lbl">Total</span>
+          <strong class="m-val">Rs. {{ savedInvoice.total | number:'1.2-2' }}</strong>
+        </div>
+        <div class="meta-item">
+          <span class="m-lbl">{{ savedAdjustmentLabel }}</span>
+          <strong class="m-val advance-ok">Rs. {{ savedInvoice.advance | number:'1.2-2' }}</strong>
+        </div>
+        <div class="meta-item">
+          <span class="m-lbl">Balance</span>
+          <strong class="m-val balance-alert">Rs. {{ savedInvoice.balance | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions-grid">
+        <!-- Direct PDF Download -->
+        <button type="button" class="btn-modal-action btn-modal-pdf" (click)="downloadSavedPdf()" [disabled]="isDownloadingModalPdf">
+          <svg *ngIf="!isDownloadingModalPdf" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span class="spinner-sm" *ngIf="isDownloadingModalPdf"></span>
+          {{ isDownloadingModalPdf ? 'Downloading...' : 'Download PDF Now' }}
+        </button>
+
+        <!-- Share PDF via WhatsApp / Email -->
+        <button type="button" class="btn-modal-action btn-modal-share" (click)="openShareSavedModal()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          Share PDF (WhatsApp / Email)
+        </button>
+
+        <!-- View Statement -->
+        <button type="button" class="btn-modal-action btn-modal-view" (click)="closeSuccessModalAndNavigate('view')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          View Statement & Print
+        </button>
+
+        <!-- Create Another -->
+        <button type="button" class="btn-modal-action btn-modal-secondary" (click)="closeSuccessModalAndNavigate('new')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Create Another Invoice
+        </button>
+
+        <!-- Back to Invoices -->
+        <button type="button" class="btn-modal-action btn-modal-secondary" (click)="closeSuccessModalAndNavigate('list')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Go to Invoice List
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SHARE INVOICE MODAL -->
+  <app-invoice-share-modal
+    [invoice]="showShareModal ? savedInvoice : null"
+    (close)="closeShareSavedModal()"
+  ></app-invoice-share-modal>
+</div>
+

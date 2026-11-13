@@ -18,24 +18,6 @@ public class PrintingCalculatorService : IPrintingCalculatorService
         _logger = logger;
     }
 
-    public async Task<object> GetImportStatusAsync()
-    {
-        var categoryCount = await _unitOfWork.PrintingCalculator.GetCategoryCountAsync();
-        var itemCount = await _unitOfWork.PrintingCalculator.GetItemCountAsync();
-        var paperSizeCount = await _unitOfWork.PrintingCalculator.GetPaperSizeCountAsync();
-        var materialCount = await _unitOfWork.PrintingCalculator.GetMaterialCountAsync();
-
-        return new
-        {
-            success = true,
-            categoriesCount = categoryCount,
-            itemsCount = itemCount,
-            paperSizesCount = paperSizeCount,
-            materialsCount = materialCount,
-            status = categoryCount >= 12 && itemCount >= 195 ? "Ready" : "PendingSeed"
-        };
-    }
-
     public async Task<List<PrintingCategoryDto>> GetCategoriesAsync()
     {
         var categories = await _unitOfWork.PrintingCalculator.GetActiveCategoriesAsync();
@@ -220,22 +202,6 @@ public class PrintingCalculatorService : IPrintingCalculatorService
             .ToList();
     }
 
-    public async Task<PrintingSizeDto?> GetPrintingSizeByIdAsync(int id)
-    {
-        var s = await _unitOfWork.PrintingCalculator.GetPrintingSizeByIdAsync(id);
-        if (s == null || !s.IsActive) return null;
-
-        return new PrintingSizeDto
-        {
-            SizeId = s.SizeId,
-            SizeName = s.SizeName,
-            WidthMm = s.WidthMm,
-            HeightMm = s.HeightMm,
-            DisplayOrder = s.DisplayOrder,
-            IsActive = s.IsActive
-        };
-    }
-
     public async Task<List<PrintingMaterialDto>> GetMaterialsAsync()
     {
         var materials = await _unitOfWork.PrintingCalculator.GetMaterialsAsync();
@@ -306,6 +272,22 @@ public class PrintingCalculatorService : IPrintingCalculatorService
         }).ToList();
     }
 
+    public async Task<List<PrintingMachineRateDto>> GetMachineRatesAsync()
+    {
+        var machines = await _unitOfWork.PrintingCalculator.GetMachineRatesAsync();
+        return machines.Select(m => new PrintingMachineRateDto
+        {
+            Id = m.Id,
+            MachineName = m.MachineName,
+            PrintPerPlate = m.PrintPerPlate,
+            PrintPerSet = m.PrintPerSet,
+            PrintingPlate = m.PrintingPlate,
+            PlatePerSet = m.PlatePerSet,
+            DisplayOrder = m.DisplayOrder,
+            IsActive = m.IsActive
+        }).ToList();
+    }
+
     public CalculateEstimateResponse CalculateEstimate(CalculateEstimateRequest req)
     {
         return ComputeEstimateResults(req);
@@ -352,6 +334,9 @@ public class PrintingCalculatorService : IPrintingCalculatorService
         {
             throw new ArgumentException("Printing color count must be between 0 (None) and 10.");
         }
+
+        // Server-side decimal-safe recalculation of Steps 4, 5, and 6
+        RecalculateProductionStepsOnServer(req);
 
         var calcReq = new CalculateEstimateRequest
         {
@@ -435,7 +420,54 @@ public class PrintingCalculatorService : IPrintingCalculatorService
             ["customMaterialName"] = req.CustomMaterialName ?? "",
             ["materialVariantName"] = req.MaterialVariantName ?? "",
             ["finishingRequirements"] = req.FinishingRequirements ?? "",
-            ["jobTitle"] = req.JobTitle ?? ""
+            ["jobTitle"] = req.JobTitle ?? "",
+
+            // Step 4: Plate / CTP & Prepress
+            ["plateMakingMethod"] = req.PlateMakingMethod ?? "",
+            ["selectedPlateSizeId"] = req.SelectedPlateSizeId ?? "",
+            ["selectedPlateSizeName"] = req.SelectedPlateSizeName ?? "",
+            ["plateCode"] = req.PlateCode ?? "",
+            ["filmType"] = req.FilmType ?? "",
+            ["plateQuantity"] = (req.PlateQuantity ?? 0).ToString(),
+            ["isPlateQuantityManual"] = (req.IsPlateQuantityManual ?? false).ToString(),
+            ["platePricingMethod"] = req.PlatePricingMethod ?? "Single Plate Rate",
+            ["platesPerSet"] = (req.PlatesPerSet ?? 4).ToString(),
+            ["singlePlateRate"] = (req.SinglePlateRate ?? 0).ToString(),
+            ["setPlateRate"] = (req.SetPlateRate ?? 0).ToString(),
+            ["manualPlateCost"] = (req.ManualPlateCost ?? 0).ToString(),
+            ["filmQuantity"] = (req.FilmQuantity ?? 0).ToString(),
+            ["ratePerFilm"] = req.RatePerFilm.HasValue ? req.RatePerFilm.Value.ToString() : "",
+            ["otherPrepressCharges"] = (req.OtherPrepressCharges ?? 0).ToString(),
+            ["computedPlateCost"] = (req.ComputedPlateCost ?? 0).ToString(),
+            ["computedFilmCost"] = (req.ComputedFilmCost ?? 0).ToString(),
+            ["computedPrepressCost"] = (req.ComputedPrepressCost ?? 0).ToString(),
+
+            // Step 5: Printing Cost (Color & Machine Wise)
+            ["printingMachine"] = req.PrintingMachine ?? "",
+            ["customPrintingMachine"] = req.CustomPrintingMachine ?? "",
+            ["printingQuantity"] = (req.PrintingQuantity ?? 0).ToString(),
+            ["printingCostMethod"] = req.PrintingCostMethod ?? "Per1000",
+            ["perColorRateScope"] = req.PerColorRateScope ?? "FlatPerColor",
+            ["printingRate"] = req.PrintingRate.HasValue ? req.PrintingRate.Value.ToString() : "",
+            ["manualPrintingAmount"] = (req.ManualPrintingAmount ?? 0).ToString(),
+            ["machineSetupCharge"] = (req.MachineSetupCharge ?? 0).ToString(),
+            ["additionalRunCharge"] = (req.AdditionalRunCharge ?? 0).ToString(),
+            ["otherPrintingCharges"] = (req.OtherPrintingCharges ?? 0).ToString(),
+            ["applyPerColorFormula"] = (req.ApplyPerColorFormula ?? false).ToString(),
+            ["computedMachinePrintingCost"] = (req.ComputedMachinePrintingCost ?? 0).ToString(),
+
+            // Step 6: Lamination (Glossy / Matte)
+            ["laminationType"] = req.LaminationType ?? "None",
+            ["laminationSides"] = req.LaminationSides ?? "Single Side",
+            ["laminationCostMethod"] = req.LaminationCostMethod ?? "PerSheet",
+            ["laminationQuantity"] = (req.LaminationQuantity ?? 0).ToString(),
+            ["glossyLaminationRate"] = req.GlossyLaminationRate.HasValue ? req.GlossyLaminationRate.Value.ToString() : "",
+            ["matteLaminationRate"] = req.MatteLaminationRate.HasValue ? req.MatteLaminationRate.Value.ToString() : "",
+            ["laminationSheetWidthInches"] = (req.LaminationSheetWidthInches ?? 0).ToString(),
+            ["laminationSheetHeightInches"] = (req.LaminationSheetHeightInches ?? 0).ToString(),
+            ["applyLaminationSideMultiplier"] = (req.ApplyLaminationSideMultiplier ?? true).ToString(),
+            ["manualLaminationAmount"] = (req.ManualLaminationAmount ?? 0).ToString(),
+            ["computedLaminationCost"] = (req.ComputedLaminationCost ?? 0).ToString()
         };
         estimate.SpecificationsSnapshot = JsonSerializer.Serialize(specDict);
 
@@ -570,6 +602,53 @@ public class PrintingCalculatorService : IPrintingCalculatorService
             ManualMaterialCost = detail.ManualMaterialCost,
             ProfitPercentage = detail.ProfitPercentage,
             TaxPercentage = detail.TaxPercentage,
+
+            // Step 4: Plate / CTP & Prepress
+            PlateMakingMethod = detail.PlateMakingMethod,
+            SelectedPlateSizeId = detail.SelectedPlateSizeId,
+            SelectedPlateSizeName = detail.SelectedPlateSizeName,
+            PlateCode = detail.PlateCode,
+            FilmType = detail.FilmType,
+            PlateQuantity = detail.PlateQuantity,
+            IsPlateQuantityManual = detail.IsPlateQuantityManual,
+            PlatePricingMethod = detail.PlatePricingMethod,
+            PlatesPerSet = detail.PlatesPerSet,
+            SinglePlateRate = detail.SinglePlateRate,
+            SetPlateRate = detail.SetPlateRate,
+            ManualPlateCost = detail.ManualPlateCost,
+            FilmQuantity = detail.FilmQuantity,
+            RatePerFilm = detail.RatePerFilm,
+            OtherPrepressCharges = detail.OtherPrepressCharges,
+            ComputedPlateCost = detail.ComputedPlateCost,
+            ComputedFilmCost = detail.ComputedFilmCost,
+            ComputedPrepressCost = detail.ComputedPrepressCost,
+
+            // Step 5: Printing Cost (Color & Machine Wise)
+            PrintingMachine = detail.PrintingMachine,
+            CustomPrintingMachine = detail.CustomPrintingMachine,
+            PrintingQuantity = detail.PrintingQuantity,
+            PrintingCostMethod = detail.PrintingCostMethod,
+            PerColorRateScope = detail.PerColorRateScope,
+            PrintingRate = detail.PrintingRate,
+            ManualPrintingAmount = detail.ManualPrintingAmount,
+            MachineSetupCharge = detail.MachineSetupCharge,
+            AdditionalRunCharge = detail.AdditionalRunCharge,
+            OtherPrintingCharges = detail.OtherPrintingCharges,
+            ApplyPerColorFormula = detail.ApplyPerColorFormula,
+            ComputedMachinePrintingCost = detail.ComputedMachinePrintingCost,
+
+            // Step 6: Lamination (Glossy / Matte)
+            LaminationType = detail.LaminationType,
+            LaminationSides = detail.LaminationSides,
+            LaminationCostMethod = detail.LaminationCostMethod,
+            LaminationQuantity = detail.LaminationQuantity,
+            GlossyLaminationRate = detail.GlossyLaminationRate,
+            MatteLaminationRate = detail.MatteLaminationRate,
+            LaminationSheetWidthInches = detail.LaminationSheetWidthInches,
+            LaminationSheetHeightInches = detail.LaminationSheetHeightInches,
+            ApplyLaminationSideMultiplier = detail.ApplyLaminationSideMultiplier,
+            ManualLaminationAmount = detail.ManualLaminationAmount,
+            ComputedLaminationCost = detail.ComputedLaminationCost,
 
             Quantities = detail.Quantities,
             CostItems = detail.CostItems
@@ -1007,6 +1086,40 @@ public class PrintingCalculatorService : IPrintingCalculatorService
         decimal.TryParse(specDict.GetValueOrDefault("ratePerColor"), out var rPerColorVal);
         short.TryParse(specDict.GetValueOrDefault("printingColorCount"), out var pColorCountVal);
 
+        // Parse Step 4 fields
+        int.TryParse(specDict.GetValueOrDefault("plateQuantity"), out var plateQtyVal);
+        bool.TryParse(specDict.GetValueOrDefault("isPlateQuantityManual"), out var isPlateQtyManualVal);
+        int.TryParse(specDict.GetValueOrDefault("platesPerSet"), out var platesPerSetVal);
+        decimal.TryParse(specDict.GetValueOrDefault("singlePlateRate"), out var singlePlateRateVal);
+        decimal.TryParse(specDict.GetValueOrDefault("setPlateRate"), out var setPlateRateVal);
+        decimal.TryParse(specDict.GetValueOrDefault("manualPlateCost"), out var manualPlateCostVal);
+        int.TryParse(specDict.GetValueOrDefault("filmQuantity"), out var filmQtyVal);
+        var hasRatePerFilm = decimal.TryParse(specDict.GetValueOrDefault("ratePerFilm"), out var ratePerFilmVal) && !string.IsNullOrWhiteSpace(specDict.GetValueOrDefault("ratePerFilm"));
+        decimal.TryParse(specDict.GetValueOrDefault("otherPrepressCharges"), out var otherPrepressVal);
+        decimal.TryParse(specDict.GetValueOrDefault("computedPlateCost"), out var compPlateCostVal);
+        decimal.TryParse(specDict.GetValueOrDefault("computedFilmCost"), out var compFilmCostVal);
+        decimal.TryParse(specDict.GetValueOrDefault("computedPrepressCost"), out var compPrepressCostVal);
+
+        // Parse Step 5 fields
+        decimal.TryParse(specDict.GetValueOrDefault("printingQuantity"), out var printingQtyVal);
+        var hasPrintingRate = decimal.TryParse(specDict.GetValueOrDefault("printingRate"), out var printingRateVal) && !string.IsNullOrWhiteSpace(specDict.GetValueOrDefault("printingRate"));
+        decimal.TryParse(specDict.GetValueOrDefault("manualPrintingAmount"), out var manualPrintingAmtVal);
+        decimal.TryParse(specDict.GetValueOrDefault("machineSetupCharge"), out var machineSetupVal);
+        decimal.TryParse(specDict.GetValueOrDefault("additionalRunCharge"), out var addRunChargeVal);
+        decimal.TryParse(specDict.GetValueOrDefault("otherPrintingCharges"), out var otherPrintingVal);
+        bool.TryParse(specDict.GetValueOrDefault("applyPerColorFormula"), out var applyPerColorVal);
+        decimal.TryParse(specDict.GetValueOrDefault("computedMachinePrintingCost"), out var compMachinePrintCostVal);
+
+        // Parse Step 6 fields
+        decimal.TryParse(specDict.GetValueOrDefault("laminationQuantity"), out var lamQtyVal);
+        var hasGlossyRate = decimal.TryParse(specDict.GetValueOrDefault("glossyLaminationRate"), out var glossyRateVal) && !string.IsNullOrWhiteSpace(specDict.GetValueOrDefault("glossyLaminationRate"));
+        var hasMatteRate = decimal.TryParse(specDict.GetValueOrDefault("matteLaminationRate"), out var matteRateVal) && !string.IsNullOrWhiteSpace(specDict.GetValueOrDefault("matteLaminationRate"));
+        decimal.TryParse(specDict.GetValueOrDefault("laminationSheetWidthInches"), out var lamSheetWVal);
+        decimal.TryParse(specDict.GetValueOrDefault("laminationSheetHeightInches"), out var lamSheetHVal);
+        var hasLamMult = bool.TryParse(specDict.GetValueOrDefault("applyLaminationSideMultiplier"), out var applyLamMultVal);
+        decimal.TryParse(specDict.GetValueOrDefault("manualLaminationAmount"), out var manualLamAmtVal);
+        decimal.TryParse(specDict.GetValueOrDefault("computedLaminationCost"), out var compLamCostVal);
+
         return new EstimateDetailDto
         {
             EstimateId = estimate.EstimateId,
@@ -1058,6 +1171,54 @@ public class PrintingCalculatorService : IPrintingCalculatorService
 
             ProfitPercentage = estimate.ProfitPercentage,
             TaxPercentage = estimate.TaxPercentage,
+
+            // Step 4: Plate / CTP & Prepress
+            PlateMakingMethod = specDict.GetValueOrDefault("plateMakingMethod"),
+            SelectedPlateSizeId = specDict.GetValueOrDefault("selectedPlateSizeId"),
+            SelectedPlateSizeName = specDict.GetValueOrDefault("selectedPlateSizeName"),
+            PlateCode = specDict.GetValueOrDefault("plateCode"),
+            FilmType = specDict.GetValueOrDefault("filmType"),
+            PlateQuantity = plateQtyVal,
+            IsPlateQuantityManual = isPlateQtyManualVal,
+            PlatePricingMethod = specDict.GetValueOrDefault("platePricingMethod", "Single Plate Rate"),
+            PlatesPerSet = platesPerSetVal > 0 ? platesPerSetVal : 4,
+            SinglePlateRate = singlePlateRateVal,
+            SetPlateRate = setPlateRateVal,
+            ManualPlateCost = manualPlateCostVal,
+            FilmQuantity = filmQtyVal,
+            RatePerFilm = hasRatePerFilm ? ratePerFilmVal : null,
+            OtherPrepressCharges = otherPrepressVal,
+            ComputedPlateCost = compPlateCostVal,
+            ComputedFilmCost = compFilmCostVal,
+            ComputedPrepressCost = compPrepressCostVal,
+
+            // Step 5: Printing Cost (Color & Machine Wise)
+            PrintingMachine = specDict.GetValueOrDefault("printingMachine"),
+            CustomPrintingMachine = specDict.GetValueOrDefault("customPrintingMachine"),
+            PrintingQuantity = printingQtyVal,
+            PrintingCostMethod = specDict.GetValueOrDefault("printingCostMethod", "Per1000"),
+            PerColorRateScope = specDict.GetValueOrDefault("perColorRateScope", "FlatPerColor"),
+            PrintingRate = hasPrintingRate ? printingRateVal : null,
+            ManualPrintingAmount = manualPrintingAmtVal,
+            MachineSetupCharge = machineSetupVal,
+            AdditionalRunCharge = addRunChargeVal,
+            OtherPrintingCharges = otherPrintingVal,
+            ApplyPerColorFormula = applyPerColorVal,
+            ComputedMachinePrintingCost = compMachinePrintCostVal,
+
+            // Step 6: Lamination (Glossy / Matte)
+            LaminationType = specDict.GetValueOrDefault("laminationType", "None"),
+            LaminationSides = specDict.GetValueOrDefault("laminationSides", "Single Side"),
+            LaminationCostMethod = specDict.GetValueOrDefault("laminationCostMethod", "PerSheet"),
+            LaminationQuantity = lamQtyVal,
+            GlossyLaminationRate = hasGlossyRate ? glossyRateVal : null,
+            MatteLaminationRate = hasMatteRate ? matteRateVal : null,
+            LaminationSheetWidthInches = lamSheetWVal,
+            LaminationSheetHeightInches = lamSheetHVal,
+            ApplyLaminationSideMultiplier = hasLamMult ? applyLamMultVal : true,
+            ManualLaminationAmount = manualLamAmtVal,
+            ComputedLaminationCost = compLamCostVal,
+
             Status = estimate.Status,
             CreatedAt = estimate.CreatedAt,
             UpdatedAt = estimate.UpdatedAt ?? estimate.CreatedAt,
@@ -1066,6 +1227,137 @@ public class PrintingCalculatorService : IPrintingCalculatorService
             CostItems = costItemsMap.Values.OrderBy(c => c.CostItemId).ToList(),
             Results = resultsDto
         };
+    }
+
+    private static void RecalculateProductionStepsOnServer(SaveEstimateRequest req)
+    {
+        // Step 4: Plate & Film Cost
+        decimal plateCost = 0m;
+        decimal filmCost = 0m;
+        var plateMethod = req.PlateMakingMethod?.Trim() ?? "";
+
+        if (!string.IsNullOrEmpty(plateMethod) && !string.Equals(plateMethod, "No Plate Required", StringComparison.OrdinalIgnoreCase))
+        {
+            int plateQty = Math.Max(0, req.PlateQuantity ?? 0);
+            var pricingMethod = req.PlatePricingMethod?.Trim() ?? "Single Plate Rate";
+
+            if (string.Equals(pricingMethod, "Manual Amount", StringComparison.OrdinalIgnoreCase))
+            {
+                plateCost = Math.Max(0m, req.ManualPlateCost ?? 0m);
+            }
+            else if (string.Equals(pricingMethod, "Set Rate", StringComparison.OrdinalIgnoreCase))
+            {
+                int setSize = (req.PlatesPerSet ?? 4) > 0 ? (req.PlatesPerSet ?? 4) : 4;
+                int completeSets = plateQty / setSize;
+                int remainingPlates = plateQty % setSize;
+                decimal setRate = Math.Max(0m, req.SetPlateRate ?? 0m);
+                decimal singleRate = Math.Max(0m, req.SinglePlateRate ?? 0m);
+                plateCost = Math.Round((completeSets * setRate) + (remainingPlates * singleRate), 2);
+            }
+            else
+            {
+                decimal singleRate = Math.Max(0m, req.SinglePlateRate ?? 0m);
+                plateCost = Math.Round(plateQty * singleRate, 2);
+            }
+
+            if (string.Equals(plateMethod, "Film-Based Plate Making", StringComparison.OrdinalIgnoreCase))
+            {
+                int filmQty = Math.Max(0, req.FilmQuantity ?? 0);
+                decimal filmRate = Math.Max(0m, req.RatePerFilm ?? 0m);
+                filmCost = Math.Round(filmQty * filmRate, 2);
+            }
+        }
+
+        decimal otherPrepress = Math.Max(0m, req.OtherPrepressCharges ?? 0m);
+        req.ComputedPlateCost = plateCost;
+        req.ComputedFilmCost = filmCost;
+        req.ComputedPrepressCost = Math.Round(plateCost + filmCost + otherPrepress, 2);
+
+        // Step 5: Machine Printing Cost
+        decimal basePrintingCost = 0m;
+        var printMethod = req.PrintingCostMethod?.Trim() ?? "Per1000";
+        decimal printQty = Math.Max(0m, req.PrintingQuantity ?? 0m);
+        decimal printRate = Math.Max(0m, req.PrintingRate ?? 0m);
+        int colors = Math.Max(0, (int)(req.PrintingColorCount ?? 0));
+
+        if (!string.IsNullOrWhiteSpace(req.PrintingMachine) || printRate > 0 || (req.ManualPrintingAmount ?? 0) > 0 || (req.ApplyPerColorFormula == true && (req.RatePerColor ?? 0) > 0))
+        {
+            if (string.Equals(printMethod, "PerSheet", StringComparison.OrdinalIgnoreCase))
+            {
+                basePrintingCost = Math.Round(printQty * printRate, 2);
+            }
+            else if (string.Equals(printMethod, "Per1000", StringComparison.OrdinalIgnoreCase))
+            {
+                basePrintingCost = Math.Round((printQty / 1000m) * printRate, 2);
+            }
+            else if (string.Equals(printMethod, "FixedJobCharge", StringComparison.OrdinalIgnoreCase))
+            {
+                basePrintingCost = Math.Round(printRate, 2);
+            }
+            else if (string.Equals(printMethod, "PerColor", StringComparison.OrdinalIgnoreCase))
+            {
+                decimal effColorRate = (req.ApplyPerColorFormula == true && req.RatePerColor.HasValue)
+                    ? Math.Max(0m, req.RatePerColor.Value)
+                    : printRate;
+                var scope = req.PerColorRateScope?.Trim() ?? "FlatPerColor";
+                if (string.Equals(scope, "PerColorPerSheet", StringComparison.OrdinalIgnoreCase))
+                {
+                    basePrintingCost = Math.Round(colors * printQty * effColorRate, 2);
+                }
+                else if (string.Equals(scope, "PerColorPer1000", StringComparison.OrdinalIgnoreCase))
+                {
+                    basePrintingCost = Math.Round(colors * (printQty / 1000m) * effColorRate, 2);
+                }
+                else
+                {
+                    basePrintingCost = Math.Round(colors * effColorRate, 2);
+                }
+            }
+            else if (string.Equals(printMethod, "ManualAmount", StringComparison.OrdinalIgnoreCase))
+            {
+                basePrintingCost = Math.Round(Math.Max(0m, req.ManualPrintingAmount ?? 0m), 2);
+            }
+        }
+
+        decimal setupCharge = Math.Max(0m, req.MachineSetupCharge ?? 0m);
+        decimal runCharge = Math.Max(0m, req.AdditionalRunCharge ?? 0m);
+        decimal otherPrintCharge = Math.Max(0m, req.OtherPrintingCharges ?? 0m);
+        req.ComputedMachinePrintingCost = Math.Round(basePrintingCost + setupCharge + runCharge + otherPrintCharge, 2);
+
+        // Step 6: Lamination Cost
+        decimal lamCost = 0m;
+        var lamType = req.LaminationType?.Trim() ?? "None";
+        if (!string.Equals(lamType, "None", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(lamType))
+        {
+            var lamMethod = req.LaminationCostMethod?.Trim() ?? "PerSheet";
+            decimal lamQty = Math.Max(0m, req.LaminationQuantity ?? 0m);
+            decimal lamRate = string.Equals(lamType, "Glossy", StringComparison.OrdinalIgnoreCase)
+                ? Math.Max(0m, req.GlossyLaminationRate ?? 0m)
+                : Math.Max(0m, req.MatteLaminationRate ?? 0m);
+            bool isDoubleSide = string.Equals(req.LaminationSides?.Trim(), "Double Side", StringComparison.OrdinalIgnoreCase);
+            decimal sideMult = (isDoubleSide && (req.ApplyLaminationSideMultiplier ?? true)) ? 2m : 1m;
+
+            if (string.Equals(lamMethod, "ManualAmount", StringComparison.OrdinalIgnoreCase))
+            {
+                lamCost = Math.Round(Math.Max(0m, req.ManualLaminationAmount ?? 0m), 2);
+            }
+            else if (string.Equals(lamMethod, "Per1000Sheets", StringComparison.OrdinalIgnoreCase))
+            {
+                lamCost = Math.Round((lamQty / 1000m) * lamRate * sideMult, 2);
+            }
+            else if (string.Equals(lamMethod, "PerSquareFoot", StringComparison.OrdinalIgnoreCase))
+            {
+                decimal wIn = Math.Max(0m, req.LaminationSheetWidthInches ?? 0m);
+                decimal hIn = Math.Max(0m, req.LaminationSheetHeightInches ?? 0m);
+                decimal areaSqFt = (wIn * hIn) / 144m;
+                lamCost = Math.Round(areaSqFt * lamQty * lamRate * sideMult, 2);
+            }
+            else
+            {
+                lamCost = Math.Round(lamQty * lamRate * sideMult, 2);
+            }
+        }
+        req.ComputedLaminationCost = lamCost;
     }
 
     private static string GenerateEstimateNumber()

@@ -147,7 +147,7 @@ import { AdminProfileResponse } from '../../core/auth/auth.model';
                     type="email"
                     formControlName="email"
                     class="form-input"
-                    placeholder="admin@zeropixel.com"
+                    placeholder="naveed@zeropixel.pk"
                     autocomplete="email"
                   />
                 </div>

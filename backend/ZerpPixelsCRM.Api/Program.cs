@@ -41,15 +41,30 @@ builder.Services.AddScoped<IAdminUserRepository, AdminUserRepository>();
 builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
 builder.Services.AddScoped<IPrintingOrderRepository, PrintingOrderRepository>();
 builder.Services.AddScoped<IProductionJobRepository, ProductionJobRepository>();
+builder.Services.AddScoped<IProductionJobSheetRepository, ProductionJobSheetRepository>();
 builder.Services.AddScoped<IPrintingCalculatorRepository, PrintingCalculatorRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<ISupplierQuoteRepository, SupplierQuoteRepository>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<ISupplierBillRepository, SupplierBillRepository>();
+builder.Services.AddScoped<ISupplierPaymentRepository, SupplierPaymentRepository>();
 
 // 4. Dependency Injection for Business Services
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPrintingOrderService, PrintingOrderService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
+builder.Services.AddScoped<IProductionJobSheetService, ProductionJobSheetService>();
 builder.Services.AddScoped<IQuotationService, QuotationService>();
 builder.Services.AddScoped<IPrintingCalculatorService, PrintingCalculatorService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ISupplierQuoteService, SupplierQuoteService>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+builder.Services.AddScoped<ISupplierBillService, SupplierBillService>();
+builder.Services.AddScoped<ISupplierPaymentService, SupplierPaymentService>();
+builder.Services.AddSingleton<InvoicePdfService>();
 builder.Services.AddSingleton<QuotationPdfService>();
 builder.Services.AddScoped<PrintingIntelligenceSeeder>();
 
@@ -228,7 +243,232 @@ using (var scope = app.Services.CreateScope())
             CREATE INDEX IF NOT EXISTS IX_printing_orders_status ON printing_orders(status);
             CREATE INDEX IF NOT EXISTS IX_printing_orders_quotation_id ON printing_orders(quotation_id);
             CREATE INDEX IF NOT EXISTS IX_production_jobs_status ON production_jobs(status);
-            CREATE INDEX IF NOT EXISTS IX_production_jobs_production_type ON production_jobs(production_type);");
+            CREATE INDEX IF NOT EXISTS IX_production_jobs_production_type ON production_jobs(production_type);
+            CREATE TABLE IF NOT EXISTS production_job_sheets (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                job_card_number VARCHAR(50) NOT NULL,
+                job_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                customer_name VARCHAR(150) NOT NULL,
+                job_name VARCHAR(200) NOT NULL,
+                quantity INTEGER NOT NULL,
+                paper_size VARCHAR(100),
+                paper_type VARCHAR(100),
+                gsm INTEGER,
+                printing_sheet_size VARCHAR(100),
+                printing_colors VARCHAR(50),
+                printing_side VARCHAR(50),
+                printing_method VARCHAR(50),
+                printing_method_other VARCHAR(100),
+                printing_machine VARCHAR(100),
+                printing_operator VARCHAR(100),
+                printing_start_date TIMESTAMPTZ,
+                printing_completion_date TIMESTAMPTZ,
+                lamination VARCHAR(50),
+                lamination_other VARCHAR(100),
+                die_cutting VARCHAR(50),
+                binding VARCHAR(50),
+                binding_other VARCHAR(100),
+                uv_coating VARCHAR(50),
+                packing VARCHAR(50),
+                packing_instructions VARCHAR(500),
+                special_instructions TEXT,
+                production_supervisor VARCHAR(100),
+                authorized_by VARCHAR(100),
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_production_job_sheets_job_card_number ON production_job_sheets(job_card_number);
+            CREATE INDEX IF NOT EXISTS IX_production_job_sheets_customer_name ON production_job_sheets(customer_name);
+            CREATE INDEX IF NOT EXISTS IX_production_job_sheets_created_at ON production_job_sheets(created_at);
+
+            CREATE TABLE IF NOT EXISTS printing_machine_rates (
+                id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                machine_name VARCHAR(100) NOT NULL UNIQUE,
+                print_per_plate NUMERIC(18,4) NOT NULL DEFAULT 0,
+                print_per_set NUMERIC(18,4) NOT NULL DEFAULT 0,
+                printing_plate NUMERIC(18,4) NOT NULL DEFAULT 0,
+                plate_per_set NUMERIC(18,4) NOT NULL DEFAULT 0,
+                display_order INT NOT NULL DEFAULT 0,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS invoices (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                invoice_number VARCHAR(50) NOT NULL UNIQUE,
+                invoice_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                customer_id BIGINT NOT NULL REFERENCES clients(client_id) ON DELETE RESTRICT,
+                customer_name VARCHAR(200) NOT NULL,
+                company_name VARCHAR(200),
+                contact_number VARCHAR(50) NOT NULL,
+                email VARCHAR(200),
+                billing_address TEXT,
+                total NUMERIC(18,2) NOT NULL DEFAULT 0,
+                advance NUMERIC(18,2) NOT NULL DEFAULT 0,
+                balance NUMERIC(18,2) NOT NULL DEFAULT 0,
+                notes TEXT,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_invoices_invoice_number ON invoices(invoice_number);
+            CREATE INDEX IF NOT EXISTS IX_invoices_customer_id ON invoices(customer_id);
+            CREATE INDEX IF NOT EXISTS IX_invoices_invoice_date ON invoices(invoice_date);
+            ALTER TABLE invoices ADD COLUMN IF NOT EXISTS ntn_number VARCHAR(100);
+            ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_po_number VARCHAR(100);
+            ALTER TABLE invoices ADD COLUMN IF NOT EXISTS adjustment_type VARCHAR(30) NOT NULL DEFAULT 'advance';
+            ALTER TABLE invoices ADD COLUMN IF NOT EXISTS adjustment_rate NUMERIC(18,2);
+
+            CREATE TABLE IF NOT EXISTS invoice_items (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                invoice_id BIGINT NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+                serial_number INT NOT NULL,
+                gr_number VARCHAR(50),
+                description VARCHAR(500) NOT NULL,
+                quantity NUMERIC(18,2) NOT NULL DEFAULT 1,
+                rate NUMERIC(18,2) NOT NULL DEFAULT 0,
+                amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_invoice_items_invoice_id ON invoice_items(invoice_id);
+
+            CREATE TABLE IF NOT EXISTS suppliers (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                supplier_name VARCHAR(200) NOT NULL,
+                contact_person VARCHAR(150),
+                phone_number VARCHAR(30),
+                email VARCHAR(200),
+                address TEXT,
+                lead_time_working_days INT,
+                bank_name VARCHAR(150),
+                account_name VARCHAR(200),
+                account_number_or_iban VARCHAR(100),
+                status VARCHAR(30) NOT NULL DEFAULT 'Active',
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_suppliers_supplier_name ON suppliers(supplier_name);
+            CREATE INDEX IF NOT EXISTS IX_suppliers_status ON suppliers(status);
+
+            CREATE TABLE IF NOT EXISTS supplier_services (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                supplier_id BIGINT NOT NULL REFERENCES suppliers(id) ON DELETE RESTRICT,
+                service_name VARCHAR(250) NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS IX_supplier_services_supplier_id ON supplier_services(supplier_id);
+
+            CREATE TABLE IF NOT EXISTS supplier_quotes (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                quote_number VARCHAR(50) NOT NULL UNIQUE,
+                supplier_id BIGINT NOT NULL REFERENCES suppliers(id) ON DELETE RESTRICT,
+                supplier_reference_number VARCHAR(100),
+                quote_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                description TEXT,
+                total_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                status VARCHAR(30) NOT NULL DEFAULT 'Recorded',
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_supplier_quotes_supplier_id ON supplier_quotes(supplier_id);
+            CREATE INDEX IF NOT EXISTS IX_supplier_quotes_quote_date ON supplier_quotes(quote_date);
+
+            CREATE TABLE IF NOT EXISTS supplier_quote_items (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                supplier_quote_id BIGINT NOT NULL REFERENCES supplier_quotes(id) ON DELETE RESTRICT,
+                serial_number INT NOT NULL,
+                description VARCHAR(500) NOT NULL,
+                quantity NUMERIC(18,2) NOT NULL DEFAULT 1,
+                rate NUMERIC(18,2) NOT NULL DEFAULT 0,
+                amount NUMERIC(18,2) NOT NULL DEFAULT 0
+            );
+            CREATE INDEX IF NOT EXISTS IX_supplier_quote_items_quote_id ON supplier_quote_items(supplier_quote_id);
+
+            CREATE TABLE IF NOT EXISTS purchase_orders (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                po_number VARCHAR(50) NOT NULL UNIQUE,
+                supplier_id BIGINT NOT NULL REFERENCES suppliers(id) ON DELETE RESTRICT,
+                supplier_quote_id BIGINT REFERENCES supplier_quotes(id) ON DELETE RESTRICT,
+                project_job_id BIGINT REFERENCES production_jobs(job_id) ON DELETE RESTRICT,
+                po_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                status VARCHAR(30) NOT NULL DEFAULT 'Draft',
+                total_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                issued_at TIMESTAMPTZ,
+                cancelled_at TIMESTAMPTZ
+            );
+            CREATE INDEX IF NOT EXISTS IX_purchase_orders_supplier_id ON purchase_orders(supplier_id);
+            CREATE INDEX IF NOT EXISTS IX_purchase_orders_status ON purchase_orders(status);
+            CREATE INDEX IF NOT EXISTS IX_purchase_orders_po_date ON purchase_orders(po_date);
+
+            CREATE TABLE IF NOT EXISTS purchase_order_items (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                purchase_order_id BIGINT NOT NULL REFERENCES purchase_orders(id) ON DELETE RESTRICT,
+                serial_number INT NOT NULL,
+                description VARCHAR(500) NOT NULL,
+                quantity NUMERIC(18,2) NOT NULL DEFAULT 1,
+                rate NUMERIC(18,2) NOT NULL DEFAULT 0,
+                amount NUMERIC(18,2) NOT NULL DEFAULT 0
+            );
+            CREATE INDEX IF NOT EXISTS IX_purchase_order_items_po_id ON purchase_order_items(purchase_order_id);
+
+            CREATE TABLE IF NOT EXISTS supplier_bills (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                internal_bill_number VARCHAR(50) NOT NULL UNIQUE,
+                supplier_invoice_number VARCHAR(100) NOT NULL,
+                supplier_id BIGINT NOT NULL REFERENCES suppliers(id) ON DELETE RESTRICT,
+                purchase_order_id BIGINT REFERENCES purchase_orders(id) ON DELETE RESTRICT,
+                bill_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                due_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                description VARCHAR(1000),
+                total_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                paid_amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                status VARCHAR(30) NOT NULL DEFAULT 'Unpaid',
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                cancelled_at TIMESTAMPTZ
+            );
+            CREATE INDEX IF NOT EXISTS IX_supplier_bills_supplier_id ON supplier_bills(supplier_id);
+            CREATE INDEX IF NOT EXISTS IX_supplier_bills_po_id ON supplier_bills(purchase_order_id);
+            CREATE INDEX IF NOT EXISTS IX_supplier_bills_status ON supplier_bills(status);
+            CREATE INDEX IF NOT EXISTS IX_supplier_bills_due_date ON supplier_bills(due_date);
+            CREATE INDEX IF NOT EXISTS IX_supplier_bills_sup_inv ON supplier_bills(supplier_id, supplier_invoice_number);
+
+            CREATE TABLE IF NOT EXISTS supplier_bill_items (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                supplier_bill_id BIGINT NOT NULL REFERENCES supplier_bills(id) ON DELETE RESTRICT,
+                serial_number INT NOT NULL,
+                description VARCHAR(500) NOT NULL,
+                quantity NUMERIC(18,2) NOT NULL DEFAULT 1,
+                rate NUMERIC(18,2) NOT NULL DEFAULT 0,
+                amount NUMERIC(18,2) NOT NULL DEFAULT 0
+            );
+            CREATE INDEX IF NOT EXISTS IX_supplier_bill_items_bill_id ON supplier_bill_items(supplier_bill_id);
+
+            CREATE TABLE IF NOT EXISTS supplier_payments (
+                id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                payment_number VARCHAR(50) NOT NULL UNIQUE,
+                supplier_id BIGINT NOT NULL REFERENCES suppliers(id) ON DELETE RESTRICT,
+                supplier_bill_id BIGINT NOT NULL REFERENCES supplier_bills(id) ON DELETE RESTRICT,
+                payment_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                amount NUMERIC(18,2) NOT NULL DEFAULT 0,
+                payment_method VARCHAR(50) NOT NULL DEFAULT 'Bank Transfer',
+                payment_account_reference VARCHAR(150),
+                transaction_reference VARCHAR(150),
+                notes VARCHAR(1000),
+                status VARCHAR(30) NOT NULL DEFAULT 'Posted',
+                reversal_reason VARCHAR(500),
+                reversed_at TIMESTAMPTZ,
+                reversed_by VARCHAR(150),
+                created_by VARCHAR(150),
+                idempotency_key VARCHAR(100) UNIQUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS IX_supplier_payments_supplier_id ON supplier_payments(supplier_id);
+            CREATE INDEX IF NOT EXISTS IX_supplier_payments_bill_id ON supplier_payments(supplier_bill_id);
+            CREATE INDEX IF NOT EXISTS IX_supplier_payments_payment_date ON supplier_payments(payment_date);
+            CREATE INDEX IF NOT EXISTS IX_supplier_payments_status ON supplier_payments(status);");
 
         var authService = services.GetRequiredService<IAuthService>();
         await authService.SeedAdminUserAsync();

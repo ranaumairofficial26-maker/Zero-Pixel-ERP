@@ -192,68 +192,6 @@ public class PrintingOrderService : IPrintingOrderService
         return confirmedOrder ?? MapToDto(order);
     }
 
-    public async Task<PrintingOrderDto?> GetOrderByIdAsync(long orderId)
-    {
-        var order = await _unitOfWork.PrintingOrders.GetOrderWithDetailsAsync(orderId);
-        return order == null ? null : MapToDto(order);
-    }
-
-    public async Task<PrintingOrderDto?> GetOrderByRevisionIdAsync(long revisionId)
-    {
-        var order = await _unitOfWork.PrintingOrders.GetOrderByRevisionIdAsync(revisionId);
-        return order == null ? null : MapToDto(order);
-    }
-
-    public async Task<List<PrintingOrderDto>> GetAllOrdersAsync(string? status = null, string? search = null)
-    {
-        var orders = await _unitOfWork.PrintingOrders.GetAllOrdersAsync(status, search);
-        return orders.Select(MapToDto).ToList();
-    }
-
-    public async Task<PrintingOrderDto?> UpdateOrderProductionTypesAsync(long orderId, UpdateOrderItemsProductionTypeRequest request)
-    {
-        var order = await _unitOfWork.PrintingOrders.GetOrderWithDetailsAsync(orderId);
-        if (order == null) return null;
-
-        if (order.Status.Equals("Confirmed", StringComparison.OrdinalIgnoreCase) ||
-            order.Status.Equals("In Production", StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException("Cannot change production type of an already confirmed order.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.OverallProductionType))
-        {
-            order.ProductionType = request.OverallProductionType.Trim();
-        }
-
-        if (request.Items != null && request.Items.Any())
-        {
-            foreach (var itemUpdate in request.Items)
-            {
-                var existingItem = order.Items.FirstOrDefault(i => i.OrderItemId == itemUpdate.OrderItemId);
-                if (existingItem != null)
-                {
-                    existingItem.ProductionType = itemUpdate.ProductionType.Trim();
-                }
-            }
-
-            var distinctTypes = order.Items.Select(i => i.ProductionType).Distinct().ToList();
-            if (distinctTypes.Count > 1)
-            {
-                order.ProductionType = "MIXED";
-            }
-            else if (distinctTypes.Count == 1)
-            {
-                order.ProductionType = distinctTypes.First();
-            }
-        }
-
-        order.UpdatedAt = DateTime.UtcNow;
-        await _unitOfWork.CompleteAsync();
-
-        return MapToDto(order);
-    }
-
     public async Task<PrintingOrderDto?> ConfirmOrderAsync(long orderId, ConfirmPrintingOrderRequest request)
     {
         // Use a database transaction to ensure atomicity and duplicate prevention

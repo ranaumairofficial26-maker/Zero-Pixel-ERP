@@ -1,6 +1,8 @@
 .admin-shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   width: 100%;
   background: #f8fafc;
 }
@@ -9,13 +11,16 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   min-width: 0;
   background-color: #f8fafc;
 }
 
 .page-container {
   flex: 1;
-  padding: 1.25rem 1.75rem;
+  padding: 0.85rem 1rem;
   overflow-y: auto;
 }
 
@@ -92,6 +97,43 @@
       .toast-icon { color: #00ADEF; }
     }
   }
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(2px);
+    z-index: 50;
+    animation: fadeInBackdrop 0.2s ease-out;
+  }
+
+  .page-container {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-container {
+    padding: 0.65rem 0.55rem;
+  }
+
+  .toast-container {
+    top: 0.85rem;
+    right: 0.85rem;
+    width: calc(100% - 1.7rem);
+  }
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes toastSlideIn {

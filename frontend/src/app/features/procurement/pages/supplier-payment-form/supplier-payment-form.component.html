@@ -1,0 +1,292 @@
+<div class="payment-form-page">
+  <div class="form-shell">
+    <!-- HEADER -->
+    <header class="form-header">
+      <div class="header-text">
+        <h1 class="form-title">Record Supplier Payment</h1>
+        <p class="form-subtitle">
+          Record a partial or full payment against an outstanding supplier bill.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="btn btn-outline" [disabled]="isSubmitting" (click)="cancel()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isSubmitting || isOverpayment"
+          (click)="recordPayment()"
+        >
+          {{ isSubmitting ? 'Recording...' : 'Record Payment' }}
+        </button>
+      </div>
+    </header>
+
+    <!-- ALERTS -->
+    <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <form [formGroup]="paymentForm" (ngSubmit)="recordPayment()">
+      <!-- SECTION A: PAYMENT INFORMATION -->
+      <section class="form-section">
+        <div class="section-heading">
+          <h2>Section A — Payment Information</h2>
+          <span class="sub">Supplier, linked bill &amp; payment details</span>
+        </div>
+
+        <div class="fields-grid">
+          <!-- Field 1: Payment Number -->
+          <div class="field-box">
+            <label class="field-label">Payment Number</label>
+            <input
+              type="text"
+              class="form-control mono read-only"
+              formControlName="paymentNumber"
+              placeholder="Auto-generated (PAY-YYYYMM-XXXX)"
+              readonly
+            />
+            <span class="field-help">Unique internal payment reference</span>
+          </div>
+
+          <!-- Field 4: Payment Date -->
+          <div class="field-box">
+            <label class="field-label required">Payment Date</label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="paymentDate"
+              [class.is-invalid]="paymentForm.get('paymentDate')?.invalid && paymentForm.get('paymentDate')?.touched"
+            />
+          </div>
+
+          <!-- Field 2: Select Supplier -->
+          <div class="field-box field-full">
+            <label class="field-label required">Select Supplier</label>
+            <div class="searchable-box">
+              <input
+                type="text"
+                class="form-control"
+                [value]="supplierSearch"
+                (input)="filterSuppliers($any($event.target).value)"
+                (focus)="showSupplierDropdown = true"
+                placeholder="Search active suppliers by name, phone or contact person..."
+                [class.is-invalid]="paymentForm.get('supplierId')?.invalid && paymentForm.get('supplierId')?.touched"
+              />
+              <button
+                *ngIf="selectedSupplier"
+                type="button"
+                class="btn-clear"
+                (click)="clearSupplier()"
+              >
+                Clear
+              </button>
+
+              <div class="dropdown-popover" *ngIf="showSupplierDropdown && filteredSuppliers.length > 0">
+                <div
+                  class="dropdown-item"
+                  *ngFor="let s of filteredSuppliers"
+                  (mousedown)="selectSupplier(s)"
+                >
+                  <div class="item-name strong">{{ s.supplierName }}</div>
+                  <div class="item-meta">
+                    <span *ngIf="s.contactPerson">Contact: {{ s.contactPerson }}</span>
+                    <span *ngIf="s.phoneNumber">Phone: {{ s.phoneNumber }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="supplier-snapshot" *ngIf="selectedSupplier">
+              <div class="snapshot-header">
+                <span class="badge-active">Active Supplier</span>
+                <span class="snapshot-name strong">{{ selectedSupplier.supplierName }}</span>
+              </div>
+              <div class="snapshot-details">
+                <span *ngIf="selectedSupplier.contactPerson">
+                  <strong>Contact:</strong> {{ selectedSupplier.contactPerson }}
+                </span>
+                <span *ngIf="selectedSupplier.phoneNumber">
+                  <strong>Phone:</strong> {{ selectedSupplier.phoneNumber }}
+                </span>
+                <span *ngIf="selectedSupplier.email">
+                  <strong>Email:</strong> {{ selectedSupplier.email }}
+                </span>
+              </div>
+            </div>
+
+            <span class="field-error" *ngIf="paymentForm.get('supplierId')?.invalid && paymentForm.get('supplierId')?.touched">
+              Please select a supplier.
+            </span>
+          </div>
+
+          <!-- Field 3: Select Supplier Bill -->
+          <div class="field-box field-full">
+            <label class="field-label required">Select Supplier Bill</label>
+            <div class="searchable-box">
+              <input
+                type="text"
+                class="form-control"
+                [value]="billSearch"
+                [disabled]="!selectedSupplier"
+                (input)="filterBills($any($event.target).value)"
+                (focus)="showBillDropdown = true"
+                [placeholder]="
+                  selectedSupplier
+                    ? isLoadingBills
+                      ? 'Loading outstanding bills...'
+                      : eligibleBills.length === 0
+                      ? 'No outstanding bills available for this supplier'
+                      : 'Search outstanding bills by Bill # or Supplier Invoice #...'
+                    : 'Select a supplier first...'
+                "
+                [class.is-invalid]="paymentForm.get('supplierBillId')?.invalid && paymentForm.get('supplierBillId')?.touched"
+              />
+              <button
+                *ngIf="selectedBill"
+                type="button"
+                class="btn-clear"
+                (click)="clearBill()"
+              >
+                Clear
+              </button>
+
+              <div class="dropdown-popover" *ngIf="showBillDropdown && selectedSupplier && filteredBills.length > 0">
+                <div
+                  class="dropdown-item"
+                  *ngFor="let b of filteredBills"
+                  (mousedown)="selectBill(b)"
+                >
+                  <div class="item-name strong">
+                    <span class="mono">{{ b.internalBillNumber }}</span> &mdash; Inv: {{ b.supplierInvoiceNumber }}
+                  </div>
+                  <div class="item-meta">
+                    <span>Date: {{ b.billDate | date:'mediumDate' }}</span>
+                    <span>Total: PKR {{ formatCurrency(b.totalAmount) }}</span>
+                    <span>Paid: PKR {{ formatCurrency(b.paidAmount) }}</span>
+                    <span class="strong text-danger">Balance: PKR {{ formatCurrency(b.balance) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <span class="field-error" *ngIf="paymentForm.get('supplierBillId')?.invalid && paymentForm.get('supplierBillId')?.touched">
+              Please select an outstanding supplier bill.
+            </span>
+          </div>
+
+          <!-- Field 5: Payment Amount -->
+          <div class="field-box">
+            <label class="field-label required">Payment Amount (PKR)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              class="form-control num-input"
+              formControlName="amount"
+              placeholder="0.00"
+              [class.is-invalid]="(paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched) || isOverpayment"
+            />
+            <span class="field-error" *ngIf="isOverpayment">
+              Cannot exceed current outstanding balance (PKR {{ formatCurrency(selectedBill?.balance || 0) }}).
+            </span>
+            <span class="field-error" *ngIf="!isOverpayment && paymentForm.get('amount')?.invalid && paymentForm.get('amount')?.touched">
+              Payment amount must be greater than zero.
+            </span>
+          </div>
+
+          <!-- Field 6: Payment Method -->
+          <div class="field-box">
+            <label class="field-label required">Payment Method</label>
+            <select class="form-control" formControlName="paymentMethod">
+              <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+
+          <!-- Field 7: Payment Account / Bank -->
+          <div class="field-box">
+            <label class="field-label">Payment Account / Bank (Optional)</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="paymentAccountReference"
+              placeholder="e.g. Company Petty Cash / Meezan Main Account"
+            />
+            <span class="field-help">Minimum paying account description or reference</span>
+          </div>
+
+          <!-- Field 8: Transaction Reference -->
+          <div class="field-box">
+            <label class="field-label">Transaction Reference (Optional)</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="transactionReference"
+              placeholder="Cheque # or Bank Transfer Reference"
+            />
+          </div>
+
+          <!-- Field 9: Payment Notes -->
+          <div class="field-box field-full">
+            <label class="field-label">Payment Notes (Optional)</label>
+            <textarea
+              class="form-control"
+              rows="2"
+              formControlName="notes"
+              placeholder="Payment remarks or details..."
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION B: PAYMENT SUMMARY -->
+      <section class="summary-section" *ngIf="selectedBill">
+        <div class="section-heading">
+          <h2>Payment Summary</h2>
+          <span class="sub">
+            Bill <strong class="mono">{{ selectedBill.internalBillNumber }}</strong> (Inv: {{ selectedBill.supplierInvoiceNumber }})
+          </span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="s-lbl">Total Bill Amount</span>
+            <span class="s-val mono">PKR {{ formatCurrency(selectedBill.totalAmount) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="s-lbl">Previously Paid Amount</span>
+            <span class="s-val mono">PKR {{ formatCurrency(selectedBill.paidAmount) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="s-lbl">Current Outstanding Balance</span>
+            <span class="s-val mono strong">PKR {{ formatCurrency(selectedBill.balance) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="s-lbl">New Payment Amount</span>
+            <span class="s-val mono text-primary">- PKR {{ formatCurrency(newPaymentAmount) }}</span>
+          </div>
+          <div class="summary-item highlight" [class.over]="isOverpayment" [class.settled]="remainingBalanceAfterPayment === 0">
+            <span class="s-lbl">Remaining Balance After Payment</span>
+            <span class="s-val mono strong">
+              PKR {{ formatCurrency(remainingBalanceAfterPayment) }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOTTOM ACTIONS -->
+      <div class="form-actions-bottom">
+        <button type="button" class="btn btn-outline" [disabled]="isSubmitting" (click)="cancel()">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSubmitting || isOverpayment"
+        >
+          {{ isSubmitting ? 'Recording...' : 'Record Payment' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

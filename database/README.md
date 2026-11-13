@@ -1,37 +1,44 @@
-# Zerp Pixels CRM - Database Setup (PostgreSQL)
+# Zero Pixel ERP — Database (`ZeroPixelErpDb`)
 
-This folder contains database initialization scripts, seed data, and Docker configurations for PostgreSQL.
-
-## 1. Local PostgreSQL Setup (Installed Service)
-If PostgreSQL is already installed on your local machine:
-1. Open **pgAdmin** or **psql**.
-2. Create a new database named `ZerpPixelsCrmDb`:
-   ```sql
-   CREATE DATABASE "ZerpPixelsCrmDb";
-   ```
-3. Run the scripts in the following order:
-   - `init.sql` (Creates tables and indexes)
-   - `seed.sql` (Inserts initial CRM sample records)
-
-4. Update your backend connection string in `backend/ZerpPixelsCRM.Api/appsettings.json`:
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Host=localhost;Port=5432;Database=ZerpPixelsCrmDb;Username=postgres;Password=YOUR_POSTGRES_PASSWORD"
-   }
-   ```
+This folder contains the complete PostgreSQL database schema, seed data, and full database backup for **Zero Pixel ERP & CRM**.
 
 ---
 
-## 2. Docker Setup (Alternative)
-If you prefer running PostgreSQL via Docker:
-```bash
-cd database
-docker compose up -d
+## 1. Files in this Folder
+
+| File / Folder | Description |
+| :--- | :--- |
+| [`schema.sql`](./schema.sql) | Complete PostgreSQL database schema (`CREATE TABLE`, primary keys, foreign keys, and indexes for all 26 tables). |
+| [`seed_data.sql`](./seed_data.sql) | `INSERT` statements for all current records and master seed data (admin users, printing categories, 195 printing items, paper sizes, materials, machine rates, clients, quotations, orders, jobs, and invoices). |
+| [`ZeroPixelErpDb_full_backup.sql`](./ZeroPixelErpDb_full_backup.sql) | Complete single-file backup (Schema + Data combined) ready to restore into any PostgreSQL instance. |
+| [`seed/printing_categories.json`](./seed/printing_categories.json) | Master JSON seed for printing categories. |
+| [`seed/printing_items_195.json`](./seed/printing_items_195.json) | Master JSON seed for 195 commercial printing items & specifications. |
+
+---
+
+## 2. Database Connection Details (Local Development)
+
+Configured in [`backend/ZerpPixelsCRM.Api/appsettings.json`](../backend/ZerpPixelsCRM.Api/appsettings.json):
+
+- **Engine**: PostgreSQL 18
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database Name**: `ZeroPixelErpDb`
+- **Username**: `postgres`
+- **Password**: `1234`
+
+---
+
+## 3. How to Restore / Import on Any Machine
+
+### Option A: Automatic (via .NET Backend)
+When you run the backend (`dotnet run`), Entity Framework Core automatically creates `ZeroPixelErpDb`, runs all migrations, ensures all tables/columns exist, and seeds default master data via [`Program.cs`](../backend/ZerpPixelsCRM.Api/Program.cs) and [`PrintingIntelligenceSeeder.cs`](../backend/ZerpPixelsCRM.Api/Data/PrintingIntelligenceSeeder.cs).
+
+### Option B: Manual Restore via `psql` or pgAdmin
+To restore the full backup (`ZeroPixelErpDb_full_backup.sql`) manually into PostgreSQL:
+
+```powershell
+$env:PGPASSWORD="1234"
+& "C:\Program Files\PostgreSQL\18\bin\psql.exe" -h localhost -p 5432 -U postgres -d ZeroPixelErpDb -f "d:\Zerp pixels crm\database\ZeroPixelErpDb_full_backup.sql"
 ```
-- PostgreSQL will be running on `localhost:5432`
-- pgAdmin will be available at `http://localhost:5050`
-  - Email: `admin@zerppixels.com`
-  - Password: `adminpassword`
-- Default DB user: `postgres`
-- Default DB password: `postgrespassword`
 

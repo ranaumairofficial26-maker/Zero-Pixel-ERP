@@ -9,7 +9,6 @@
         <span class="date-display">{{ currentDate | date:'fullDate' }}</span>
       </div>
       <h1 class="page-title">{{ greeting }}, {{ adminDisplayName }}</h1>
-      <p class="page-subtitle">Zero Pixel ERP Executive Command Center &bull; Live overview of customer accounts, smart quotations, and multi-channel production.</p>
     </div>
 
     <div class="topbar-actions">
@@ -168,95 +167,8 @@
   <div class="dashboard-main-layout">
     <!-- Left Column: Operations Hub & Live Queue -->
     <main class="operations-column">
-      <!-- Workflow Modules Navigation Cards -->
-      <section class="section-card">
-        <div class="section-header">
-          <div>
-            <span class="section-tag">CORE OPERATIONS</span>
-            <h2 class="section-title">Production &amp; Quotation Workflows</h2>
-          </div>
-          <span class="active-badge">3 Modules Integrated</span>
-        </div>
-
-        <div class="workflow-cards-grid">
-          <!-- In-House Production Hub Card -->
-          <div class="workflow-card">
-            <div class="wf-icon-head floor">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 6 2 18 2 18 9"/>
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                <rect x="6" y="14" width="12" height="8"/>
-              </svg>
-              <span class="wf-status-pill in-house">In-House</span>
-            </div>
-            <div class="wf-content">
-              <h4>In-House Production Floor</h4>
-              <p>Track shop-floor manufacturing live, manage execution queues, and dispatch finished goods.</p>
-              <div class="wf-stats-row">
-                <span class="stat-bubble">{{ totalInHouseJobs() }} Total Jobs</span>
-                <span class="stat-bubble live">{{ inHouseInProgress() }} In Progress</span>
-              </div>
-            </div>
-            <a routerLink="/admin/production/in-house" class="btn-wf-action">
-              <span>Open Floor Queue</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-          </div>
-
-          <!-- Outsourced Production Hub Card -->
-          <div class="workflow-card">
-            <div class="wf-icon-head vendor">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="1" y="3" width="15" height="13"/>
-                <polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
-              <span class="wf-status-pill outsourced">Outsourced</span>
-            </div>
-            <div class="wf-content">
-              <h4>Outsourced Production</h4>
-              <p>Assign vendor Purchase Orders, record internal vendor costs, and monitor delivery timelines.</p>
-              <div class="wf-stats-row">
-                <span class="stat-bubble">{{ totalOutsourcedJobs() }} Total Jobs</span>
-                <span class="stat-bubble pending">{{ outsourcedInProgress() }} Active POs</span>
-              </div>
-            </div>
-            <a routerLink="/admin/production/outsourced" class="btn-wf-action">
-              <span>Manage Vendors</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-          </div>
-
-          <!-- Smart Quotations Hub Card -->
-          <div class="workflow-card">
-            <div class="wf-icon-head quote">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-              <span class="wf-status-pill quotes">Quoting Engine</span>
-            </div>
-            <div class="wf-content">
-              <h4>Smart Quotations Builder</h4>
-              <p>Configure Printing &amp; Digital Marketing pricing with revision control, VAT rules, and PDF generation.</p>
-              <div class="wf-stats-row">
-                <span class="stat-bubble">{{ totalQuotations() }} Quotations</span>
-                <span class="stat-bubble auto">Auto-Sync</span>
-              </div>
-            </div>
-            <a routerLink="/admin/quotations" class="btn-wf-action">
-              <span>View Quotations</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
-          </div>
-        </div>
-      </section>
-
       <!-- Live Production Jobs Queue -->
-      <section class="section-card live-feed-card mt-4">
+      <section class="section-card live-feed-card">
         <div class="section-header">
           <div class="header-info">
             <div class="live-status-badge">

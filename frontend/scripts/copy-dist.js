@@ -7,6 +7,11 @@ const path = require('path');
 const src = path.join(__dirname, '..', 'dist', 'frontend', 'browser');
 const dst = path.join(__dirname, '..', 'dist', 'frontend');
 
+
+
+
+
+
 if (fs.existsSync(src)) {
   fs.readdirSync(src).forEach(file => {
     const s = path.join(src, file);

@@ -123,10 +123,15 @@ export class ProductionService {
         jobId: j.jobId,
         orderItemId: item.orderItemId || 0,
         productName: item.productName || '',
+        description: item.description || '',
         sizeDimensions: item.sizeDimensions || '',
         material: item.material || '',
+        gsm: item.gsm || '',
+        printingColor: item.printingColor || '',
+        finishing: item.finishing || '',
         quantity: item.quantity || 0,
-        unit: item.unit || 'pcs'
+        unit: item.unit || 'pcs',
+        notes: item.notes || ''
       }))
     };
   }

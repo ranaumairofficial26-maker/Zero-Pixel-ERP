@@ -13,7 +13,7 @@ $dark-bg-active: #23314c;
 
 $dark-border-subtle: #1f293d;
 $dark-border-medium: #2a374f;
-$dark-border-focus: #00adef;
+$dark-border-focus: #02b7ff;
 
 $dark-text-high: #f8fafc;
 $dark-text-body: #e2e8f0;
@@ -372,6 +372,192 @@ body.dark-mode {
           background: #00adef !important;
           border-color: #00adef !important;
           color: #ffffff !important;
+        }
+      }
+    }
+  }
+
+  /* Live Production Activity Feed & Table (Dashboard) */
+  .section-card.live-feed-card,
+  .live-feed-card {
+    background: $dark-bg-surface !important;
+    border: 1px solid $dark-border-subtle !important;
+
+    .section-header {
+      border-bottom-color: $dark-border-subtle !important;
+
+      .header-info {
+        .live-status-badge {
+          background: rgba(14, 165, 233, 0.15) !important;
+          border-color: rgba(14, 165, 233, 0.3) !important;
+          .live-tag { color: #38bdf8 !important; }
+        }
+
+        .section-title {
+          color: $dark-text-high !important;
+        }
+
+        .section-subtitle {
+          color: $dark-text-muted !important;
+        }
+      }
+
+      .header-queue-actions {
+        .queue-btn {
+          &.in-house {
+            background: rgba(16, 185, 129, 0.12) !important;
+            border-color: rgba(16, 185, 129, 0.3) !important;
+            color: #34d399 !important;
+            &:hover { background: rgba(16, 185, 129, 0.22) !important; }
+            .count-pill { background: $dark-bg-input !important; color: #34d399 !important; }
+          }
+          &.outsourced {
+            background: rgba(249, 115, 22, 0.12) !important;
+            border-color: rgba(249, 115, 22, 0.3) !important;
+            color: #fb923c !important;
+            &:hover { background: rgba(249, 115, 22, 0.22) !important; }
+            .count-pill { background: $dark-bg-input !important; color: #fb923c !important; }
+          }
+        }
+      }
+    }
+
+    .live-activity-table {
+      background: $dark-bg-surface !important;
+      border-color: $dark-border-subtle !important;
+
+      thead tr {
+        background: #0d1424 !important;
+        border-bottom: 2px solid $dark-border-subtle !important;
+      }
+
+      th {
+        background: #0d1424 !important;
+        color: $dark-text-muted !important;
+        border-bottom-color: $dark-border-subtle !important;
+      }
+
+      td {
+        border-bottom-color: $dark-border-subtle !important;
+        color: $dark-text-body !important;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid $dark-border-subtle !important;
+        &:hover {
+          background: $dark-bg-hover !important;
+        }
+      }
+
+      .job-badge-code {
+        background: $dark-bg-input !important;
+        color: #38bdf8 !important;
+        border: 1px solid $dark-border-medium !important;
+        font-weight: 800 !important;
+      }
+
+      .order-ref-pill {
+        background: rgba(2, 132, 199, 0.15) !important;
+        color: #38bdf8 !important;
+        border: 1px solid rgba(2, 132, 199, 0.35) !important;
+      }
+
+      .cust-cell {
+        .cust-avatar {
+          background: linear-gradient(135deg, #00ADEF, #0284c7) !important;
+          color: #ffffff !important;
+          border-color: $dark-border-medium !important;
+          box-shadow: 0 2px 8px rgba(0, 173, 239, 0.35) !important;
+        }
+
+        .cust-info {
+          .cust-title {
+            color: $dark-text-high !important;
+            font-weight: 700 !important;
+          }
+          .cust-sub {
+            color: $dark-text-muted !important;
+            font-weight: 500 !important;
+          }
+        }
+      }
+
+      .prod-badge {
+        &.in-house {
+          background: rgba(16, 185, 129, 0.16) !important;
+          color: #34d399 !important;
+          border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        }
+        &.outsourced {
+          background: rgba(249, 115, 22, 0.16) !important;
+          color: #fb923c !important;
+          border: 1px solid rgba(249, 115, 22, 0.35) !important;
+        }
+      }
+
+      .priority-pill {
+        &.normal {
+          background: $dark-bg-input !important;
+          color: #cbd5e1 !important;
+          border: 1px solid $dark-border-medium !important;
+          .priority-indicator { background: #94a3b8 !important; }
+        }
+        &.high {
+          background: rgba(249, 115, 22, 0.18) !important;
+          color: #fb923c !important;
+          border: 1px solid rgba(249, 115, 22, 0.4) !important;
+          .priority-indicator { background: #f97316 !important; }
+        }
+        &.urgent {
+          background: rgba(239, 68, 68, 0.2) !important;
+          color: #f87171 !important;
+          border: 1px solid rgba(239, 68, 68, 0.45) !important;
+          .priority-indicator { background: #ef4444 !important; }
+        }
+      }
+
+      .status-pill {
+        &.badge-progress {
+          background: rgba(16, 185, 129, 0.16) !important;
+          color: #34d399 !important;
+          border: 1px solid rgba(16, 185, 129, 0.35) !important;
+          .status-indicator { background: #10b981 !important; }
+        }
+        &.badge-completed {
+          background: rgba(34, 197, 94, 0.16) !important;
+          color: #4ade80 !important;
+          border: 1px solid rgba(34, 197, 94, 0.35) !important;
+          .status-indicator { background: #22c55e !important; }
+        }
+        &.badge-queued {
+          background: rgba(245, 158, 11, 0.16) !important;
+          color: #fbbf24 !important;
+          border: 1px solid rgba(245, 158, 11, 0.35) !important;
+          .status-indicator { background: #f59e0b !important; }
+        }
+        &.badge-hold {
+          background: rgba(239, 68, 68, 0.16) !important;
+          color: #f87171 !important;
+          border: 1px solid rgba(239, 68, 68, 0.35) !important;
+          .status-indicator { background: #ef4444 !important; }
+        }
+        &.badge-default {
+          background: $dark-bg-input !important;
+          color: #cbd5e1 !important;
+          border: 1px solid $dark-border-medium !important;
+          .status-indicator { background: #94a3b8 !important; }
+        }
+      }
+
+      .btn-job-jump {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+        &:hover {
+          background: $dark-bg-hover !important;
+          color: #7dd3fc !important;
+          border-color: #38bdf8 !important;
         }
       }
     }
@@ -743,6 +929,113 @@ body.dark-mode {
       background: transparent !important;
     }
 
+    // Customer Directory Row Elements
+    .id-tag {
+      background: #1e293b !important;
+      color: #38bdf8 !important;
+      border: 1px solid #334155 !important;
+      font-weight: 800 !important;
+    }
+
+    .company-cell {
+      .company-name {
+        color: #f8fafc !important;
+        font-weight: 700 !important;
+      }
+      .sub-address {
+        color: #94a3b8 !important;
+      }
+    }
+
+    .col-contact {
+      .contact-name {
+        color: #f1f5f9 !important;
+        font-weight: 600 !important;
+      }
+    }
+
+    .col-phone {
+      .phone-link {
+        color: #00adef !important;
+        font-weight: 700 !important;
+      }
+    }
+
+    .col-email {
+      .email-text {
+        color: #cbd5e1 !important;
+      }
+      .muted-text {
+        color: #64748b !important;
+      }
+    }
+
+    .col-date {
+      .date-text {
+        color: #94a3b8 !important;
+        font-weight: 600 !important;
+      }
+    }
+
+    .status-pill {
+      &.status-active {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.35) !important;
+      }
+      &.status-inactive {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #fbbf24 !important;
+        border: 1px solid rgba(245, 158, 11, 0.35) !important;
+      }
+      &.status-archived {
+        background: rgba(239, 68, 68, 0.16) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+      }
+    }
+
+    .action-buttons-group {
+      .btn-icon-action {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-medium !important;
+        color: $dark-text-muted !important;
+
+        &:hover {
+          background: $dark-bg-hover !important;
+          border-color: #475569 !important;
+          color: $dark-text-high !important;
+        }
+
+        &.btn-archive {
+          color: #c084fc !important;
+          border-color: rgba(139, 92, 246, 0.35) !important;
+          &:hover {
+            background: rgba(139, 92, 246, 0.2) !important;
+            color: #e9d5ff !important;
+          }
+        }
+
+        &.btn-restore {
+          color: #34d399 !important;
+          border-color: rgba(16, 185, 129, 0.35) !important;
+          &:hover {
+            background: rgba(16, 185, 129, 0.2) !important;
+            color: #a7f3d0 !important;
+          }
+        }
+
+        &.btn-delete {
+          color: #f87171 !important;
+          border-color: rgba(239, 68, 68, 0.35) !important;
+          &:hover {
+            background: rgba(239, 68, 68, 0.2) !important;
+            color: #fca5a5 !important;
+          }
+        }
+      }
+    }
+
     .customer-name,
     .primary-date {
       color: $dark-text-high !important;
@@ -766,6 +1059,192 @@ body.dark-mode {
     .quote-link {
       color: #38bdf8 !important;
       font-weight: 700;
+    }
+  }
+
+  /* Customer Directory Specific Wrappers & Details */
+  .customers-page {
+    .page-header {
+      .header-titles {
+        .page-title { color: $dark-text-high !important; }
+        .page-subtitle { color: $dark-text-muted !important; }
+      }
+    }
+
+    .table-card {
+      background: $dark-bg-surface !important;
+      border: 1px solid $dark-border-subtle !important;
+
+      .table-meta-bar {
+        border-bottom: 1px solid $dark-border-subtle !important;
+        .meta-left {
+          .record-counter {
+            color: $dark-text-muted !important;
+            strong { color: $dark-text-high !important; }
+          }
+          .loading-tag {
+            background: rgba(0, 173, 239, 0.15) !important;
+            color: #38bdf8 !important;
+          }
+        }
+
+        .meta-right {
+          color: $dark-text-muted !important;
+          .select-page-size {
+            background: $dark-bg-input !important;
+            color: $dark-text-high !important;
+            border: 1px solid $dark-border-medium !important;
+          }
+        }
+      }
+
+      .customer-table {
+        th {
+          background: #0d1424 !important;
+          color: $dark-text-muted !important;
+          border-bottom: 1px solid $dark-border-subtle !important;
+        }
+
+        td {
+          border-bottom: 1px solid $dark-border-subtle !important;
+        }
+
+        .data-row {
+          &:hover {
+            background: $dark-bg-hover !important;
+          }
+        }
+      }
+
+      .pagination-footer {
+        background: #0d1424 !important;
+        border-top: 1px solid $dark-border-subtle !important;
+
+        .pagination-info {
+          color: $dark-text-muted !important;
+          strong { color: $dark-text-high !important; }
+        }
+
+        .pagination-controls {
+          .btn-page {
+            background: $dark-bg-input !important;
+            border: 1px solid $dark-border-medium !important;
+            color: $dark-text-body !important;
+
+            &:hover:not(:disabled) {
+              background: $dark-bg-hover !important;
+              color: $dark-text-high !important;
+            }
+
+            &:disabled {
+              opacity: 0.35 !important;
+            }
+          }
+
+          .page-indicator {
+            color: $dark-text-high !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* Customer Detail View */
+  .customer-detail-page {
+    .top-nav-row {
+      .btn-back {
+        background: $dark-bg-input !important;
+        border: 1.5px solid $dark-border-medium !important;
+        color: $dark-text-body !important;
+        &:hover {
+          background: $dark-bg-hover !important;
+          color: $dark-text-high !important;
+          border-color: #475569 !important;
+        }
+      }
+
+      .header-actions {
+        .btn-subtle {
+          background: $dark-bg-input !important;
+          border: 1.5px solid $dark-border-medium !important;
+          color: $dark-text-body !important;
+          &:hover:not(:disabled) {
+            background: $dark-bg-hover !important;
+            color: $dark-text-high !important;
+          }
+        }
+
+        .btn-danger-outline {
+          background: rgba(239, 68, 68, 0.12) !important;
+          border: 1.5px solid rgba(239, 68, 68, 0.35) !important;
+          color: #f87171 !important;
+          &:hover:not(:disabled) {
+            background: rgba(239, 68, 68, 0.22) !important;
+          }
+        }
+      }
+    }
+
+    .profile-hero-card {
+      background: $dark-bg-surface !important;
+      border: 1px solid $dark-border-subtle !important;
+
+      .hero-top {
+        .hero-titles {
+          .client-company-title {
+            color: $dark-text-high !important;
+          }
+          .client-contact-title {
+            color: $dark-text-muted !important;
+            strong { color: $dark-text-high !important; }
+          }
+        }
+      }
+
+      .status-summary-strip {
+        background: $dark-bg-input !important;
+        border: 1px solid $dark-border-subtle !important;
+
+        .status-pill-large {
+          &.pill-active {
+            background: rgba(16, 185, 129, 0.18) !important;
+            color: #34d399 !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+          }
+          &.pill-inactive {
+            background: rgba(245, 158, 11, 0.18) !important;
+            color: #fbbf24 !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+          }
+          &.pill-archived {
+            background: rgba(239, 68, 68, 0.18) !important;
+            color: #f87171 !important;
+            border-color: rgba(239, 68, 68, 0.35) !important;
+          }
+        }
+      }
+
+      .field-list-section {
+        .field-item {
+          .field-label {
+            color: $dark-text-dim !important;
+          }
+          .field-value {
+            color: $dark-text-high !important;
+            svg { color: $dark-text-muted !important; }
+            &.phone-val {
+              color: #00adef !important;
+            }
+          }
+        }
+      }
+    }
+
+    .stat-card {
+      background: $dark-bg-surface !important;
+      border: 1px solid $dark-border-subtle !important;
+      .stat-title { color: $dark-text-muted !important; }
+      .stat-val { color: $dark-text-high !important; }
     }
   }
 
@@ -1198,6 +1677,386 @@ body.dark-mode {
       background: #064e3b !important;
       color: #34d399 !important;
       border-color: #059669 !important;
+    }
+  }
+
+  /* ========================================================
+     JOB TICKET SHEET EXEMPTION (SCREEN LIVE-PREVIEW)
+     The Production Job Sheet must ALWAYS stay pure white paper
+     with crisp black text and cyan blue accents even in Dark Mode!
+     ======================================================== */
+  .job-ticket-sheet,
+  #printable-job-sheet {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #0099dd !important;
+
+    * {
+      color-scheme: light !important;
+    }
+
+    .brand-sub {
+      color: #1e293b !important;
+    }
+
+    .brand-contacts {
+      color: #64748b !important;
+      .sep { color: #cbd5e1 !important; }
+    }
+
+    .ticket-title-block {
+      .ticket-badge {
+        background: #0099dd !important;
+        background-color: #0099dd !important;
+        color: #ffffff !important;
+      }
+      .ticket-job-number {
+        color: #0f172a !important;
+      }
+      .ticket-meta-print-date {
+        color: #64748b !important;
+      }
+    }
+
+    .divider-line {
+      background: #0099dd !important;
+      background-color: #0099dd !important;
+    }
+
+    .summary-cell {
+      background: #f8fafc !important;
+      background-color: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      border-top: 3px solid #0099dd !important;
+
+      .cell-label {
+        color: #475569 !important;
+      }
+      .cell-val {
+        color: #0f172a !important;
+      }
+      .highlight-qty {
+        color: #0284c7 !important;
+      }
+    }
+
+    .info-card {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+
+      .card-heading {
+        background: #f0f9ff !important;
+        background-color: #f0f9ff !important;
+        color: #0284c7 !important;
+        border-bottom: 1px solid #bae6fd !important;
+
+        .heading-num {
+          background: #0284c7 !important;
+          background-color: #0284c7 !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    table,
+    table.info-table,
+    table.sheet-data-table,
+    .info-table,
+    .sheet-data-table {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+
+      thead, thead tr, thead th, th {
+        background: #0284c7 !important;
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border-color: #38bdf8 !important;
+      }
+
+      tbody, tbody tr, tr {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+
+        &:hover,
+        &:hover td,
+        &:hover th {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+        }
+      }
+
+      td {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        border-right: 1px solid #e2e8f0 !important;
+
+        &.lbl {
+          color: #334155 !important;
+          font-weight: 700 !important;
+          background: #f8fafc !important;
+          background-color: #f8fafc !important;
+        }
+
+        &.val,
+        &.bold-val {
+          color: #0f172a !important;
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+        }
+
+        &.highlight-cyan {
+          color: #0284c7 !important;
+        }
+      }
+    }
+
+    .specs-table-section,
+    .instructions-section {
+      .section-heading {
+        background: #f0f9ff !important;
+        background-color: #f0f9ff !important;
+        color: #0284c7 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-bottom: none !important;
+
+        .heading-num {
+          background: #0284c7 !important;
+          background-color: #0284c7 !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    .sheet-data-table {
+      thead th {
+        background: #0284c7 !important;
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border-right: 1px solid #38bdf8 !important;
+      }
+
+      tbody td {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        border-right: 1px solid #cbd5e1 !important;
+      }
+
+      .packing-inst-row {
+        background: #f8fafc !important;
+        background-color: #f8fafc !important;
+        color: #334155 !important;
+      }
+    }
+
+    .instructions-box {
+      background: #f8fafc !important;
+      background-color: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #334155 !important;
+
+      .custom-instruction {
+        background: #fef3c7 !important;
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-left: 4px solid #f59e0b !important;
+      }
+
+      .standard-instructions {
+        color: #475569 !important;
+        li { color: #475569 !important; }
+      }
+    }
+
+    .signoff-box {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border: 1px solid #94a3b8 !important;
+
+      .signoff-title { color: #0f172a !important; }
+      .signoff-sub { color: #64748b !important; }
+      .signoff-meta { color: #475569 !important; }
+    }
+
+    .sheet-doc-footer {
+      color: #94a3b8 !important;
+      border-top: 1px solid #e2e8f0 !important;
+    }
+  }
+}
+
+/* ========================================================
+   CRITICAL: COMPLETE PRINT RESET
+   Ensure printouts ALWAYS use clean white paper, black text,
+   and zero dark mode leakage across all printers & PDF exports.
+   ======================================================== */
+@media print {
+  html,
+  html.dark-mode,
+  body,
+  body.dark-mode,
+  body.dark-sidebar,
+  div,
+  article,
+  section,
+  header,
+  footer,
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td,
+  p,
+  span,
+  h1,
+  h2,
+  h3,
+  strong {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    color-scheme: light !important;
+  }
+
+  /* Specific overrides for printable job ticket sheet */
+  .job-ticket-sheet {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 2px solid #0099dd !important;
+
+    * {
+      color-scheme: light !important;
+    }
+
+    .summary-cell {
+      background: #f8fafc !important;
+      background-color: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      
+      .cell-label {
+        color: #475569 !important;
+      }
+      .cell-val {
+        color: #0f172a !important;
+      }
+    }
+
+    .info-card {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border: 1px solid #0099dd !important;
+
+      .card-heading {
+        background: #f0f9ff !important;
+        background-color: #f0f9ff !important;
+        color: #0284c7 !important;
+        border-bottom: 1px solid #bae6fd !important;
+      }
+    }
+
+    .info-table {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+
+      tr {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+      }
+
+      td {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+
+        &.lbl {
+          color: #475569 !important;
+        }
+
+        &.val,
+        &.bold-val {
+          color: #0f172a !important;
+        }
+      }
+    }
+
+    .specs-table-section {
+      .section-heading {
+        background: #f0f9ff !important;
+        background-color: #f0f9ff !important;
+        color: #0284c7 !important;
+        border: 1px solid #0099dd !important;
+        border-bottom: none !important;
+      }
+    }
+
+    .sheet-data-table {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border: 1px solid #0099dd !important;
+
+      thead th {
+        background: #0284c7 !important;
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        border-right: 1px solid #38bdf8 !important;
+      }
+
+      tbody td {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        border-right: 1px solid #cbd5e1 !important;
+      }
+
+      .packing-inst-row {
+        background: #f8fafc !important;
+        background-color: #f8fafc !important;
+        color: #334155 !important;
+      }
+    }
+
+    .instructions-box {
+      background: #f8fafc !important;
+      background-color: #f8fafc !important;
+      border: 1px solid #cbd5e1 !important;
+      color: #334155 !important;
+
+      .custom-instruction {
+        background: #fef3c7 !important;
+        background-color: #fef3c7 !important;
+        color: #92400e !important;
+        border-left: 4px solid #f59e0b !important;
+      }
+
+      .standard-instructions {
+        color: #475569 !important;
+      }
+    }
+
+    .signoff-box {
+      background: #ffffff !important;
+      background-color: #ffffff !important;
+      border: 1px solid #94a3b8 !important;
+
+      .signoff-title {
+        color: #0f172a !important;
+      }
+      .signoff-sub {
+        color: #64748b !important;
+      }
+      .signoff-meta {
+        color: #475569 !important;
+      }
     }
   }
 }

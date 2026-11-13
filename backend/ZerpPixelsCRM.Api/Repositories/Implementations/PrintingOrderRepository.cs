@@ -35,34 +35,6 @@ public class PrintingOrderRepository : Repository<PrintingOrder>, IPrintingOrder
             .FirstOrDefaultAsync(o => o.RevisionId == revisionId);
     }
 
-    public async Task<List<PrintingOrder>> GetAllOrdersAsync(string? status, string? search)
-    {
-        var query = _dbSet
-            .Include(o => o.Quotation)
-            .Include(o => o.Revision)
-            .Include(o => o.Items)
-            .Include(o => o.ProductionJobs)
-            .AsNoTracking()
-            .AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(o => o.Status.ToLower() == status.Trim().ToLower());
-        }
-
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var term = search.Trim().ToLower();
-            query = query.Where(o =>
-                o.OrderNumber.ToLower().Contains(term) ||
-                o.CustomerName.ToLower().Contains(term) ||
-                o.CustomerPhone.Contains(term) ||
-                o.Quotation.QuotationNumber.ToLower().Contains(term));
-        }
-
-        return await query.OrderByDescending(o => o.CreatedAt).ToListAsync();
-    }
-
     public async Task<string> GenerateNextOrderNumberAsync()
     {
         var year = DateTime.UtcNow.Year;

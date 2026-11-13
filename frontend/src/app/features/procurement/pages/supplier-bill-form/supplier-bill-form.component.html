@@ -1,0 +1,288 @@
+<div class="bill-form-page">
+  <div class="form-shell">
+    <!-- HEADER -->
+    <header class="form-header">
+      <div class="header-text">
+        <h1 class="form-title">
+          {{ isEditMode ? 'Edit Supplier Bill' : 'Record Supplier Bill' }}
+        </h1>
+        <p class="form-subtitle">
+          Record supplier invoices, verify items against purchase orders, and track payables.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="btn btn-outline" [disabled]="isSubmitting" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" [disabled]="isSubmitting" (click)="saveBill()">
+          {{ isSubmitting ? 'Saving Bill...' : isEditMode ? 'Update Bill' : 'Save Bill' }}
+        </button>
+      </div>
+    </header>
+
+    <!-- ALERTS -->
+    <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-warning" *ngIf="serverConflictMessage">
+      <strong>Duplicate Reference:</strong> {{ serverConflictMessage }}
+    </div>
+
+    <!-- MAIN FORM -->
+    <form [formGroup]="billForm" (ngSubmit)="saveBill()">
+      <!-- SECTION A: BILL INFORMATION -->
+      <section class="form-section">
+        <div class="section-heading">
+          <h2>Section A — Bill Information</h2>
+          <span class="sub">Header information &amp; invoice references</span>
+        </div>
+
+        <div class="fields-grid">
+          <!-- Field 1: Internal Bill Number -->
+          <div class="field-box">
+            <label class="field-label">Internal Bill Number</label>
+            <input
+              type="text"
+              class="form-control mono read-only"
+              formControlName="internalBillNumber"
+              placeholder="Auto-generated (BILL-YYYYMM-XXXX)"
+              readonly
+            />
+            <span class="field-help">Unique ERP internal bill reference</span>
+          </div>
+
+          <!-- Field 4: Supplier Invoice Number -->
+          <div class="field-box">
+            <label class="field-label required">Supplier Invoice Number</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="supplierInvoiceNumber"
+              placeholder="e.g. INV-98421"
+              [class.is-invalid]="billForm.get('supplierInvoiceNumber')?.invalid && billForm.get('supplierInvoiceNumber')?.touched"
+            />
+            <span class="field-error" *ngIf="billForm.get('supplierInvoiceNumber')?.invalid && billForm.get('supplierInvoiceNumber')?.touched">
+              Supplier invoice number is required.
+            </span>
+            <span class="field-help" *ngIf="!billForm.get('supplierInvoiceNumber')?.invalid || !billForm.get('supplierInvoiceNumber')?.touched">
+              From the supplier's actual invoice
+            </span>
+          </div>
+
+          <!-- Field 2: Select Supplier -->
+          <div class="field-box field-full">
+            <label class="field-label required">Select Supplier</label>
+            <div class="searchable-supplier-box">
+              <input
+                type="text"
+                class="form-control"
+                [value]="supplierSearch"
+                (input)="filterSuppliers($any($event.target).value)"
+                (focus)="showSupplierDropdown = true"
+                placeholder="Search active suppliers by name, phone or contact person..."
+                [class.is-invalid]="billForm.get('supplierId')?.invalid && billForm.get('supplierId')?.touched"
+              />
+              <button
+                *ngIf="selectedSupplier"
+                type="button"
+                class="btn-clear-supplier"
+                (click)="clearSupplier()"
+              >
+                Clear
+              </button>
+
+              <div
+                class="dropdown-popover"
+                *ngIf="showSupplierDropdown && filteredSuppliers.length > 0"
+              >
+                <div
+                  class="dropdown-item"
+                  *ngFor="let s of filteredSuppliers"
+                  (mousedown)="selectSupplier(s)"
+                >
+                  <div class="item-name strong">{{ s.supplierName }}</div>
+                  <div class="item-meta">
+                    <span *ngIf="s.contactPerson">Contact: {{ s.contactPerson }}</span>
+                    <span *ngIf="s.phoneNumber">Phone: {{ s.phoneNumber }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Supplier Snapshot Card -->
+            <div class="supplier-snapshot" *ngIf="selectedSupplier">
+              <div class="snapshot-header">
+                <span class="badge-active">Active Supplier</span>
+                <span class="snapshot-name strong">{{ selectedSupplier.supplierName }}</span>
+              </div>
+              <div class="snapshot-details">
+                <span *ngIf="selectedSupplier.contactPerson">
+                  <strong>Contact:</strong> {{ selectedSupplier.contactPerson }}
+                </span>
+                <span *ngIf="selectedSupplier.phoneNumber">
+                  <strong>Phone:</strong> {{ selectedSupplier.phoneNumber }}
+                </span>
+                <span *ngIf="selectedSupplier.email">
+                  <strong>Email:</strong> {{ selectedSupplier.email }}
+                </span>
+                <span *ngIf="selectedSupplier.address">
+                  <strong>Address:</strong> {{ selectedSupplier.address }}
+                </span>
+              </div>
+            </div>
+
+            <span class="field-error" *ngIf="billForm.get('supplierId')?.invalid && billForm.get('supplierId')?.touched">
+              Please select a supplier from the list.
+            </span>
+          </div>
+
+          <!-- Field 3: Reference Purchase Order -->
+          <div class="field-box">
+            <label class="field-label">Reference Purchase Order (Optional)</label>
+            <select
+              class="form-control"
+              formControlName="purchaseOrderId"
+              (change)="onPurchaseOrderSelected($event)"
+              [disabled]="!selectedSupplier"
+            >
+              <option [ngValue]="null">-- None / General Supplier Bill --</option>
+              <option *ngFor="let po of supplierPurchaseOrders" [ngValue]="po.id">
+                {{ po.poNumber }} — {{ po.poDate | date:'mediumDate' }} (PKR {{ formatCurrency(po.totalAmount) }})
+              </option>
+            </select>
+            <span class="field-help" *ngIf="selectedSupplier">
+              Selecting a PO will copy its items for review.
+            </span>
+            <span class="field-help muted" *ngIf="!selectedSupplier">
+              Select a supplier first to view linked Purchase Orders.
+            </span>
+          </div>
+
+          <!-- Field 5: Bill Date -->
+          <div class="field-box">
+            <label class="field-label required">Bill Date</label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="billDate"
+              [class.is-invalid]="billForm.get('billDate')?.invalid && billForm.get('billDate')?.touched"
+            />
+          </div>
+
+          <!-- Field 6: Due Date -->
+          <div class="field-box">
+            <label class="field-label required">Due Date</label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="dueDate"
+              [class.is-invalid]="billForm.get('dueDate')?.invalid && billForm.get('dueDate')?.touched"
+            />
+            <span class="field-help">Used for overdue tracking &amp; aging report</span>
+          </div>
+
+          <!-- Field 7: Description -->
+          <div class="field-box field-full">
+            <label class="field-label">Bill Description (Optional)</label>
+            <textarea
+              class="form-control"
+              rows="2"
+              formControlName="description"
+              placeholder="Notes or details regarding this supplier invoice..."
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION B: SUPPLIER BILL ITEMS -->
+      <section class="form-section">
+        <div class="section-heading-row">
+          <div>
+            <h2>Section B — Supplier Bill Items</h2>
+            <span class="sub">Verify quantities and rates against the actual supplier invoice.</span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" (click)="addItem()">
+            + Add Item
+          </button>
+        </div>
+
+        <div class="items-table-wrapper" formArrayName="items">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th class="col-sr">#</th>
+                <th class="col-desc">Description</th>
+                <th class="col-qty">Quantity</th>
+                <th class="col-rate">Rate (PKR)</th>
+                <th class="col-amt">Amount (PKR)</th>
+                <th class="col-act">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of items.controls; let i = index" [formGroupName]="i">
+                <td class="col-sr">{{ i + 1 }}</td>
+                <td class="col-desc">
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="description"
+                    placeholder="e.g. 300gsm Art Card Sheets (25x36)"
+                  />
+                </td>
+                <td class="col-qty">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    class="form-control num-input"
+                    formControlName="quantity"
+                  />
+                </td>
+                <td class="col-rate">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control num-input"
+                    formControlName="rate"
+                  />
+                </td>
+                <td class="col-amt">
+                  <span class="amt-text mono strong">
+                    {{ formatCurrency(getItemAmount(i)) }}
+                  </span>
+                </td>
+                <td class="col-act">
+                  <button
+                    type="button"
+                    class="btn-remove-item"
+                    title="Remove item"
+                    (click)="removeItem(i)"
+                  >
+                    &times;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TOTAL FOOTER -->
+        <div class="total-bar">
+          <span class="total-label">Total Bill Amount</span>
+          <span class="total-value mono">PKR {{ formatCurrency(totalBillAmount) }}</span>
+        </div>
+      </section>
+
+      <!-- FORM ACTIONS -->
+      <div class="form-actions-bottom">
+        <button type="button" class="btn btn-outline" [disabled]="isSubmitting" (click)="cancel()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Saving Bill...' : isEditMode ? 'Update Bill' : 'Save Bill' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+

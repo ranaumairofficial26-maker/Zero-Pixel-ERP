@@ -1,0 +1,114 @@
+<div class="quote-view-container">
+  <!-- Loading -->
+  <div class="loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading Supplier Quote...</span>
+  </div>
+
+  <!-- Error -->
+  <div class="alert-box-danger" *ngIf="errorMessage && !loading">
+    <span>{{ errorMessage }}</span>
+    <a routerLink="/admin/procurement/supplier-quotes" class="btn-back-link">Back to Supplier Quotes</a>
+  </div>
+
+  <ng-container *ngIf="quote && !loading">
+    <!-- Header -->
+    <div class="view-header-card">
+      <div class="header-left">
+        <div class="breadcrumb">
+          <a routerLink="/admin/procurement/supplier-quotes">Supplier Quotes</a>
+          <span>&gt;</span>
+          <span>{{ quote.quoteNumber }}</span>
+        </div>
+        <div class="title-row">
+          <h1 class="quote-title">{{ quote.quoteNumber }}</h1>
+          <span class="status-badge" [class.status-recorded]="quote.status !== 'Cancelled'" [class.status-cancelled]="quote.status === 'Cancelled'">
+            {{ quote.status }}
+          </span>
+        </div>
+        <p class="header-meta">
+          Quote Date: <strong>{{ quote.quoteDate | date:'mediumDate' }}</strong> &bull;
+          Supplier: <strong>{{ quote.supplierName }}</strong>
+          <ng-container *ngIf="quote.supplierReferenceNumber">
+            &bull; Supplier Ref: <strong>{{ quote.supplierReferenceNumber }}</strong>
+          </ng-container>
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <a routerLink="/admin/procurement/supplier-quotes" class="btn-back">
+          Back to Supplier Quotes
+        </a>
+        <a
+          *ngIf="quote.status !== 'Cancelled'"
+          [routerLink]="['/admin/procurement/supplier-quotes/edit', quote.id]"
+          class="btn-edit"
+        >
+          Edit Quote
+        </a>
+      </div>
+    </div>
+
+    <!-- Supplier Information -->
+    <div class="view-card">
+      <h2 class="card-title">Supplier Information</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Supplier Name</span>
+          <strong class="info-val">{{ quote.supplierName }}</strong>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Contact Person</span>
+          <strong class="info-val">{{ quote.supplierContactPerson || 'N/A' }}</strong>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Phone</span>
+          <strong class="info-val mono">{{ quote.supplierPhone || 'N/A' }}</strong>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <strong class="info-val">{{ quote.supplierEmail || 'N/A' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quotation Details -->
+    <div class="view-card">
+      <h2 class="card-title">Quotation Details</h2>
+
+      <div class="desc-block" *ngIf="quote.description">
+        <span class="info-label">Quote Description</span>
+        <p class="desc-text">{{ quote.description }}</p>
+      </div>
+
+      <div class="table-responsive">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width: 70px; text-align: center;">Sr No</th>
+              <th>Description</th>
+              <th style="width: 120px; text-align: right;">Quantity</th>
+              <th style="width: 140px; text-align: right;">Rate (PKR)</th>
+              <th style="width: 160px; text-align: right;">Amount (PKR)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let it of quote.items">
+              <td style="text-align: center;">{{ it.serialNumber }}</td>
+              <td class="item-desc">{{ it.description }}</td>
+              <td style="text-align: right;">{{ it.quantity | number }}</td>
+              <td style="text-align: right;">Rs. {{ it.rate | number:'1.2-2' }}</td>
+              <td style="text-align: right;" class="item-amount">Rs. {{ it.amount | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="total-bar">
+        <span class="total-label">Total Quoted Amount:</span>
+        <strong class="total-value">Rs. {{ quote.totalAmount | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+  </ng-container>
+</div>
+

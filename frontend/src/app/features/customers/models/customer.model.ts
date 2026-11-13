@@ -5,6 +5,7 @@ export interface Customer {
   phone: string;
   email?: string | null;
   address?: string | null;
+  ntnNumber?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -18,6 +19,7 @@ export interface CreateCustomerRequest {
   phone: string;
   email?: string | null;
   address?: string | null;
+  ntnNumber?: string | null;
   isActive: boolean;
 }
 
@@ -27,6 +29,7 @@ export interface UpdateCustomerRequest {
   phone: string;
   email?: string | null;
   address?: string | null;
+  ntnNumber?: string | null;
   isActive: boolean;
 }
 

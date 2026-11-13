@@ -163,6 +163,26 @@ export interface QuantityCalculationResult {
   perPiecePrice: number;
 }
 
+export interface PrintingMachineRate {
+  id: number;
+  machineName: string;
+  printPerPlate: number;
+  printPerSet: number;
+  printingPlate: number;
+  platePerSet: number;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export interface PlateSizePreset {
+  id: string;
+  label: string;
+  sizeMm: string;
+  machineName?: string;
+  singleRate: number;
+  setRate: number;
+}
+
 export interface CalculateEstimateResponse {
   computedPerSheetPrice: number;
   results: QuantityCalculationResult[];
@@ -215,6 +235,53 @@ export interface SaveEstimateRequest {
 
   profitPercentage: number;
   taxPercentage: number;
+
+  // Step 4: Plate / CTP & Prepress
+  plateMakingMethod?: string;
+  selectedPlateSizeId?: string;
+  selectedPlateSizeName?: string;
+  plateCode?: string;
+  filmType?: string;
+  plateQuantity?: number;
+  isPlateQuantityManual?: boolean;
+  platePricingMethod?: string;
+  platesPerSet?: number;
+  singlePlateRate?: number;
+  setPlateRate?: number;
+  manualPlateCost?: number;
+  filmQuantity?: number;
+  ratePerFilm?: number | null;
+  otherPrepressCharges?: number;
+  computedPlateCost?: number;
+  computedFilmCost?: number;
+  computedPrepressCost?: number;
+
+  // Step 5: Printing Cost (Color & Machine Wise)
+  printingMachine?: string;
+  customPrintingMachine?: string;
+  printingQuantity?: number;
+  printingCostMethod?: string;
+  perColorRateScope?: string;
+  printingRate?: number | null;
+  manualPrintingAmount?: number;
+  machineSetupCharge?: number;
+  additionalRunCharge?: number;
+  otherPrintingCharges?: number;
+  applyPerColorFormula?: boolean;
+  computedMachinePrintingCost?: number;
+
+  // Step 6: Lamination (Glossy / Matte)
+  laminationType?: string;
+  laminationSides?: string;
+  laminationCostMethod?: string;
+  laminationQuantity?: number;
+  glossyLaminationRate?: number | null;
+  matteLaminationRate?: number | null;
+  laminationSheetWidthInches?: number;
+  laminationSheetHeightInches?: number;
+  applyLaminationSideMultiplier?: boolean;
+  manualLaminationAmount?: number;
+  computedLaminationCost?: number;
 
   quantities: EstimateQuantityInput[];
   costItems: EstimateCostItemInput[];

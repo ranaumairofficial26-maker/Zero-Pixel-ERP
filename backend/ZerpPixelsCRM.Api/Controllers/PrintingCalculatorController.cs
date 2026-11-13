@@ -22,13 +22,6 @@ public class PrintingCalculatorController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("import-status")]
-    public async Task<IActionResult> GetImportStatus()
-    {
-        var status = await _printingCalculatorService.GetImportStatusAsync();
-        return Ok(status);
-    }
-
     // 1. Categories
     [HttpGet("categories")]
     public async Task<ActionResult<List<PrintingCategoryDto>>> GetCategories()
@@ -36,8 +29,7 @@ public class PrintingCalculatorController : ControllerBase
         var categories = await _printingCalculatorService.GetCategoriesAsync();
         return Ok(categories);
     }
-
-    // 2. Printing Items
+        // 2. Printing Items
     [HttpGet("items")]
     public async Task<ActionResult<List<PrintingItemDto>>> GetItems([FromQuery] int? categoryId)
     {
@@ -94,17 +86,6 @@ public class PrintingCalculatorController : ControllerBase
         return Ok(sizes);
     }
 
-    [HttpGet("printing-sizes/{id:int}")]
-    public async Task<ActionResult<PrintingSizeDto>> GetPrintingSize(int id)
-    {
-        var size = await _printingCalculatorService.GetPrintingSizeByIdAsync(id);
-        if (size == null)
-        {
-            return NotFound(new { message = "Printing size not found." });
-        }
-        return Ok(size);
-    }
-
     // 6. Materials
     [HttpGet("materials")]
     public async Task<ActionResult<List<PrintingMaterialDto>>> GetMaterials()
@@ -132,6 +113,14 @@ public class PrintingCalculatorController : ControllerBase
     {
         var categories = await _printingCalculatorService.GetCostCategoriesAsync();
         return Ok(categories);
+    }
+
+    // 8.1 Machine Rates (Step 5 Confirmed Master Data)
+    [HttpGet("machine-rates")]
+    public async Task<ActionResult<List<PrintingMachineRateDto>>> GetMachineRates()
+    {
+        var machines = await _printingCalculatorService.GetMachineRatesAsync();
+        return Ok(machines);
     }
 
     // 9. Calculation Engine

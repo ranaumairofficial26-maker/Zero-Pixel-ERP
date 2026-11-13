@@ -11,11 +11,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
     {
     }
 
-    public async Task<int> GetCategoryCountAsync() => await _context.PrintingCategories.CountAsync();
-    public async Task<int> GetItemCountAsync() => await _context.PrintingItems.CountAsync();
-    public async Task<int> GetPaperSizeCountAsync() => await _context.PaperSizes.CountAsync();
-    public async Task<int> GetMaterialCountAsync() => await _context.PrintingMaterials.CountAsync();
-
     public async Task<List<PrintingCategory>> GetActiveCategoriesAsync()
     {
         return await _context.PrintingCategories
@@ -53,14 +48,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
         return await _context.PrintingItems.FindAsync(itemId);
     }
 
-    public async Task<PrintingItem?> GetItemWithCategoryAsync(int itemId)
-    {
-        return await _context.PrintingItems
-            .AsNoTracking()
-            .Include(i => i.Category)
-            .FirstOrDefaultAsync(i => i.ItemId == itemId);
-    }
-
     public async Task<PrintingItem> AddCustomItemAsync(PrintingItem item)
     {
         _context.PrintingItems.Add(item);
@@ -83,11 +70,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
             .OrderBy(p => p.PaperSizeId)
             .ThenBy(p => p.SizeName)
             .ToListAsync();
-    }
-
-    public async Task<PaperSize?> GetPaperSizeByIdAsync(int paperSizeId)
-    {
-        return await _context.PaperSizes.FindAsync(paperSizeId);
     }
 
     public async Task<PaperSize> AddPaperSizeAsync(PaperSize paperSize)
@@ -115,11 +97,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
             .ToListAsync();
     }
 
-    public async Task<PrintingSize?> GetPrintingSizeByIdAsync(int sizeId)
-    {
-        return await _context.PrintingSizes.FindAsync(sizeId);
-    }
-
     public async Task<List<PrintingMaterial>> GetMaterialsAsync()
     {
         return await _context.PrintingMaterials
@@ -128,11 +105,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
             .OrderBy(m => m.MaterialId)
             .ThenBy(m => m.MaterialName)
             .ToListAsync();
-    }
-
-    public async Task<PrintingMaterial?> GetMaterialByIdAsync(int materialId)
-    {
-        return await _context.PrintingMaterials.FindAsync(materialId);
     }
 
     public async Task<PrintingMaterial> AddCustomMaterialAsync(PrintingMaterial material)
@@ -148,6 +120,16 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
             .AsNoTracking()
             .Where(c => c.IsActive)
             .OrderBy(c => c.DisplayOrder)
+            .ToListAsync();
+    }
+
+    public async Task<List<PrintingMachineRate>> GetMachineRatesAsync()
+    {
+        return await _context.PrintingMachineRates
+            .AsNoTracking()
+            .Where(m => m.IsActive)
+            .OrderBy(m => m.DisplayOrder)
+            .ThenBy(m => m.MachineName)
             .ToListAsync();
     }
 
@@ -203,13 +185,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
             .FirstOrDefaultAsync(e => e.EstimateId == estimateId && e.DeletedAt == null);
     }
 
-    public async Task<PrintingCostEstimate> CreateEstimateWithDetailsAsync(PrintingCostEstimate estimate)
-    {
-        _context.PrintingCostEstimates.Add(estimate);
-        await _context.SaveChangesAsync();
-        return estimate;
-    }
-
     public async Task<bool> SoftDeleteEstimateAsync(long estimateId)
     {
         var estimate = await _context.PrintingCostEstimates.FindAsync(estimateId);
@@ -218,15 +193,6 @@ public class PrintingCalculatorRepository : Repository<PrintingCostEstimate>, IP
         estimate.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
         return true;
-    }
-
-    public async Task<string> GenerateNextEstimateNumberAsync()
-    {
-        var today = DateTime.UtcNow.ToString("yyyyMMdd");
-        var prefix = $"EST-{today}-";
-        var countToday = await _context.PrintingCostEstimates
-            .CountAsync(e => e.EstimateNumber.StartsWith(prefix));
-        return $"{prefix}{(countToday + 1):D3}";
     }
 
     public async Task<Quotation?> GetQuotationForLinkingAsync(long quotationId)

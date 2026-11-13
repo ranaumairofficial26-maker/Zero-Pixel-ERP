@@ -1,0 +1,238 @@
+<div class="quote-form-container">
+  <!-- Header -->
+  <div class="page-header-bar">
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/admin/procurement/supplier-quotes">Supplier Quotes</a>
+        <span>/</span>
+        <span>{{ isEditMode ? 'Edit Quote' : 'Record Quote' }}</span>
+      </div>
+      <h1 class="page-title">{{ isEditMode ? 'Edit Supplier Quote' : 'Record Supplier Quote' }}</h1>
+    </div>
+
+    <a routerLink="/admin/procurement/supplier-quotes" class="btn-back">
+      Back to Supplier Quotes
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading Quotation Form...</span>
+  </div>
+
+  <!-- Error -->
+  <div class="alert-box-danger" *ngIf="errorMessage && !loading">
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form [formGroup]="quoteForm" (ngSubmit)="onSubmit()" *ngIf="!loading" novalidate>
+    <!-- SECTION A: QUOTATION INFORMATION -->
+    <div class="card-section">
+      <div class="section-header">
+        <span class="section-badge">A</span>
+        <div>
+          <h2 class="section-title">Quotation Information</h2>
+          <p class="section-subtitle">Select an active supplier and enter quotation header details.</p>
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <!-- Quote Number -->
+        <div class="form-group">
+          <label class="field-label">Quote Number</label>
+          <div class="readonly-badge">{{ previewQuoteNumber }}</div>
+          <span class="field-hint">Auto-generated unique ERP reference.</span>
+        </div>
+
+        <!-- Supplier Reference Number (Optional) -->
+        <div class="form-group">
+          <label class="field-label" for="supplierRef">Supplier Reference # (Optional)</label>
+          <input
+            id="supplierRef"
+            type="text"
+            class="form-control"
+            formControlName="supplierReferenceNumber"
+            placeholder="Supplier's own ref (if provided)"
+          />
+        </div>
+
+        <!-- Quote Date -->
+        <div class="form-group">
+          <label class="field-label" for="quoteDate">Quote Date <span class="req">*</span></label>
+          <input
+            id="quoteDate"
+            type="date"
+            class="form-control"
+            formControlName="quoteDate"
+            [class.is-invalid]="quoteForm.get('quoteDate')?.invalid && quoteForm.get('quoteDate')?.touched"
+          />
+        </div>
+      </div>
+
+      <!-- Select Supplier (Searchable Dropdown) -->
+      <div class="supplier-select-block">
+        <div class="form-group">
+          <label class="field-label" for="supplierSearch">Select Supplier <span class="req">*</span></label>
+          <div class="searchable-supplier-row">
+            <input
+              id="supplierSearch"
+              type="text"
+              class="form-control search-filter-input"
+              [(ngModel)]="supplierSearchTerm"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Filter active suppliers by name, contact, phone or email..."
+            />
+            <select
+              class="form-control supplier-dropdown"
+              formControlName="supplierId"
+              [class.is-invalid]="quoteForm.get('supplierId')?.invalid && quoteForm.get('supplierId')?.touched"
+            >
+              <option [ngValue]="null">-- Select Active Supplier --</option>
+              <option *ngFor="let sup of filteredSuppliers" [ngValue]="sup.id">
+                {{ sup.supplierName }}{{ sup.contactPerson ? ' (' + sup.contactPerson + ')' : '' }}
+              </option>
+            </select>
+          </div>
+          <span class="field-error" *ngIf="quoteForm.get('supplierId')?.invalid && quoteForm.get('supplierId')?.touched">
+            Please select a supplier from the Suppliers Directory.
+          </span>
+          <span class="field-hint" *ngIf="activeSuppliers.length === 0">
+            No active suppliers found in Suppliers Directory.
+          </span>
+        </div>
+
+        <!-- Selected Supplier Info Card -->
+        <div class="supplier-snapshot-card" *ngIf="selectedSupplier">
+          <div class="snapshot-grid">
+            <div class="snap-item">
+              <span class="snap-lbl">Supplier Name</span>
+              <strong class="snap-val">{{ selectedSupplier.supplierName }}</strong>
+            </div>
+            <div class="snap-item">
+              <span class="snap-lbl">Contact Person</span>
+              <strong class="snap-val">{{ selectedSupplier.contactPerson || 'N/A' }}</strong>
+            </div>
+            <div class="snap-item">
+              <span class="snap-lbl">Phone</span>
+              <strong class="snap-val mono">{{ selectedSupplier.phoneNumber || 'N/A' }}</strong>
+            </div>
+            <div class="snap-item">
+              <span class="snap-lbl">Email</span>
+              <strong class="snap-val">{{ selectedSupplier.email || 'N/A' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quote Details / Description -->
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="field-label" for="description">Quote Details / Description</label>
+        <textarea
+          id="description"
+          rows="3"
+          class="form-control textarea"
+          formControlName="description"
+          placeholder="Describe the quotation..."
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION B: QUOTATION ITEMS -->
+    <div class="card-section">
+      <div class="section-header flex-between">
+        <div class="header-left-group">
+          <span class="section-badge">B</span>
+          <div>
+            <h2 class="section-title">Quotation Items</h2>
+            <p class="section-subtitle">Enter printing materials or services with supplier-quoted rates (PKR).</p>
+          </div>
+        </div>
+        <button type="button" class="btn-add-item" (click)="addItem()">
+          + Add Item
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width: 65px; text-align: center;">Sr No</th>
+              <th>Description <span class="req">*</span></th>
+              <th style="width: 135px;">Quantity <span class="req">*</span></th>
+              <th style="width: 155px;">Rate (PKR) <span class="req">*</span></th>
+              <th style="width: 165px; text-align: right;">Amount (PKR)</th>
+              <th style="width: 90px; text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="items">
+            <tr *ngFor="let row of items.controls; let i = index" [formGroupName]="i">
+              <td style="text-align: center;">
+                <span class="sr-badge">{{ i + 1 }}</span>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="table-input"
+                  formControlName="description"
+                  [placeholder]="getItemPlaceholder(i)"
+                  [class.is-invalid]="row.get('description')?.invalid && row.get('description')?.touched"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  min="0.0001"
+                  step="any"
+                  class="table-input num-input"
+                  formControlName="quantity"
+                  [class.is-invalid]="row.get('quantity')?.invalid && row.get('quantity')?.touched"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="table-input num-input"
+                  formControlName="rate"
+                  placeholder="0.00"
+                  [class.is-invalid]="row.get('rate')?.invalid && row.get('rate')?.touched"
+                />
+              </td>
+              <td style="text-align: right;">
+                <strong class="amount-val">Rs. {{ (row.get('amount')?.value || 0) | number:'1.2-2' }}</strong>
+              </td>
+              <td style="text-align: center;">
+                <button
+                  type="button"
+                  class="btn-remove-row"
+                  (click)="removeItem(i)"
+                  [disabled]="items.length <= 1"
+                  title="Remove Row"
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total Quoted Amount -->
+      <div class="total-bar">
+        <span class="total-label">Total Quoted Amount:</span>
+        <strong class="total-value">Rs. {{ totalQuotedAmount | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <!-- FORM ACTIONS -->
+    <div class="form-actions-bar">
+      <a routerLink="/admin/procurement/supplier-quotes" class="btn-cancel">Cancel</a>
+      <button type="submit" class="btn-save" [disabled]="saving">
+        {{ saving ? 'Saving...' : (isEditMode ? 'Update Quote' : 'Save Quote') }}
+      </button>
+    </div>
+  </form>
+</div>
+

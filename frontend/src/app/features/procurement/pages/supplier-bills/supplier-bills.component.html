@@ -1,0 +1,290 @@
+<div class="supplier-bills-page">
+  <!-- PAGE HEADER -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-title-row">
+        <div class="header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <line x1="2" y1="10" x2="22" y2="10"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="page-title">Supplier Bills &amp; Payments</h1>
+          <p class="page-subtitle">Manage supplier invoices, outstanding payables and bill status.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="goToAgingReport()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        Aging Report
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="goToRecordBill()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Record Bill
+      </button>
+    </div>
+  </header>
+
+  <!-- SUMMARY CARDS -->
+  <section class="summary-cards-grid">
+    <div class="summary-card">
+      <div class="card-meta">
+        <span class="card-label">Outstanding Payables</span>
+        <div class="card-icon card-icon-warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="card-value">
+        <span class="currency">PKR</span>
+        <span class="amount">{{ formatCurrency(summary.outstandingPayables) }}</span>
+      </div>
+      <div class="card-footnote">Sum of unpaid supplier bill balances</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-meta">
+        <span class="card-label">Overdue Bills</span>
+        <div class="card-icon card-icon-danger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+      </div>
+      <div class="card-value">
+        <span class="count">{{ summary.overdueBillsCount }}</span>
+      </div>
+      <div class="card-footnote">Unpaid bills past due date</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-meta">
+        <span class="card-label">Paid This Month</span>
+        <div class="card-icon card-icon-info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+      </div>
+      <div class="card-value">
+        <span class="amount">{{ summary.paidThisMonth }}</span>
+      </div>
+      <div class="card-footnote">Valid supplier payments recorded this month</div>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <div class="alert alert-success" *ngIf="actionMessage">{{ actionMessage }}</div>
+  <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- FILTER & SEARCH BAR -->
+  <section class="filter-card">
+    <div class="search-input-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search by Bill #, Supplier Invoice #, Supplier or PO..."
+      />
+    </div>
+
+    <div class="status-filters">
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="selectedStatus === 'All'"
+        (click)="onStatusChange('All')"
+      >
+        All
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="selectedStatus === 'Unpaid'"
+        (click)="onStatusChange('Unpaid')"
+      >
+        Unpaid
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="selectedStatus === 'Overdue'"
+        (click)="onStatusChange('Overdue')"
+      >
+        Overdue
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="selectedStatus === 'Cancelled'"
+        (click)="onStatusChange('Cancelled')"
+      >
+        Cancelled
+      </button>
+    </div>
+  </section>
+
+  <!-- BILLS TABLE CARD -->
+  <section class="table-card">
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Loading supplier bills...</span>
+    </div>
+
+    <table class="bills-table" *ngIf="!isLoading && bills.length > 0">
+      <thead>
+        <tr>
+          <th>Bill #</th>
+          <th>Supplier &amp; Ref</th>
+          <th class="num">Amount (PKR)</th>
+          <th class="num">Balance (PKR)</th>
+          <th>Status</th>
+          <th class="act">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of bills">
+          <td>
+            <div class="bill-numbers">
+              <span class="internal-num mono strong">{{ b.internalBillNumber }}</span>
+              <span class="supplier-inv">Inv: {{ b.supplierInvoiceNumber }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="supplier-meta">
+              <span class="supplier-name strong">{{ b.supplierName }}</span>
+              <span class="po-ref" *ngIf="b.purchaseOrderNumber">PO: {{ b.purchaseOrderNumber }}</span>
+              <span class="po-ref none" *ngIf="!b.purchaseOrderNumber">No PO Ref</span>
+            </div>
+          </td>
+          <td class="num strong">
+            {{ formatCurrency(b.totalAmount) }}
+          </td>
+          <td class="num balance-col" [class.overdue-balance]="b.status === 'Overdue'">
+            {{ formatCurrency(b.balance) }}
+          </td>
+          <td>
+            <span
+              class="status-pill"
+              [class.unpaid]="b.status === 'Unpaid'"
+              [class.overdue]="b.status === 'Overdue'"
+              [class.partially-paid]="b.status === 'Partially Paid'"
+              [class.paid]="b.status === 'Paid'"
+              [class.cancelled]="b.status === 'Cancelled'"
+            >
+              {{ b.status }}
+            </span>
+          </td>
+          <td class="act">
+            <div class="actions-group">
+              <button type="button" class="action-btn" title="View Bill" (click)="viewBill(b.id)">
+                View
+              </button>
+              <button
+                *ngIf="b.status !== 'Cancelled' && b.paidAmount === 0"
+                type="button"
+                class="action-btn"
+                title="Edit Bill"
+                (click)="editBill(b.id)"
+              >
+                Edit
+              </button>
+              <button
+                *ngIf="b.status !== 'Cancelled' && b.paidAmount === 0"
+                type="button"
+                class="action-btn danger"
+                title="Cancel Bill"
+                (click)="openCancelModal(b)"
+              >
+                Cancel
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="!isLoading && bills.length === 0">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <line x1="2" y1="10" x2="22" y2="10"></line>
+        </svg>
+      </div>
+      <h3>No Supplier Bills Found</h3>
+      <p>Record supplier invoices to track payables, due dates and outstanding balances.</p>
+      <button type="button" class="btn btn-primary" (click)="goToRecordBill()">
+        + Record Bill
+      </button>
+    </div>
+
+    <!-- PAGINATION -->
+    <footer class="table-footer" *ngIf="totalPages > 1">
+      <span class="total-info">
+        Showing {{ (currentPage - 1) * pageSize + 1 }} to
+        {{ currentPage * pageSize > totalCount ? totalCount : currentPage * pageSize }} of
+        {{ totalCount }} bills
+      </span>
+      <div class="pagination">
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)"
+        >
+          Previous
+        </button>
+        <span class="current-page-text">{{ currentPage }} / {{ totalPages }}</span>
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<!-- CANCEL CONFIRMATION MODAL -->
+<div class="modal-backdrop" *ngIf="showCancelModal" (click)="closeCancelModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Cancel Supplier Bill</h3>
+    <p>
+      Are you sure you want to cancel bill
+      <strong>{{ billToCancel?.internalBillNumber }}</strong> (Invoice:
+      <strong>{{ billToCancel?.supplierInvoiceNumber }}</strong>)? This will exclude it from
+      active payables and aging reports.
+    </p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" [disabled]="isCancelling" (click)="closeCancelModal()">
+        Keep Bill
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="isCancelling" (click)="confirmCancel()">
+        {{ isCancelling ? 'Cancelling...' : 'Yes, Cancel Bill' }}
+      </button>
+    </div>
+  </div>
+</div>
+

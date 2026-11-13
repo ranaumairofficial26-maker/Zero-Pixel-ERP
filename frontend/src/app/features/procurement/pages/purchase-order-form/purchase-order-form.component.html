@@ -1,0 +1,274 @@
+<div class="po-form-container">
+  <!-- Header -->
+  <div class="page-header-bar">
+    <div>
+      <div class="breadcrumb">
+        <a routerLink="/admin/procurement/purchase-orders">Purchase Orders</a>
+        <span>/</span>
+        <span>{{ isEditMode ? 'Edit Draft PO' : 'Create PO' }}</span>
+      </div>
+      <h1 class="page-title">{{ isEditMode ? 'Edit Purchase Order' : 'Create Purchase Order' }}</h1>
+    </div>
+
+    <a routerLink="/admin/procurement/purchase-orders" class="btn-back">
+      Back to Purchase Orders
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Loading Purchase Order Form...</span>
+  </div>
+
+  <!-- Error -->
+  <div class="alert-box-danger" *ngIf="errorMessage && !loading">
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <form [formGroup]="poForm" *ngIf="!loading && !(isEditMode && poStatus !== 'Draft')" novalidate>
+    <!-- SECTION A: PURCHASE ORDER INFORMATION -->
+    <div class="card-section">
+      <div class="section-header">
+        <span class="section-badge">A</span>
+        <div>
+          <h2 class="section-title">Purchase Order Information</h2>
+          <p class="section-subtitle">Select supplier, optional supplier quote reference, and optional printing job.</p>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <!-- PO Number -->
+        <div class="form-group">
+          <label class="field-label">PO Number</label>
+          <div class="readonly-badge">{{ previewPoNumber }}</div>
+          <span class="field-hint">Auto-generated unique ERP sequence.</span>
+        </div>
+
+        <!-- PO Date -->
+        <div class="form-group">
+          <label class="field-label" for="poDate">Purchase Order Date <span class="req">*</span></label>
+          <input
+            id="poDate"
+            type="date"
+            class="form-control"
+            formControlName="poDate"
+            [class.is-invalid]="poForm.get('poDate')?.invalid && poForm.get('poDate')?.touched"
+          />
+        </div>
+      </div>
+
+      <!-- Select Supplier -->
+      <div class="selector-block">
+        <div class="form-group">
+          <label class="field-label" for="supplierSearch">Select Supplier <span class="req">*</span></label>
+          <div class="searchable-row">
+            <input
+              id="supplierSearch"
+              type="text"
+              class="form-control"
+              [(ngModel)]="supplierSearchTerm"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Search active suppliers..."
+            />
+            <select
+              class="form-control"
+              formControlName="supplierId"
+              (change)="onSupplierSelected()"
+              [class.is-invalid]="poForm.get('supplierId')?.invalid && poForm.get('supplierId')?.touched"
+            >
+              <option [ngValue]="null">-- Select Active Supplier --</option>
+              <option *ngFor="let sup of filteredSuppliers" [ngValue]="sup.id">
+                {{ sup.supplierName }}{{ sup.contactPerson ? ' (' + sup.contactPerson + ')' : '' }}
+              </option>
+            </select>
+          </div>
+          <span class="field-error" *ngIf="poForm.get('supplierId')?.invalid && poForm.get('supplierId')?.touched">
+            Please select an active supplier.
+          </span>
+        </div>
+
+        <!-- Supplier Snapshot -->
+        <div class="supplier-snapshot-card" *ngIf="selectedSupplier">
+          <div class="snapshot-grid">
+            <div class="snap-item">
+              <span class="snap-lbl">Supplier Name</span>
+              <strong class="snap-val">{{ selectedSupplier.supplierName }}</strong>
+            </div>
+            <div class="snap-item">
+              <span class="snap-lbl">Contact Person</span>
+              <strong class="snap-val">{{ selectedSupplier.contactPerson || 'N/A' }}</strong>
+            </div>
+            <div class="snap-item">
+              <span class="snap-lbl">Phone</span>
+              <strong class="snap-val mono">{{ selectedSupplier.phoneNumber || 'N/A' }}</strong>
+            </div>
+            <div class="snap-item">
+              <span class="snap-lbl">Email</span>
+              <strong class="snap-val">{{ selectedSupplier.email || 'N/A' }}</strong>
+            </div>
+            <div class="snap-item full-span">
+              <span class="snap-lbl">Address</span>
+              <strong class="snap-val">{{ selectedSupplier.address || 'N/A' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Optional Reference Supplier Quote -->
+      <div class="selector-block">
+        <div class="form-group">
+          <label class="field-label" for="quoteSearch">Reference Supplier Quote (Optional)</label>
+          <div class="searchable-row">
+            <input
+              id="quoteSearch"
+              type="text"
+              class="form-control"
+              [(ngModel)]="quoteSearchTerm"
+              [ngModelOptions]="{ standalone: true }"
+              [disabled]="!poForm.get('supplierId')?.value"
+              placeholder="Search quotes for selected supplier..."
+            />
+            <select
+              class="form-control"
+              formControlName="supplierQuoteId"
+              (change)="onQuoteSelected()"
+              [attr.disabled]="!poForm.get('supplierId')?.value ? true : null"
+            >
+              <option [ngValue]="null">-- None (Create without Quote) --</option>
+              <option *ngFor="let q of eligibleQuotesForSupplier" [ngValue]="q.id">
+                {{ q.quoteNumber }} — Rs. {{ q.totalAmount | number:'1.2-2' }} ({{ q.quoteDate | date:'mediumDate' }})
+              </option>
+            </select>
+          </div>
+          <span class="field-hint">
+            Selecting a quote copies its items into this PO for review; the original Supplier Quote remains unchanged.
+          </span>
+        </div>
+      </div>
+
+      <!-- Optional Project / Job Reference -->
+      <div class="selector-block">
+        <div class="form-group">
+          <label class="field-label" for="jobSearch">Project / Job (Optional)</label>
+          <div class="searchable-row">
+            <input
+              id="jobSearch"
+              type="text"
+              class="form-control"
+              [(ngModel)]="jobSearchTerm"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Search printing jobs..."
+            />
+            <select class="form-control" formControlName="projectJobId">
+              <option [ngValue]="null">-- None (General / No Job Linked) --</option>
+              <option *ngFor="let j of filteredJobs" [ngValue]="j.jobId">
+                {{ j.jobNumber }} — {{ j.customerName || j.orderNumber }} ({{ j.status }})
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION B: PURCHASE ORDER ITEMS -->
+    <div class="card-section">
+      <div class="section-header flex-between">
+        <div class="header-left-group">
+          <span class="section-badge">B</span>
+          <div>
+            <h2 class="section-title">Purchase Order Items</h2>
+            <p class="section-subtitle">Enter materials or services being ordered from the supplier (PKR).</p>
+          </div>
+        </div>
+        <button type="button" class="btn-add-item" (click)="addItem()">
+          + Add Item
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th style="width: 65px; text-align: center;">Sr No</th>
+              <th>Description <span class="req">*</span></th>
+              <th style="width: 135px;">Quantity <span class="req">*</span></th>
+              <th style="width: 155px;">Rate (PKR) <span class="req">*</span></th>
+              <th style="width: 165px; text-align: right;">Amount (PKR)</th>
+              <th style="width: 90px; text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="items">
+            <tr *ngFor="let row of items.controls; let i = index" [formGroupName]="i">
+              <td style="text-align: center;">
+                <span class="sr-badge">{{ i + 1 }}</span>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  class="table-input"
+                  formControlName="description"
+                  [placeholder]="getItemPlaceholder(i)"
+                  [class.is-invalid]="row.get('description')?.invalid && row.get('description')?.touched"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  min="0.0001"
+                  step="any"
+                  class="table-input num-input"
+                  formControlName="quantity"
+                  [class.is-invalid]="row.get('quantity')?.invalid && row.get('quantity')?.touched"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="table-input num-input"
+                  formControlName="rate"
+                  placeholder="0.00"
+                  [class.is-invalid]="row.get('rate')?.invalid && row.get('rate')?.touched"
+                />
+              </td>
+              <td style="text-align: right;">
+                <strong class="amount-val">Rs. {{ (row.get('amount')?.value || 0) | number:'1.2-2' }}</strong>
+              </td>
+              <td style="text-align: center;">
+                <button
+                  type="button"
+                  class="btn-remove-row"
+                  (click)="removeItem(i)"
+                  [disabled]="items.length <= 1"
+                  title="Remove Item"
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total Purchase Order Amount -->
+      <div class="total-bar">
+        <span class="total-label">Total Purchase Order Amount:</span>
+        <strong class="total-value">Rs. {{ totalPoAmount | number:'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <!-- FORM ACTIONS -->
+    <div class="form-actions-bar">
+      <a routerLink="/admin/procurement/purchase-orders" class="btn-cancel">Cancel</a>
+      <button type="button" class="btn-save-draft" (click)="submitPo(false)" [disabled]="saving">
+        {{ saving ? 'Saving...' : 'Save Draft' }}
+      </button>
+      <button type="button" class="btn-issue-po" (click)="submitPo(true)" [disabled]="saving">
+        {{ saving ? 'Processing...' : 'Issue PO' }}
+      </button>
+    </div>
+  </form>
+</div>
+

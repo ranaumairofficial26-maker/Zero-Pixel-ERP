@@ -1,0 +1,176 @@
+<div class="payment-view-page">
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <button type="button" class="btn btn-back" (click)="backToList()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to Supplier Payments
+    </button>
+
+    <div class="action-buttons" *ngIf="payment">
+      <button
+        *ngIf="payment.status === 'Posted'"
+        type="button"
+        class="btn btn-danger-outline"
+        [disabled]="isReversing"
+        (click)="openReverseModal()"
+      >
+        Reverse Payment
+      </button>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alert alert-success" *ngIf="actionMessage">{{ actionMessage }}</div>
+  <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- LOADING -->
+  <div class="loading-box" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <span>Loading Supplier Payment...</span>
+  </div>
+
+  <!-- PAYMENT SHEET -->
+  <div class="payment-sheet" *ngIf="!isLoading && payment">
+    <header class="sheet-header">
+      <div class="brand-block">
+        <img src="/zeropixel_logo.png" alt="Zero Pixel ERP" class="brand-logo" />
+        <div class="brand-text">
+          <h2>Zero Pixel</h2>
+          <p>Supplier Payment Voucher</p>
+        </div>
+      </div>
+
+      <div class="doc-title-block">
+        <h1>SUPPLIER PAYMENT</h1>
+        <div class="doc-meta">
+          <div class="meta-row">
+            <span class="meta-label">Payment Number:</span>
+            <span class="meta-value strong mono">{{ payment.paymentNumber }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Payment Date:</span>
+            <span class="meta-value">{{ formatDate(payment.paymentDate) }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Status:</span>
+            <span
+              class="status-pill"
+              [class.posted]="payment.status === 'Posted'"
+              [class.reversed]="payment.status === 'Reversed'"
+            >
+              {{ payment.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="divider"></div>
+
+    <!-- REVERSAL NOTICE -->
+    <div class="reversal-banner" *ngIf="payment.status === 'Reversed'">
+      <strong>Payment Reversed:</strong>
+      <div class="rev-details">
+        <span><strong>Reason:</strong> {{ payment.reversalReason }}</span>
+        <span *ngIf="payment.reversedBy"><strong>Reversed By:</strong> {{ payment.reversedBy }}</span>
+        <span *ngIf="payment.reversedAt"><strong>Reversed On:</strong> {{ formatDate(payment.reversedAt) }}</span>
+      </div>
+    </div>
+
+    <!-- DETAILS GRID -->
+    <section class="info-grid">
+      <div class="info-card">
+        <h3>Supplier &amp; Linked Bill</h3>
+        <div class="info-line">
+          <span class="lbl">Supplier:</span>
+          <span class="strong">{{ payment.supplierName }}</span>
+        </div>
+        <div class="info-line" *ngIf="payment.supplierContactPerson">
+          <span class="lbl">Contact Person:</span> {{ payment.supplierContactPerson }}
+        </div>
+        <div class="info-line">
+          <span class="lbl">Linked Bill:</span>
+          <a class="link mono strong" [routerLink]="['/admin/procurement/supplier-bills', payment.supplierBillId]">
+            {{ payment.internalBillNumber }}
+          </a>
+          (Inv: {{ payment.supplierInvoiceNumber }})
+        </div>
+        <div class="info-line">
+          <span class="lbl">Bill Status:</span> {{ payment.billStatus }}
+        </div>
+        <div class="info-line">
+          <span class="lbl">Bill Total:</span> PKR {{ formatCurrency(payment.billTotalAmount) }}
+        </div>
+        <div class="info-line">
+          <span class="lbl">Bill Remaining Balance:</span>
+          <strong class="mono">PKR {{ formatCurrency(payment.billOutstandingBalance) }}</strong>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Payment Details</h3>
+        <div class="info-line">
+          <span class="lbl">Payment Method:</span>
+          <span class="strong">{{ payment.paymentMethod }}</span>
+        </div>
+        <div class="info-line">
+          <span class="lbl">Account / Bank Ref:</span>
+          <span>{{ payment.paymentAccountReference || 'N/A' }}</span>
+        </div>
+        <div class="info-line">
+          <span class="lbl">Transaction Ref:</span>
+          <span class="mono">{{ payment.transactionReference || 'N/A' }}</span>
+        </div>
+        <div class="info-line" *ngIf="payment.notes">
+          <span class="lbl">Notes:</span>
+          <span>{{ payment.notes }}</span>
+        </div>
+        <div class="info-line" *ngIf="payment.createdBy">
+          <span class="lbl">Recorded By:</span>
+          <span>{{ payment.createdBy }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- AMOUNT BOX -->
+    <section class="amount-banner" [class.reversed]="payment.status === 'Reversed'">
+      <span class="a-lbl">Payment Amount</span>
+      <span class="a-val mono">PKR {{ formatCurrency(payment.amount) }}</span>
+    </section>
+  </div>
+</div>
+
+<!-- REVERSE MODAL -->
+<div class="modal-backdrop" *ngIf="showReverseModal" (click)="closeReverseModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <h3>Reverse Supplier Payment</h3>
+    <p>
+      Reversing payment <strong class="mono">{{ payment?.paymentNumber }}</strong>
+      (PKR {{ formatCurrency(payment?.amount || 0) }}) will restore the outstanding balance on bill
+      <strong class="mono">{{ payment?.internalBillNumber }}</strong>.
+    </p>
+
+    <div class="modal-field">
+      <label class="field-label required">Reversal Reason</label>
+      <textarea
+        rows="3"
+        class="form-control"
+        [(ngModel)]="reversalReason"
+        placeholder="Enter the reason for reversing this payment..."
+      ></textarea>
+      <span class="field-error" *ngIf="reversalError">{{ reversalError }}</span>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" [disabled]="isReversing" (click)="closeReverseModal()">
+        Keep Payment
+      </button>
+      <button type="button" class="btn btn-danger" [disabled]="isReversing" (click)="confirmReverse()">
+        {{ isReversing ? 'Reversing...' : 'Confirm Reversal' }}
+      </button>
+    </div>
+  </div>
+</div>

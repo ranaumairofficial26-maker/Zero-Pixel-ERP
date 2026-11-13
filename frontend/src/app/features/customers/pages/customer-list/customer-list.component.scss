@@ -693,3 +693,226 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ========================================================
+   DARK THEME INLINE OVERRIDES FOR CUSTOMER DIRECTORY TABLE
+   ======================================================== */
+:host-context(.dark-mode) {
+  .page-header {
+    .page-title { color: #f8fafc !important; }
+    .page-subtitle { color: #94a3b8 !important; }
+  }
+
+  .controls-card {
+    background: #111827 !important;
+    border-color: #1f293d !important;
+
+    .search-wrap {
+      .search-icon { color: #64748b !important; }
+      .search-input {
+        background: #172133 !important;
+        border-color: #2a374f !important;
+        color: #f8fafc !important;
+        &::placeholder { color: #64748b !important; }
+      }
+    }
+
+    .status-tabs-group .tab-pill {
+      background: #172133 !important;
+      border-color: #2a374f !important;
+      color: #94a3b8 !important;
+
+      &:hover {
+        background: #1c283e !important;
+        color: #f8fafc !important;
+      }
+
+      &.active {
+        background: #00ADEF !important;
+        border-color: #00ADEF !important;
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  .table-card {
+    background: #111827 !important;
+    border-color: #1f293d !important;
+
+    .table-meta-bar {
+      border-bottom: 1px solid #1f293d !important;
+      .meta-left {
+        .record-counter {
+          color: #94a3b8 !important;
+          strong { color: #f8fafc !important; }
+        }
+      }
+      .meta-right {
+        color: #94a3b8 !important;
+        .select-page-size {
+          background: #172133 !important;
+          border-color: #2a374f !important;
+          color: #f8fafc !important;
+        }
+      }
+    }
+
+    .customer-table {
+      th {
+        background: #0d1424 !important;
+        color: #94a3b8 !important;
+        border-bottom: 1px solid #1f293d !important;
+      }
+
+      td {
+        border-bottom: 1px solid #1f293d !important;
+        color: #e2e8f0 !important;
+      }
+
+      .data-row:hover {
+        background-color: #1c283e !important;
+      }
+
+      .col-id .id-tag {
+        background: #1e293d !important;
+        color: #38bdf8 !important;
+        border: 1px solid #2a374f !important;
+      }
+
+      .col-company .company-cell {
+        .company-name {
+          color: #f8fafc !important;
+        }
+        .sub-address {
+          color: #94a3b8 !important;
+        }
+      }
+
+      .col-contact .contact-name {
+        color: #f1f5f9 !important;
+      }
+
+      .col-phone .phone-link {
+        color: #00ADEF !important;
+      }
+
+      .col-email .email-text {
+        color: #cbd5e1 !important;
+      }
+
+      .col-date .date-text {
+        color: #94a3b8 !important;
+      }
+
+      .status-pill {
+        &.status-active {
+          background: rgba(16, 185, 129, 0.16) !important;
+          color: #34d399 !important;
+          border: 1px solid rgba(16, 185, 129, 0.35) !important;
+        }
+        &.status-inactive {
+          background: rgba(245, 158, 11, 0.16) !important;
+          color: #fbbf24 !important;
+          border: 1px solid rgba(245, 158, 11, 0.35) !important;
+        }
+        &.status-archived {
+          background: rgba(239, 68, 68, 0.16) !important;
+          color: #f87171 !important;
+          border: 1px solid rgba(239, 68, 68, 0.35) !important;
+        }
+      }
+
+      .action-buttons-group .btn-icon-action {
+        background: #172133 !important;
+        border-color: #2a374f !important;
+        color: #94a3b8 !important;
+
+        &:hover {
+          background: #1c283e !important;
+          color: #f8fafc !important;
+          border-color: #475569 !important;
+        }
+
+        &.btn-archive {
+          color: #c084fc !important;
+          border-color: rgba(139, 92, 246, 0.35) !important;
+          &:hover {
+            background: rgba(139, 92, 246, 0.2) !important;
+            color: #e9d5ff !important;
+          }
+        }
+
+        &.btn-restore {
+          color: #34d399 !important;
+          border-color: rgba(16, 185, 129, 0.35) !important;
+          &:hover {
+            background: rgba(16, 185, 129, 0.2) !important;
+            color: #a7f3d0 !important;
+          }
+        }
+
+        &.btn-delete {
+          color: #f87171 !important;
+          border-color: rgba(239, 68, 68, 0.35) !important;
+          &:hover {
+            background: rgba(239, 68, 68, 0.2) !important;
+            color: #fca5a5 !important;
+          }
+        }
+      }
+    }
+
+    .pagination-footer {
+      background: #0d1424 !important;
+      border-top: 1px solid #1f293d !important;
+
+      .pagination-info {
+        color: #94a3b8 !important;
+        strong { color: #f8fafc !important; }
+      }
+
+      .pagination-controls {
+        .btn-page {
+          background: #172133 !important;
+          border-color: #2a374f !important;
+          color: #e2e8f0 !important;
+          &:hover:not(:disabled) {
+            background: #1c283e !important;
+            color: #f8fafc !important;
+          }
+        }
+
+        .page-indicator {
+          color: #f8fafc !important;
+        }
+      }
+    }
+  }
+
+  .modal-card {
+    background: #111827 !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #1f293d !important;
+
+    .modal-header {
+      border-bottom: 1px solid #1f293d !important;
+      .modal-title { color: #f8fafc !important; }
+      .btn-close-modal { color: #94a3b8 !important; &:hover { color: #f8fafc !important; } }
+    }
+  }
+
+  .confirm-dialog-card {
+    background: #111827 !important;
+    border: 1px solid #1f293d !important;
+    color: #e2e8f0 !important;
+
+    .confirm-title { color: #f8fafc !important; }
+    .confirm-message { color: #94a3b8 !important; }
+    .confirm-actions .btn-cancel {
+      background: #172133 !important;
+      border-color: #2a374f !important;
+      color: #94a3b8 !important;
+      &:hover { background: #1c283e !important; color: #f8fafc !important; }
+    }
+  }
+}
