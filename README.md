@@ -82,13 +82,6 @@ npm start
 
 ---
 
-## 🔐 Admin Authentication Credentials
-
-- **Email:** `admin@zeropixel.com`
-- **Password:** `Admin@123456`
-
----
-
 ## 🌐 API Endpoints
 
 | Method | Endpoint | Description |
