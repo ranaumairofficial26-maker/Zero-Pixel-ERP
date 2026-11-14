@@ -26,6 +26,57 @@ button, input, select, textarea {
   -webkit-overflow-scrolling: touch;
 }
 
+.page-container > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 991px) {
+  .table-card,
+  .table-wrap,
+  .data-table-wrap,
+  .table-container {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page-header-card,
+  .page-header,
+  .controls-card,
+  .filters-bar,
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-header-card,
+  .section-card,
+  .controls-card {
+    padding: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  .modal-card,
+  .delete-modal-card,
+  .share-modal-card,
+  .confirm-modal-card,
+  .dialog-card {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: 100% !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+}
+
 @media print {
   html, body {
     height: auto !important;
