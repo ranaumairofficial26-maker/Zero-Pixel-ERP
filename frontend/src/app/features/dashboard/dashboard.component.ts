@@ -8,6 +8,7 @@ import { QuotationService } from '../quotations/services/quotation.service';
 import { ProductionService } from '../production/services/production.service';
 import { ProductionJob } from '../production/models/production.model';
 import { InvoiceService } from '../invoices/services/invoice.service';
+import { SupplierBillService } from '../procurement/services/supplier-bill.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,6 +23,7 @@ export class DashboardComponent implements OnInit {
   private quotationService = inject(QuotationService);
   private productionService = inject(ProductionService);
   private invoiceService = inject(InvoiceService);
+  private supplierBillService = inject(SupplierBillService);
 
   totalActive = signal<number>(0);
   totalQuotations = signal<number>(0);
@@ -31,6 +33,8 @@ export class DashboardComponent implements OnInit {
   outsourcedInProgress = signal<number>(0);
   totalInvoices = signal<number>(0);
   invoiceClients = signal<{ customerName: string; count: number; invoiceNumbers: string[] }[]>([]);
+  totalSupplierBills = signal<number>(0);
+  supplierBillVendors = signal<{ supplierName: string; count: number; billNumbers: string[] }[]>([]);
   
   // Live Queue & Recent Jobs
   recentJobs = signal<ProductionJob[]>([]);
@@ -71,9 +75,12 @@ export class DashboardComponent implements OnInit {
       ),
       invoices: this.invoiceService.getInvoices(undefined, 1, 100).pipe(
         catchError(() => of({ totalCount: 0, items: [], page: 1, pageSize: 100, totalPages: 0 }))
+      ),
+      supplierBills: this.supplierBillService.getSupplierBills(undefined, undefined, 1, 100).pipe(
+        catchError(() => of({ totalCount: 0, items: [], page: 1, pageSize: 100, totalPages: 0 }))
       )
     }).subscribe({
-      next: ({ customers, quotations, inHouse, outsourced, invoices }) => {
+      next: ({ customers, quotations, inHouse, outsourced, invoices, supplierBills }) => {
         this.totalActive.set(customers.totalCount || 0);
         this.totalQuotations.set((quotations as any)?.totalQuotations || 0);
         this.totalInHouseJobs.set(inHouse.length || 0);
@@ -98,6 +105,24 @@ export class DashboardComponent implements OnInit {
           }
         }
         this.invoiceClients.set(Array.from(clientMap.values()).sort((a, b) => b.count - a.count));
+
+        this.totalSupplierBills.set(supplierBills.totalCount || 0);
+        const vendorMap = new Map<string, { supplierName: string; count: number; billNumbers: string[] }>();
+        for (const bill of supplierBills.items || []) {
+          const name = (bill.supplierName || 'Unknown Supplier').trim();
+          const existing = vendorMap.get(name);
+          if (existing) {
+            existing.count += 1;
+            if (bill.internalBillNumber) existing.billNumbers.push(bill.internalBillNumber);
+          } else {
+            vendorMap.set(name, {
+              supplierName: name,
+              count: 1,
+              billNumbers: bill.internalBillNumber ? [bill.internalBillNumber] : []
+            });
+          }
+        }
+        this.supplierBillVendors.set(Array.from(vendorMap.values()).sort((a, b) => b.count - a.count));
         
         // Combine and sort top 5 recent production jobs
         const allJobs = [...inHouse, ...outsourced].sort((a, b) => 

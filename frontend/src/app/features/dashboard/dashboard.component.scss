@@ -221,6 +221,7 @@
     &.emerald-theme::after { background: #10b981; }
     &.amber-theme::after { background: #f59e0b; }
     &.rose-theme::after { background: #e11d48; }
+    &.violet-theme::after { background: #7c3aed; }
 
     .kpi-top {
       display: flex;
@@ -261,6 +262,7 @@
     &.emerald-theme .icon-disc { background: #ecfdf5; color: #10b981; }
     &.amber-theme .icon-disc { background: #fef3c7; color: #d97706; }
     &.rose-theme .icon-disc { background: #ffe4e6; color: #e11d48; }
+    &.violet-theme .icon-disc { background: #ede9fe; color: #7c3aed; }
 
     .invoice-clients-list {
       margin-top: 0.55rem;
@@ -298,6 +300,11 @@
           padding: 0 0.45rem;
           font-size: 0.72rem;
           flex-shrink: 0;
+
+          &.violet {
+            color: #7c3aed;
+            background: #ede9fe;
+          }
         }
       }
     }

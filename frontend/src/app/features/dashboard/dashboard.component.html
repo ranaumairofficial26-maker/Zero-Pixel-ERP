@@ -200,6 +200,45 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
     </div>
+
+    <!-- Supplier Bills -->
+    <div class="kpi-card violet-theme">
+      <div class="card-glow"></div>
+      <div class="kpi-top">
+        <div class="label-wrapper">
+          <span class="kpi-tag">PROCUREMENT &amp; VENDORS</span>
+          <h3 class="kpi-label">Supplier Bills</h3>
+        </div>
+        <div class="icon-disc">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <path d="M9 15h6"/>
+            <path d="M9 11h6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <div class="number-display">
+          <span class="number">{{ totalSupplierBills() }}</span>
+          <span class="subtext">{{ supplierBillVendors().length }} Supplier(s)</span>
+        </div>
+        @if (supplierBillVendors().length > 0) {
+          <div class="invoice-clients-list">
+            @for (v of supplierBillVendors(); track v.supplierName) {
+              <div class="invoice-client-row" [title]="v.billNumbers.join(', ')">
+                <span class="ic-name">{{ v.supplierName }}</span>
+                <span class="ic-count violet">{{ v.count }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <a routerLink="/admin/procurement/supplier-bills" class="card-link">
+        <span>View Supplier Bills</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
   </section>
 
   <!-- Executive Dual Layout (Main Operations + Strategic Shortcuts) -->
