@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, Output, inject, signal, OnInit } from '
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
-import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,13 +10,11 @@ import { ThemeService } from '../../core/services/theme.service';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss',
   host: {
-    '[class.dark-sidebar]': 'themeService.isDarkMode()',
     '[class.mobile-open]': 'isOpen'
   }
 })
 export class SidebarComponent implements OnInit {
   private router = inject(Router);
-  public themeService = inject(ThemeService);
 
   @Input() isOpen: boolean = false;
   @Output() closeRequested = new EventEmitter<void>();
@@ -68,8 +65,7 @@ export class SidebarComponent implements OnInit {
   }
 
   isSalesRouteActive(): boolean {
-    return this.router.url.startsWith('/admin/customers') || 
-           this.router.url.startsWith('/admin/quotations');
+    return this.router.url.startsWith('/admin/quotations');
   }
 
   isProductionRouteActive(): boolean {

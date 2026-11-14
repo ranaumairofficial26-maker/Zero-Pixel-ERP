@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SupplierPayment } from '../../models/supplier-payment.model';
 import { SupplierPaymentService } from '../../services/supplier-payment.service';
+import { decodeRouteId } from '../../../../core/utils/id-hash.util';
 
 @Component({
   selector: 'app-supplier-payment-view',
@@ -33,9 +34,9 @@ export class SupplierPaymentViewComponent implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? Number(idParam) : NaN;
+    const id = decodeRouteId(idParam);
 
-    if (!id || Number.isNaN(id)) {
+    if (!id) {
       this.errorMessage = 'Invalid Supplier Payment ID.';
       this.isLoading = false;
       this.cdr.markForCheck();

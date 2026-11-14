@@ -68,6 +68,9 @@ public class Invoice
     [Column("balance")]
     public decimal Balance { get; set; }
 
+    [Column("previous_balance")]
+    public decimal? PreviousBalance { get; set; }
+
     [Column("notes")]
     public string? Notes { get; set; }
 

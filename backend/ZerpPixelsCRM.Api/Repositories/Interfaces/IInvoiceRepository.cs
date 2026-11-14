@@ -4,7 +4,7 @@ namespace ZerpPixelsCRM.Api.Repositories.Interfaces;
 
 public interface IInvoiceRepository
 {
-    Task<(IEnumerable<Invoice> Items, int TotalCount)> GetInvoicesAsync(string? search = null, int page = 1, int pageSize = 10);
+    Task<(IEnumerable<Invoice> Items, int TotalCount)> GetInvoicesAsync(string? search = null, string? period = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10);
     Task<Invoice?> GetByIdAsync(long id);
     Task<Invoice?> GetByInvoiceNumberAsync(string invoiceNumber);
     Task<Invoice?> GetByIdOrNumberAsync(string idOrNumber);

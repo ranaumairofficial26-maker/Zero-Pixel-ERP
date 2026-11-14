@@ -174,9 +174,12 @@
    ======================================================== */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.35rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.15rem;
 
+  @media (max-width: 1360px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
   @media (max-width: 1100px) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -217,6 +220,7 @@
     &.indigo-theme::after { background: #6366F1; }
     &.emerald-theme::after { background: #10b981; }
     &.amber-theme::after { background: #f59e0b; }
+    &.rose-theme::after { background: #e11d48; }
 
     .kpi-top {
       display: flex;
@@ -256,6 +260,47 @@
     &.indigo-theme .icon-disc { background: #e0e7ff; color: #6366F1; }
     &.emerald-theme .icon-disc { background: #ecfdf5; color: #10b981; }
     &.amber-theme .icon-disc { background: #fef3c7; color: #d97706; }
+    &.rose-theme .icon-disc { background: #ffe4e6; color: #e11d48; }
+
+    .invoice-clients-list {
+      margin-top: 0.55rem;
+      max-height: 82px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding-right: 2px;
+
+      .invoice-client-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.78rem;
+        color: #334155;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.22rem 0.5rem;
+
+        .ic-name {
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .ic-count {
+          font-weight: 800;
+          color: #e11d48;
+          background: #ffe4e6;
+          border-radius: 999px;
+          padding: 0 0.45rem;
+          font-size: 0.72rem;
+          flex-shrink: 0;
+        }
+      }
+    }
 
     .kpi-body {
       .number-display {
@@ -1179,366 +1224,6 @@
 /* ========================================================
    DARK MODE OVERRIDES FOR EXECUTIVE DASHBOARD
    ======================================================== */
-:host-context(html.dark-mode),
-:host-context(body.dark-mode),
-:host-context(.dark-mode) {
-  // 1. Executive Topbar
-  .executive-topbar {
-    background: #111827;
-    border-color: #1f293d;
-
-    .system-status-pill {
-      background: #172133;
-      border-color: #2a374f;
-      color: #94a3b8;
-      strong { color: #f8fafc; }
-    }
-
-    .executive-title {
-      color: #f8fafc;
-    }
-
-    .executive-subtitle {
-      color: #94a3b8;
-    }
-
-    .btn-refresh {
-      background: #172133;
-      border-color: #2a374f;
-      color: #94a3b8;
-
-      &:hover {
-        background: #1f293d;
-        color: #f8fafc;
-      }
-    }
-  }
-
-  // 2. 4-Column KPI Cards (Visible, Bright & Clean in Dark Mode)
-  .kpi-grid {
-    .kpi-card {
-      background: #111827;
-      border-color: #1f293d;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-
-      &:hover {
-        background: #162032;
-        border-color: #2a374f;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      }
-
-      .kpi-top {
-        .label-wrapper {
-          .kpi-tag {
-            color: #94a3b8;
-          }
-
-          .kpi-label {
-            color: #f8fafc;
-          }
-        }
-
-        .icon-disc {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-      }
-
-      &.cyan-theme .icon-disc {
-        background: rgba(0, 173, 239, 0.15);
-        color: #38bdf8;
-        border: 1px solid rgba(0, 173, 239, 0.3);
-      }
-
-      &.indigo-theme .icon-disc {
-        background: rgba(99, 102, 241, 0.15);
-        color: #818cf8;
-        border: 1px solid rgba(99, 102, 241, 0.3);
-      }
-
-      &.emerald-theme .icon-disc {
-        background: rgba(16, 185, 129, 0.15);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.3);
-      }
-
-      &.amber-theme .icon-disc {
-        background: rgba(245, 158, 11, 0.15);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.3);
-      }
-
-      .kpi-body {
-        .number-display {
-          .number {
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-          }
-
-          .subtext {
-            color: #cbd5e1;
-
-            &.highlight-emerald {
-              color: #34d399;
-            }
-
-            &.highlight-amber {
-              color: #fbbf24;
-            }
-          }
-        }
-      }
-
-      .card-link {
-        border-top-color: #1f293d;
-        color: #cbd5e1;
-
-        &:hover {
-          color: #38bdf8;
-        }
-
-        svg {
-          color: inherit;
-        }
-      }
-    }
-  }
-
-  // 3. Activity Feed Section & Table
-  .section-card.live-feed-card,
-  .live-feed-card,
-  .feed-card {
-    background: #111827 !important;
-    border-color: #1f293d !important;
-
-    .section-header,
-    .feed-header {
-      border-bottom-color: #1f293d !important;
-
-      .header-info {
-        .live-status-badge {
-          background: rgba(14, 165, 233, 0.15) !important;
-          border-color: rgba(14, 165, 233, 0.3) !important;
-          .live-tag { color: #38bdf8 !important; }
-        }
-
-        .section-title,
-        .feed-title {
-          color: #f8fafc !important;
-        }
-
-        .section-subtitle,
-        .feed-subtitle {
-          color: #94a3b8 !important;
-        }
-      }
-
-      .header-queue-actions {
-        .queue-btn {
-          &.in-house {
-            background: rgba(16, 185, 129, 0.12) !important;
-            border-color: rgba(16, 185, 129, 0.3) !important;
-            color: #34d399 !important;
-            &:hover { background: rgba(16, 185, 129, 0.22) !important; }
-            .count-pill { background: #172133 !important; color: #34d399 !important; }
-          }
-          &.outsourced {
-            background: rgba(249, 115, 22, 0.12) !important;
-            border-color: rgba(249, 115, 22, 0.3) !important;
-            color: #fb923c !important;
-            &:hover { background: rgba(249, 115, 22, 0.22) !important; }
-            .count-pill { background: #172133 !important; color: #fb923c !important; }
-          }
-        }
-      }
-    }
-
-    .live-activity-table {
-      background: #111827 !important;
-      border-color: #1f293d !important;
-
-      thead tr {
-        background: #0d1424 !important;
-        border-bottom: 2px solid #1f293d !important;
-      }
-
-      th {
-        background: #0d1424 !important;
-        color: #94a3b8 !important;
-        border-bottom-color: #1f293d !important;
-      }
-
-      td {
-        border-bottom-color: #1f293d !important;
-        color: #e2e8f0 !important;
-      }
-
-      tbody tr {
-        border-bottom: 1px solid #1f293d !important;
-        &:hover {
-          background: #162032 !important;
-        }
-      }
-
-      .job-badge-code {
-        background: #172133 !important;
-        color: #38bdf8 !important;
-        border: 1px solid #2a374f !important;
-        font-weight: 800 !important;
-      }
-
-      .order-ref-pill {
-        background: rgba(2, 132, 199, 0.15) !important;
-        color: #38bdf8 !important;
-        border: 1px solid rgba(2, 132, 199, 0.35) !important;
-      }
-
-      .cust-cell {
-        .cust-avatar {
-          background: linear-gradient(135deg, #00ADEF, #0284c7) !important;
-          color: #ffffff !important;
-          border-color: #2a374f !important;
-          box-shadow: 0 2px 8px rgba(0, 173, 239, 0.35) !important;
-        }
-
-        .cust-info {
-          .cust-title {
-            color: #f8fafc !important;
-            font-weight: 700 !important;
-          }
-          .cust-sub,
-          .cust-meta {
-            color: #94a3b8 !important;
-            font-weight: 500 !important;
-          }
-        }
-      }
-
-      .prod-badge {
-        &.in-house {
-          background: rgba(16, 185, 129, 0.16) !important;
-          color: #34d399 !important;
-          border: 1px solid rgba(16, 185, 129, 0.35) !important;
-        }
-        &.outsourced {
-          background: rgba(249, 115, 22, 0.16) !important;
-          color: #fb923c !important;
-          border: 1px solid rgba(249, 115, 22, 0.35) !important;
-        }
-      }
-
-      .priority-pill {
-        &.normal {
-          background: #172133 !important;
-          color: #cbd5e1 !important;
-          border: 1px solid #2a374f !important;
-          .priority-indicator { background: #94a3b8 !important; }
-        }
-        &.high {
-          background: rgba(249, 115, 22, 0.18) !important;
-          color: #fb923c !important;
-          border: 1px solid rgba(249, 115, 22, 0.4) !important;
-          .priority-indicator { background: #f97316 !important; }
-        }
-        &.urgent {
-          background: rgba(239, 68, 68, 0.2) !important;
-          color: #f87171 !important;
-          border: 1px solid rgba(239, 68, 68, 0.45) !important;
-          .priority-indicator { background: #ef4444 !important; }
-        }
-      }
-
-      .status-pill {
-        &.badge-progress {
-          background: rgba(16, 185, 129, 0.16) !important;
-          color: #34d399 !important;
-          border: 1px solid rgba(16, 185, 129, 0.35) !important;
-          .status-indicator { background: #10b981 !important; }
-        }
-        &.badge-completed {
-          background: rgba(34, 197, 94, 0.16) !important;
-          color: #4ade80 !important;
-          border: 1px solid rgba(34, 197, 94, 0.35) !important;
-          .status-indicator { background: #22c55e !important; }
-        }
-        &.badge-queued {
-          background: rgba(245, 158, 11, 0.16) !important;
-          color: #fbbf24 !important;
-          border: 1px solid rgba(245, 158, 11, 0.35) !important;
-          .status-indicator { background: #f59e0b !important; }
-        }
-        &.badge-hold {
-          background: rgba(239, 68, 68, 0.16) !important;
-          color: #f87171 !important;
-          border: 1px solid rgba(239, 68, 68, 0.35) !important;
-          .status-indicator { background: #ef4444 !important; }
-        }
-        &.badge-default {
-          background: #172133 !important;
-          color: #cbd5e1 !important;
-          border: 1px solid #2a374f !important;
-          .status-indicator { background: #94a3b8 !important; }
-        }
-      }
-
-      .btn-job-jump,
-      .view-job-link {
-        background: #172133 !important;
-        border: 1px solid #2a374f !important;
-        color: #38bdf8 !important;
-        font-weight: 700 !important;
-        &:hover {
-          background: #1c283e !important;
-          color: #7dd3fc !important;
-          border-color: #38bdf8 !important;
-        }
-      }
-    }
-  }
-
-  // 4. Sidebar Widgets
-  .sidebar-widget {
-    background: #111827;
-    border-color: #1f293d;
-
-    .widget-header {
-      border-bottom-color: #1f293d;
-
-      .widget-title { color: #f8fafc; }
-      .widget-subtitle { color: #94a3b8; }
-    }
-
-    .quick-links-list {
-      .quick-link-item {
-        background: #172133;
-        border-color: #1f293d;
-
-        &:hover {
-          background: #1e293b;
-          border-color: #2a374f;
-        }
-
-        .item-info {
-          strong { color: #f8fafc; }
-          span { color: #94a3b8; }
-        }
-
-        .arrow { color: #94a3b8; }
-      }
-    }
-
-    .telemetry-list {
-      .telemetry-row {
-        .telemetry-name { color: #cbd5e1; }
-      }
-    }
-
-    .telemetry-footer {
-      border-top-color: #1f293d;
-      color: #94a3b8;
-    }
-  }
-}
-
 @media (max-width: 991px) {
   .dashboard-stage {
     zoom: 1;
@@ -1577,5 +1262,24 @@
         font-size: 1.25rem;
       }
     }
+
+    .topbar-actions {
+      gap: 0.5rem;
+
+      .btn-action,
+      .btn-refresh,
+      a,
+      button {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+    }
+  }
+
+  .kpi-card,
+  .chart-card,
+  .activity-card,
+  .quick-actions-card {
+    padding: 1rem;
   }
 }

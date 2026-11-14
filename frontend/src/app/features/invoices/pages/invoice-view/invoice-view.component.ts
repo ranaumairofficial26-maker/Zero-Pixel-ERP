@@ -4,7 +4,6 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { InvoiceService } from '../../services/invoice.service';
 import { Invoice } from '../../models/invoice.model';
-import { ThemeService } from '../../../../core/services/theme.service';
 import { InvoiceShareModalComponent } from '../../components/invoice-share-modal/invoice-share-modal.component';
 
 @Component({
@@ -18,7 +17,6 @@ export class InvoiceViewComponent implements OnInit, OnDestroy {
   private invoiceService = inject(InvoiceService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  public themeService = inject(ThemeService);
   private cdr = inject(ChangeDetectorRef);
 
   invoice: Invoice | null = null;

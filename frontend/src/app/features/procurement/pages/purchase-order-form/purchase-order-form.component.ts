@@ -6,10 +6,8 @@ import { forkJoin, finalize } from 'rxjs';
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { SupplierService } from '../../services/supplier.service';
 import { SupplierQuoteService } from '../../services/supplier-quote.service';
-import { ProductionService } from '../../../production/services/production.service';
 import { Supplier, SupplierListItem } from '../../models/supplier.model';
 import { SupplierQuoteListItem } from '../../models/supplier-quote.model';
-import { ProductionJob } from '../../../production/models/production.model';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
@@ -24,7 +22,6 @@ export class PurchaseOrderFormComponent implements OnInit {
   private poService = inject(PurchaseOrderService);
   private supplierService = inject(SupplierService);
   private quoteService = inject(SupplierQuoteService);
-  private productionService = inject(ProductionService);
   private toastService = inject(ToastService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -47,9 +44,6 @@ export class PurchaseOrderFormComponent implements OnInit {
   quoteSearchTerm: string = '';
   hasQuoteDerivedItems: boolean = false;
   private lastSupplierId: number | null = null;
-
-  jobs: ProductionJob[] = [];
-  jobSearchTerm: string = '';
 
   readonly itemPlaceholders = [
     'e.g. Art Card',
@@ -102,16 +96,6 @@ export class PurchaseOrderFormComponent implements OnInit {
     });
   }
 
-  get filteredJobs(): ProductionJob[] {
-    const term = (this.jobSearchTerm || '').trim().toLowerCase();
-    if (!term) return this.jobs;
-    return this.jobs.filter(j =>
-      (j.jobNumber || '').toLowerCase().includes(term) ||
-      (j.customerName || '').toLowerCase().includes(term) ||
-      (j.orderNumber || '').toLowerCase().includes(term)
-    );
-  }
-
   createItemRow(description: string = '', quantity: number = 1, rate: number | null = null): FormGroup {
     const initialAmt = rate !== null ? Math.round(quantity * rate * 100) / 100 : 0;
     const row = this.fb.group({
@@ -162,13 +146,11 @@ export class PurchaseOrderFormComponent implements OnInit {
   private loadReferenceData(): void {
     forkJoin({
       suppliers: this.supplierService.getSuppliers('', 1, 50),
-      quotes: this.quoteService.getQuotes('', 1, 50),
-      jobs: this.productionService.getJobs()
+      quotes: this.quoteService.getQuotes('', 1, 50)
     }).subscribe({
-      next: ({ suppliers, quotes, jobs }) => {
+      next: ({ suppliers, quotes }) => {
         this.activeSuppliers = (suppliers.items || []).filter(s => s.status === 'Active');
         this.allQuotes = quotes.items || [];
-        this.jobs = jobs || [];
         this.checkRouteAndLoadData();
       },
       error: (err) => {

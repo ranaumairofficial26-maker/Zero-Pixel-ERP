@@ -26,13 +26,22 @@ export class InvoiceService {
     return `${this.baseUrl}/invoices`;
   }
 
-  getInvoices(search?: string, page: number = 1, pageSize: number = 10): Observable<PaginatedInvoicesResponse> {
+  getInvoices(search?: string, page: number = 1, pageSize: number = 10, period?: string, fromDate?: string, toDate?: string): Observable<PaginatedInvoicesResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
     if (search && search.trim()) {
       params = params.set('search', search.trim());
+    }
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (!fromDate && !toDate && period && period !== 'all') {
+      params = params.set('period', period);
     }
 
     return this.http.get<PaginatedInvoicesResponse>(this.apiUrl, { params });
@@ -78,6 +87,41 @@ export class InvoiceService {
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = defaultName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      })
+    );
+  }
+
+  downloadReportPdf(period?: string, search?: string, fromDate?: string, toDate?: string): Observable<Blob> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    if (!fromDate && !toDate && period && period !== 'all') {
+      params = params.set('period', period);
+    }
+    if (search && search.trim()) {
+      params = params.set('search', search.trim());
+    }
+
+    return this.http.get(`${this.apiUrl}/report/pdf`, {
+      params,
+      responseType: 'blob'
+    }).pipe(
+      tap((blob: Blob) => {
+        const label = fromDate || toDate
+          ? `${fromDate || 'start'}_to_${toDate || 'end'}`
+          : (period && period !== 'all' ? period : 'all');
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `Invoices_Report_${label}.pdf`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

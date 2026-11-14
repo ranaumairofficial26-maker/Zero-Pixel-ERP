@@ -379,30 +379,3 @@
   font-weight: 600;
 }
 
-:host-context(.dark-mode),
-:host-context([data-theme="dark"]) {
-  .page-header-bar .page-title,
-  .card-section .section-header .section-title,
-  .items-table .amount-val,
-  .supplier-snapshot-card .snap-val {
-    color: #f8fafc;
-  }
-  .card-section {
-    background: #111827;
-    border-color: #1f293d;
-    .section-header { border-bottom-color: #1f293d; }
-  }
-  .form-group .field-label { color: #cbd5e1; }
-  .form-group .form-control,
-  .items-table .table-input {
-    background: #172133;
-    border-color: #2a374f;
-    color: #f8fafc;
-  }
-  .supplier-snapshot-card,
-  .total-bar {
-    background: #172133;
-    border-color: #2a374f;
-  }
-}
-

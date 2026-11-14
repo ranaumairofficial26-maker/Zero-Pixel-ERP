@@ -3,9 +3,13 @@
     <!-- HEADER -->
     <header class="form-header">
       <div class="header-text">
-        <h1 class="form-title">Record Supplier Payment</h1>
+        <h1 class="form-title">{{ isEditMode ? 'Edit Supplier Payment' : 'Record Supplier Payment' }}</h1>
         <p class="form-subtitle">
-          Record a partial or full payment against an outstanding supplier bill.
+          {{
+            isEditMode
+              ? 'Update payment amount or details and automatically recalculate the linked bill balance.'
+              : 'Record a partial or full payment against an outstanding supplier bill.'
+          }}
         </p>
       </div>
 
@@ -16,10 +20,14 @@
         <button
           type="button"
           class="btn btn-primary"
-          [disabled]="isSubmitting || isOverpayment"
+          [disabled]="isSubmitting || isLoadingPayment || isOverpayment"
           (click)="recordPayment()"
         >
-          {{ isSubmitting ? 'Recording...' : 'Record Payment' }}
+          {{
+            isSubmitting
+              ? (isEditMode ? 'Updating...' : 'Recording...')
+              : (isEditMode ? 'Update Payment' : 'Record Payment')
+          }}
         </button>
       </div>
     </header>
@@ -67,14 +75,16 @@
               <input
                 type="text"
                 class="form-control"
+                [class.read-only]="isEditMode"
                 [value]="supplierSearch"
+                [disabled]="isEditMode"
                 (input)="filterSuppliers($any($event.target).value)"
-                (focus)="showSupplierDropdown = true"
+                (focus)="!isEditMode && (showSupplierDropdown = true)"
                 placeholder="Search active suppliers by name, phone or contact person..."
                 [class.is-invalid]="paymentForm.get('supplierId')?.invalid && paymentForm.get('supplierId')?.touched"
               />
               <button
-                *ngIf="selectedSupplier"
+                *ngIf="selectedSupplier && !isEditMode"
                 type="button"
                 class="btn-clear"
                 (click)="clearSupplier()"
@@ -127,10 +137,11 @@
               <input
                 type="text"
                 class="form-control"
+                [class.read-only]="isEditMode"
                 [value]="billSearch"
-                [disabled]="!selectedSupplier"
+                [disabled]="isEditMode || !selectedSupplier"
                 (input)="filterBills($any($event.target).value)"
-                (focus)="showBillDropdown = true"
+                (focus)="!isEditMode && (showBillDropdown = true)"
                 [placeholder]="
                   selectedSupplier
                     ? isLoadingBills
@@ -143,7 +154,7 @@
                 [class.is-invalid]="paymentForm.get('supplierBillId')?.invalid && paymentForm.get('supplierBillId')?.touched"
               />
               <button
-                *ngIf="selectedBill"
+                *ngIf="selectedBill && !isEditMode"
                 type="button"
                 class="btn-clear"
                 (click)="clearBill()"
@@ -177,7 +188,18 @@
 
           <!-- Field 5: Payment Amount -->
           <div class="field-box">
-            <label class="field-label required">Payment Amount (PKR)</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <label class="field-label required">Payment Amount (PKR)</label>
+              <button
+                *ngIf="selectedBill && remainingBalanceAfterPayment > 0"
+                type="button"
+                class="btn-clear"
+                style="position: static; transform: none; padding: 2px 8px; font-size: 11.5px;"
+                (click)="fillFullBalance()"
+              >
+                Pay Full ({{ formatCurrency(selectedBill.balance) }})
+              </button>
+            </div>
             <input
               type="number"
               step="0.01"
@@ -282,9 +304,13 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="isSubmitting || isOverpayment"
+          [disabled]="isSubmitting || isLoadingPayment || isOverpayment"
         >
-          {{ isSubmitting ? 'Recording...' : 'Record Payment' }}
+          {{
+            isSubmitting
+              ? (isEditMode ? 'Updating...' : 'Recording...')
+              : (isEditMode ? 'Update Payment' : 'Record Payment')
+          }}
         </button>
       </div>
     </form>

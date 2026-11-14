@@ -40,6 +40,9 @@ public class CreateInvoiceDto
     [Range(0, double.MaxValue, ErrorMessage = "Adjustment rate cannot be negative.")]
     public decimal? AdjustmentRate { get; set; }
 
+    [Range(0, double.MaxValue, ErrorMessage = "Previous balance cannot be negative.")]
+    public decimal? PreviousBalance { get; set; }
+
     public string? Notes { get; set; }
 
     [Required]
@@ -68,6 +71,9 @@ public class UpdateInvoiceDto
 
     [Range(0, double.MaxValue, ErrorMessage = "Adjustment rate cannot be negative.")]
     public decimal? AdjustmentRate { get; set; }
+
+    [Range(0, double.MaxValue, ErrorMessage = "Previous balance cannot be negative.")]
+    public decimal? PreviousBalance { get; set; }
 
     public string? Notes { get; set; }
 
@@ -110,6 +116,8 @@ public class InvoiceDto
     public string AdjustmentType { get; set; } = "advance";
     public decimal? AdjustmentRate { get; set; }
     public decimal Balance { get; set; }
+    public decimal? PreviousBalance { get; set; }
+    public decimal TotalBalance => Math.Round(Balance + (PreviousBalance ?? 0m), 2);
     public string? Notes { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -132,6 +140,8 @@ public class InvoiceListDto
     public string AdjustmentType { get; set; } = "advance";
     public decimal? AdjustmentRate { get; set; }
     public decimal Balance { get; set; }
+    public decimal? PreviousBalance { get; set; }
+    public decimal TotalBalance => Math.Round(Balance + (PreviousBalance ?? 0m), 2);
     public int ItemCount { get; set; }
     public DateTime CreatedAt { get; set; }
 }

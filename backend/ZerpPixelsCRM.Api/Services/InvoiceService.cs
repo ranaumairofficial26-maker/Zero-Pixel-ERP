@@ -24,12 +24,12 @@ public class InvoiceService : IInvoiceService
         _logger = logger;
     }
 
-    public async Task<PaginatedInvoicesResponse> GetInvoicesAsync(string? search = null, int page = 1, int pageSize = 10)
+    public async Task<PaginatedInvoicesResponse> GetInvoicesAsync(string? search = null, string? period = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
-        var (items, totalCount) = await _invoiceRepository.GetInvoicesAsync(search, page, pageSize);
+        var (items, totalCount) = await _invoiceRepository.GetInvoicesAsync(search, period, fromDate, toDate, page, pageSize);
 
         var dtos = items.Select(i => new InvoiceListDto
         {
@@ -45,6 +45,7 @@ public class InvoiceService : IInvoiceService
             AdjustmentType = string.IsNullOrWhiteSpace(i.AdjustmentType) ? "advance" : i.AdjustmentType,
             AdjustmentRate = i.AdjustmentRate,
             Balance = i.Balance,
+            PreviousBalance = i.PreviousBalance,
             ItemCount = i.Items.Count,
             CreatedAt = i.CreatedAt
         }).ToList();
@@ -175,6 +176,7 @@ public class InvoiceService : IInvoiceService
             AdjustmentType = normalizedType,
             AdjustmentRate = calculatedRate,
             Balance = balance,
+            PreviousBalance = dto.PreviousBalance.HasValue && dto.PreviousBalance.Value > 0 ? Math.Round(dto.PreviousBalance.Value, 2) : null,
             Notes = dto.Notes,
             Items = invoiceItems
         };
@@ -266,6 +268,7 @@ public class InvoiceService : IInvoiceService
         existing.AdjustmentType = normalizedType;
         existing.AdjustmentRate = calculatedRate;
         existing.Balance = balance;
+        existing.PreviousBalance = dto.PreviousBalance.HasValue && dto.PreviousBalance.Value > 0 ? Math.Round(dto.PreviousBalance.Value, 2) : null;
         existing.Notes = dto.Notes;
         existing.Items = updatedItems;
 
@@ -332,6 +335,19 @@ public class InvoiceService : IInvoiceService
         }
     }
 
+    public async Task<(byte[] FileBytes, string FileName)> GenerateReportPdfAsync(string? period = null, string? search = null, DateTime? fromDate = null, DateTime? toDate = null)
+    {
+        var (items, _) = await _invoiceRepository.GetInvoicesAsync(search, period, fromDate, toDate, 1, 1000);
+        var list = items.ToList();
+        var pdfBytes = _invoicePdfService.GenerateInvoicesReportPdf(list, period, search, fromDate, toDate);
+
+        var normalizedPeriod = (fromDate.HasValue || toDate.HasValue)
+            ? "custom"
+            : (string.IsNullOrWhiteSpace(period) ? "all" : period.Trim().ToLowerInvariant());
+        var fileName = $"Invoices_Report_{normalizedPeriod}_{DateTime.UtcNow:yyyyMMdd}.pdf";
+        return (pdfBytes, fileName);
+    }
+
     private static InvoiceDto MapToDto(Invoice invoice)
     {
         return new InvoiceDto
@@ -352,6 +368,7 @@ public class InvoiceService : IInvoiceService
             AdjustmentType = string.IsNullOrWhiteSpace(invoice.AdjustmentType) ? "advance" : invoice.AdjustmentType,
             AdjustmentRate = invoice.AdjustmentRate,
             Balance = invoice.Balance,
+            PreviousBalance = invoice.PreviousBalance,
             Notes = invoice.Notes,
             CreatedAt = invoice.CreatedAt,
             UpdatedAt = invoice.UpdatedAt,

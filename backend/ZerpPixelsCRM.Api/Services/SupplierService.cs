@@ -62,6 +62,9 @@ public class SupplierService : ISupplierService
             BankName = TrimOrNull(request.BankName),
             AccountName = TrimOrNull(request.AccountName),
             AccountNumberOrIban = TrimOrNull(request.AccountNumberOrIban),
+            AccountNumberHash = string.IsNullOrWhiteSpace(request.AccountNumberOrIban)
+                ? null
+                : ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSha256(request.AccountNumberOrIban),
             Status = request.Status == "Inactive" ? "Inactive" : "Active",
             CreatedAt = now,
             UpdatedAt = now,
@@ -87,6 +90,9 @@ public class SupplierService : ISupplierService
         supplier.BankName = TrimOrNull(request.BankName);
         supplier.AccountName = TrimOrNull(request.AccountName);
         supplier.AccountNumberOrIban = TrimOrNull(request.AccountNumberOrIban);
+        supplier.AccountNumberHash = string.IsNullOrWhiteSpace(request.AccountNumberOrIban)
+            ? null
+            : ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSha256(request.AccountNumberOrIban);
         supplier.Status = request.Status == "Inactive" ? "Inactive" : "Active";
         supplier.UpdatedAt = DateTime.UtcNow;
 

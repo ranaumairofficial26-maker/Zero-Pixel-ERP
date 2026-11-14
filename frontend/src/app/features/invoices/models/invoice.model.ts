@@ -32,6 +32,8 @@ export interface Invoice {
   adjustmentType?: InvoiceAdjustmentType;
   adjustmentRate?: number | null;
   balance: number;
+  previousBalance?: number | null;
+  totalBalance?: number;
   notes?: string | null;
 
   createdAt: string;
@@ -52,6 +54,8 @@ export interface InvoiceListItem {
   adjustmentType?: InvoiceAdjustmentType;
   adjustmentRate?: number | null;
   balance: number;
+  previousBalance?: number | null;
+  totalBalance?: number;
   itemCount: number;
   createdAt: string;
 }
@@ -72,6 +76,7 @@ export interface CreateInvoiceRequest {
   advance: number;
   adjustmentType?: InvoiceAdjustmentType;
   adjustmentRate?: number | null;
+  previousBalance?: number | null;
   notes?: string | null;
   items: {
     grNumber?: string | null;
@@ -89,6 +94,7 @@ export interface UpdateInvoiceRequest {
   advance: number;
   adjustmentType?: InvoiceAdjustmentType;
   adjustmentRate?: number | null;
+  previousBalance?: number | null;
   notes?: string | null;
   items: {
     grNumber?: string | null;

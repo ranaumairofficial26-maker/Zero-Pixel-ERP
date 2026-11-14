@@ -11,17 +11,20 @@ public class SupplierPaymentService : ISupplierPaymentService
     private readonly ISupplierPaymentRepository _paymentRepo;
     private readonly ISupplierRepository _supplierRepo;
     private readonly IValidator<CreateSupplierPaymentRequest> _createValidator;
+    private readonly IValidator<UpdateSupplierPaymentRequest> _updateValidator;
     private readonly IValidator<ReverseSupplierPaymentRequest> _reverseValidator;
 
     public SupplierPaymentService(
         ISupplierPaymentRepository paymentRepo,
         ISupplierRepository supplierRepo,
         IValidator<CreateSupplierPaymentRequest> createValidator,
+        IValidator<UpdateSupplierPaymentRequest> updateValidator,
         IValidator<ReverseSupplierPaymentRequest> reverseValidator)
     {
         _paymentRepo = paymentRepo;
         _supplierRepo = supplierRepo;
         _createValidator = createValidator;
+        _updateValidator = updateValidator;
         _reverseValidator = reverseValidator;
     }
 
@@ -111,6 +114,32 @@ public class SupplierPaymentService : ISupplierPaymentService
         return MapToDto(saved);
     }
 
+    public async Task<SupplierPaymentDto?> UpdateSupplierPaymentAsync(long id, UpdateSupplierPaymentRequest request)
+    {
+        var validation = await _updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            var firstError = validation.Errors.FirstOrDefault()?.ErrorMessage ?? "Invalid supplier payment data.";
+            throw new ArgumentException(firstError);
+        }
+
+        var normalizedMethod = NormalizeMethod(request.PaymentMethod);
+        var paymentDateUtc = request.PaymentDate.Kind == DateTimeKind.Utc
+            ? request.PaymentDate
+            : DateTime.SpecifyKind(request.PaymentDate, DateTimeKind.Utc);
+
+        var updated = await _paymentRepo.UpdatePaymentAtomicAsync(
+            id,
+            paymentDateUtc,
+            request.Amount,
+            normalizedMethod,
+            string.IsNullOrWhiteSpace(request.PaymentAccountReference) ? null : request.PaymentAccountReference.Trim(),
+            string.IsNullOrWhiteSpace(request.TransactionReference) ? null : request.TransactionReference.Trim(),
+            string.IsNullOrWhiteSpace(request.Notes) ? null : request.Notes.Trim());
+
+        return updated == null ? null : MapToDto(updated);
+    }
+
     public async Task<SupplierPaymentDto?> ReverseSupplierPaymentAsync(long id, ReverseSupplierPaymentRequest request, string? reversedBy)
     {
         var validation = await _reverseValidator.ValidateAsync(request);
@@ -133,6 +162,10 @@ public class SupplierPaymentService : ISupplierPaymentService
 
     private static SupplierPaymentListItemDto MapToListItemDto(SupplierPayment p)
     {
+        var billTotal = p.SupplierBill?.TotalAmount ?? 0m;
+        var billPaid = p.SupplierBill?.PaidAmount ?? 0m;
+        var billBalance = Math.Round(billTotal - billPaid, 2);
+
         return new SupplierPaymentListItemDto
         {
             Id = p.Id,
@@ -142,6 +175,10 @@ public class SupplierPaymentService : ISupplierPaymentService
             SupplierBillId = p.SupplierBillId,
             InternalBillNumber = p.SupplierBill?.InternalBillNumber ?? string.Empty,
             SupplierInvoiceNumber = p.SupplierBill?.SupplierInvoiceNumber ?? string.Empty,
+            BillTotalAmount = billTotal,
+            BillPaidAmount = billPaid,
+            BillOutstandingBalance = billBalance,
+            BillStatus = p.SupplierBill?.Status ?? string.Empty,
             PaymentDate = p.PaymentDate,
             Amount = p.Amount,
             PaymentMethod = p.PaymentMethod,
@@ -183,6 +220,8 @@ public class SupplierPaymentService : ISupplierPaymentService
             ReversedAt = p.ReversedAt,
             ReversedBy = p.ReversedBy,
             CreatedBy = p.CreatedBy,
+            RecordIntegrityHash = p.RecordIntegrityHash,
+            IsIntegrityVerified = ZerpPixelsCRM.Api.Utils.SecurityHashHelper.VerifySupplierPaymentIntegrity(p),
             CreatedAt = p.CreatedAt,
             UpdatedAt = p.UpdatedAt
         };

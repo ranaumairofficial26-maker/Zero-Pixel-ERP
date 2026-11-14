@@ -37,6 +37,14 @@ public class SupplierPayment
     [Column("payment_account_reference")]
     public string? PaymentAccountReference { get; set; }
 
+    [MaxLength(64)]
+    [Column("payment_account_hash")]
+    public string? PaymentAccountHash { get; set; }
+
+    [MaxLength(64)]
+    [Column("record_integrity_hash")]
+    public string? RecordIntegrityHash { get; set; }
+
     [MaxLength(150)]
     [Column("transaction_reference")]
     public string? TransactionReference { get; set; }

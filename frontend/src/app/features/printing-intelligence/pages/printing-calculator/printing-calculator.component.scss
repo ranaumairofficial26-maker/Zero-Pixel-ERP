@@ -5,8 +5,8 @@
   max-width: 1680px;
   margin: 0 auto;
   box-sizing: border-box;
-  background-color: #070b14;
-  color: #f1f5f9;
+  background-color: #f8fafc;
+  color: #0f172a;
   min-height: 100vh;
 }
 
@@ -17,12 +17,12 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1.25rem;
-  background: #09101e;
-  border: 1px solid #162238;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 1.25rem 1.75rem;
   margin-bottom: 1.25rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
   position: relative;
   overflow: hidden;
 
@@ -75,14 +75,14 @@
           .page-title {
             font-size: 1.55rem;
             font-weight: 800;
-            color: #ffffff;
+            color: #0f172a;
             margin: 0;
             letter-spacing: -0.02em;
           }
 
           .badge-accent {
             background: rgba(2, 132, 199, 0.15);
-            color: #38bdf8;
+            color: #0284c7;
             border: 1px solid #0284c7;
             font-size: 0.725rem;
             font-weight: 700;
@@ -93,9 +93,9 @@
           }
 
           .badge-subtle {
-            background: #0f1828;
-            border: 1px solid #1e293b;
-            color: #94a3b8;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #475569;
             font-size: 0.75rem;
             font-weight: 600;
             padding: 0.25rem 0.65rem;
@@ -118,7 +118,7 @@
 
         .page-subtitle {
           font-size: 0.85rem;
-          color: #7e8ea7;
+          color: #64748b;
           margin: 0;
           line-height: 1.45;
         }
@@ -213,9 +213,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #0f172a;
-  color: #f1f5f9;
-  border: 1px solid #1e293b;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
   padding: 0.525rem 1rem;
   border-radius: 8px;
   font-weight: 600;
@@ -225,9 +225,9 @@
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    background: #1e293b;
-    border-color: #334155;
-    color: #ffffff;
+    background: #e2e8f0;
+    border-color: #475569;
+    color: #0f172a;
     transform: translateY(-1px);
   }
 }
@@ -370,11 +370,11 @@
 }
 
 .calc-card {
-  background: #0b1322;
-  border: 1px solid #16243b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 1.25rem 1.45rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
   transition: all 0.2s ease;
 
   @media (max-width: 640px) {
@@ -383,8 +383,8 @@
   }
 
   &:hover {
-    border-color: #203554;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    border-color: #334155;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.07);
   }
 
   &.full-card {
@@ -399,7 +399,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #16243b;
+  border-bottom: 1px solid #e2e8f0;
   margin-bottom: 1rem;
 
   .card-title-group {
@@ -427,7 +427,7 @@
     .card-title {
       font-size: 1rem;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
       letter-spacing: -0.01em;
       margin: 0;
     }
@@ -508,10 +508,10 @@
   padding: 0.55rem 0.85rem;
   font-size: 0.85rem;
   font-weight: 500;
-  background: #080e1b;
-  border: 1px solid #1c2b44;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  color: #f1f5f9;
+  color: #0f172a;
   outline: none;
   transition: all 0.15s ease-in-out;
   height: 38px;
@@ -522,8 +522,8 @@
   }
 
   option {
-    background: #080e1b;
-    color: #ffffff;
+    background: #ffffff;
+    color: #0f172a;
   }
 }
 
@@ -549,13 +549,13 @@
 
 // Reference Item Box
 .item-reference-box {
-  background: #080f1d;
-  border: 1px solid #16243b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-left: 4px solid #0284c7;
   border-radius: 10px;
   padding: 0.9rem 1.15rem;
   margin-top: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 
   .ref-header {
     display: flex;
@@ -566,12 +566,12 @@
     .ref-name {
       font-size: 0.925rem;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
     }
 
     .ref-badge {
       background: rgba(2, 132, 199, 0.2);
-      color: #38bdf8;
+      color: #0284c7;
       border: 1px solid #0284c7;
       font-size: 0.725rem;
       font-weight: 700;
@@ -593,18 +593,18 @@
 
     .dim-pill {
       font-size: 0.8rem;
-      background: #0b1424;
-      border: 1px solid #1c2b44;
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
       padding: 0.25rem 0.65rem;
       border-radius: 6px;
-      color: #cbd5e1;
+      color: #334155;
       font-weight: 500;
     }
   }
 
   .ref-notes {
     font-size: 0.8rem;
-    color: #7e8ea7;
+    color: #64748b;
     margin: 0;
     line-height: 1.4;
   }
@@ -612,8 +612,8 @@
 
 // Dimension Edit Panel (Step 2.2) - Compact & Clean
 .dimension-edit-panel {
-  background: #080f1d;
-  border: 1px solid #16243b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 0.65rem 0.85rem;
   transition: all 0.2s ease-in-out;
@@ -621,7 +621,7 @@
 
   &.custom-mode {
     border-color: #22c55e;
-    background: #061812;
+    background: #ecfdf5;
   }
 
   .dimension-header-bar {
@@ -653,15 +653,15 @@
       .header-title {
         font-size: 0.8125rem;
         font-weight: 700;
-        color: #ffffff;
+        color: #0f172a;
       }
 
       .badge-status-pill {
         font-size: 0.7rem;
         font-weight: 700;
-        color: #94a3b8;
-        background: #111c2e;
-        border: 1px solid #1c2b44;
+        color: #475569;
+        background: #f1f5f9;
+        border: 1.5px solid #cbd5e1;
         padding: 0.15rem 0.5rem;
         border-radius: 9999px;
 
@@ -679,9 +679,9 @@
       gap: 0.4rem;
 
       .btn-switch-custom {
-        background: #0b1322;
-        border: 1px solid #1c2b44;
-        color: #38bdf8;
+        background: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        color: #0284c7;
         font-size: 0.725rem;
         font-weight: 700;
         padding: 0.2rem 0.55rem;
@@ -690,7 +690,7 @@
         transition: all 0.15s ease-in-out;
 
         &:hover {
-          background: #16243b;
+          background: #e2e8f0;
           border-color: #0284c7;
         }
       }
@@ -716,15 +716,15 @@
     .dim-cross {
       font-size: 1.1rem;
       font-weight: 700;
-      color: #94a3b8;
+      color: #475569;
       user-select: none;
     }
 
     .dim-input-group {
       display: inline-flex;
       align-items: center;
-      background: #080e1b;
-      border: 1px solid #1c2b44;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
       border-radius: 6px;
       overflow: hidden;
       height: 34px;
@@ -741,7 +741,7 @@
       }
 
       .dim-addon {
-        background: #0e1726;
+        background: #f8fafc;
         color: #8295ad;
         font-weight: 700;
         font-size: 0.75rem;
@@ -761,11 +761,11 @@
         padding: 0 0.5rem;
         font-size: 0.875rem;
         font-weight: 600;
-        color: #ffffff;
+        color: #0f172a;
         background: transparent;
 
         &.dim-input-editable {
-          color: #4ade80;
+          color: #15803d;
           font-weight: 700;
         }
 
@@ -777,15 +777,15 @@
       }
 
       .dim-unit-tag {
-        background: #0e1726;
-        color: #8295ad;
+        background: #f8fafc;
+        color: #475569;
         font-size: 0.7rem;
         font-weight: 700;
         padding: 0 0.45rem;
         height: 100%;
         display: flex;
         align-items: center;
-        border-left: 1px solid #1c2b44;
+        border-left: 1px solid #cbd5e1;
         user-select: none;
       }
     }
@@ -793,9 +793,9 @@
 
   .canonical-info-row {
     font-size: 0.75rem;
-    color: #8295ad;
-    background: #080e1b;
-    border: 1px solid #1c2b44;
+    color: #475569;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
     border-radius: 5px;
     padding: 0.3rem 0.6rem;
     display: flex;
@@ -804,9 +804,9 @@
     gap: 0.35rem;
 
     .canonical-text {
-      color: #cbd5e1;
+      color: #334155;
       font-weight: 500;
-      strong { color: #ffffff; font-weight: 700; }
+      strong { color: #0f172a; font-weight: 700; }
     }
   }
 }
@@ -854,7 +854,7 @@
 
       .times-sym {
         font-weight: 700;
-        color: #94a3b8;
+        color: #475569;
       }
 
       .unit-pill {
@@ -993,8 +993,8 @@
 }
 
 .per-color-config-box {
-  background: #080f1d;
-  border: 1px solid #16243b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 0.85rem 1rem;
 
@@ -1012,7 +1012,7 @@
       cursor: pointer;
       font-size: 0.8125rem;
       font-weight: 600;
-      color: #cbd5e1;
+      color: #334155;
 
       input[type="checkbox"] {
         cursor: pointer;
@@ -1026,7 +1026,7 @@
       font-size: 0.75rem;
       font-weight: 700;
       background: rgba(2, 132, 199, 0.2);
-      color: #38bdf8;
+      color: #0284c7;
       border: 1px solid #0284c7;
       padding: 0.25rem 0.5rem;
       border-radius: 6px;
@@ -1101,8 +1101,8 @@
 // Pricing method container & Pill box
 .pricing-method-container {
   margin-top: 1rem;
-  background: #080f1d;
-  border: 1px solid #16243b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 1rem;
 
@@ -1110,7 +1110,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: #061a33;
+    background: #f0f9ff;
     border: 1px solid #0284c7;
     border-radius: 8px;
     padding: 0.65rem 1rem;
@@ -1118,7 +1118,7 @@
     .sub-title {
       font-size: 0.75rem;
       font-weight: 700;
-      color: #38bdf8;
+      color: #0284c7;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
@@ -1126,13 +1126,13 @@
     .big-price {
       font-size: 1.25rem;
       font-weight: 800;
-      color: #ffffff;
+      color: #0f172a;
       margin: 0.15rem 0;
     }
 
     .formula-caption {
       font-size: 0.7rem;
-      color: #7dd3fc;
+      color: #0369a1;
     }
   }
 }
@@ -1351,7 +1351,7 @@
     background: transparent;
     border: none;
     font-size: 1.5rem;
-    color: #94a3b8;
+    color: #475569;
     cursor: pointer;
     line-height: 1;
 
@@ -1502,406 +1502,6 @@
 }
 
 // 5. Dark Mode Overrides
-:host-context(.dark-mode) {
-  .header-card,
-  .calc-card,
-  .modal-dialog {
-    background: #111827;
-    border-color: #1f293d;
-  }
-
-  .header-card {
-    &::before {
-      background: linear-gradient(90deg, #0284c7, #38bdf8, #10b981);
-    }
-
-    .header-left {
-      .page-title { color: #f8fafc; }
-      .page-subtitle { color: #94a3b8; }
-      .badge-accent { 
-        background: #0c4a6e; 
-        color: #38bdf8; 
-        border-color: #0284c7; 
-      }
-      .badge-subtle { 
-        background: #1e293b; 
-        color: #cbd5e1; 
-        border-color: #2a374f; 
-      }
-    }
-  }
-
-  .tab-pill-group {
-    background: #0f172a;
-    border-color: #1f293d;
-
-    .tab-pill {
-      color: #94a3b8;
-
-      &:hover { color: #f8fafc; }
-
-      &.active {
-        background: #1e293b;
-        color: #38bdf8;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-      }
-    }
-  }
-
-  .card-header-bar {
-    border-bottom-color: #1f293d;
-    .card-title { color: #f8fafc; }
-    .section-desc { color: #94a3b8; }
-  }
-
-  .form-group .field-label { color: #cbd5e1; }
-
-  .form-input,
-  .form-select,
-  .form-textarea,
-  .form-input-sm,
-  .form-select-sm,
-  .costing-table .table-input {
-    background: #172133;
-    border-color: #2a374f;
-    color: #f8fafc;
-  }
-
-  .item-reference-box,
-  .dimension-edit-panel,
-  .dimensions-dual-box .dim-box-half,
-  .pricing-method-container,
-  .breakdown-summary-box,
-  .modal-footer,
-  .specs-box-compact,
-  .per-color-config-box {
-    background: #131c2e;
-    border-color: #1f293d;
-  }
-
-  .per-color-config-box {
-    background: #131c2e !important;
-    border: 1px dashed #2a374f !important;
-
-    .config-header {
-      .checkbox-label {
-        color: #e2e8f0 !important;
-
-        .toggle-text {
-          color: #e2e8f0 !important;
-        }
-      }
-
-      .formula-preview-badge {
-        background: #082f49 !important;
-        color: #38bdf8 !important;
-        border: 1px solid #0369a1 !important;
-      }
-    }
-  }
-
-  .specs-box-compact {
-    background: #131c2e !important;
-    border-color: #1f293d !important;
-
-    .field-label {
-      color: #cbd5e1 !important;
-    }
-
-    .form-input {
-      background: #172133 !important;
-      border-color: #2a374f !important;
-      color: #f8fafc !important;
-
-      &::placeholder {
-        color: #64748b !important;
-      }
-    }
-  }
-
-  .dimension-edit-panel {
-    background: #111827;
-    border-color: #1f293d;
-
-    &.custom-mode {
-      border-color: #15803d;
-      background: rgba(6, 78, 59, 0.25);
-    }
-    .dimension-header-bar {
-      .header-title { color: #f8fafc; }
-      .badge-status-pill {
-        background: #1e293b;
-        color: #94a3b8;
-        &.badge-editable {
-          background: rgba(34, 197, 94, 0.2);
-          color: #4ade80;
-          border-color: rgba(34, 197, 94, 0.4);
-        }
-      }
-      .btn-switch-custom {
-        background: #172133;
-        border-color: #2a374f;
-        color: #38bdf8;
-      }
-    }
-    .dim-compact-row {
-      .dim-cross { color: #64748b; }
-      .dim-input-group {
-        background: #172133;
-        border-color: #2a374f;
-
-        &.is-editable {
-          border-color: #16a34a;
-        }
-
-        &:focus-within {
-          border-color: #4ade80;
-          box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
-        }
-
-        .dim-addon {
-          background: #0f172a;
-          color: #94a3b8;
-          border-right-color: #2a374f;
-        }
-
-        .dim-input {
-          color: #f8fafc;
-          &.dim-input-editable { color: #4ade80; }
-          &::placeholder { color: #64748b; }
-        }
-
-        .dim-unit-tag {
-          background: #0f172a;
-          color: #94a3b8;
-          border-left-color: #2a374f;
-        }
-      }
-    }
-    .canonical-info-row {
-      background: #172133;
-      border-color: #2a374f;
-      .canonical-text {
-        color: #94a3b8;
-        strong { color: #f8fafc; }
-      }
-    }
-  }
-
-  .item-reference-box {
-    .ref-header .ref-name { color: #f8fafc; }
-    .dim-pill {
-      background: #172133;
-      border-color: #2a374f;
-      color: #e2e8f0;
-    }
-  }
-
-  .dimensions-dual-box .dim-box-half .dim-box-title {
-    color: #f8fafc;
-  }
-
-  .input-with-label {
-    background: #172133;
-    border-color: #2a374f;
-    .unit-tag {
-      background: #1e293b;
-      border-color: #2a374f;
-      color: #94a3b8;
-    }
-    input {
-      background: #172133;
-      color: #f8fafc;
-    }
-  }
-
-  .pricing-method-container .computed-pill-box {
-    background: #082f49;
-    border-color: #0369a1;
-    .sub-title { color: #38bdf8; }
-    .big-price { color: #7dd3fc; }
-    .formula-caption { color: #bae6fd; }
-  }
-
-  .costing-table {
-    th {
-      background: #131c2e;
-      color: #94a3b8;
-      border-color: #1f293d;
-    }
-    td {
-      border-color: #1f293d;
-      color: #e2e8f0;
-    }
-    .expense-name { color: #f8fafc; }
-    .paper-cost-val { color: #f8fafc; }
-    .total-sheets-badge {
-      background: #1e293b;
-      color: #e2e8f0;
-    }
-    .summary-subtotal-row {
-      background: #131c2e;
-      color: #f8fafc;
-    }
-  }
-
-  .totals-table {
-    .result-row:hover {
-      background: #172554;
-    }
-  }
-
-  .btn-secondary {
-    background: #172133;
-    border-color: #2a374f;
-    color: #e2e8f0;
-    &:hover { background: #1f293d; }
-  }
-
-  .modal-header {
-    border-color: #1f293d;
-    .modal-title { color: #f8fafc; }
-  }
-
-  .breakdown-stat-grid .b-stat {
-    background: #172133;
-    .b-label { color: #94a3b8; }
-    .b-val { color: #f8fafc; }
-  }
-
-  .breakdown-list {
-    border-color: #1f293d;
-    .breakdown-row {
-      border-color: #1f293d;
-      .row-name { color: #cbd5e1; }
-      .row-price { color: #f8fafc; }
-    }
-  }
-
-  .radio-pill-group .radio-pill {
-    background: #172133;
-    border-color: #2a374f;
-    color: #e2e8f0;
-    &.selected {
-      background: #0c4a6e;
-      border-color: #0284c7;
-      color: #38bdf8;
-    }
-  }
-
-  .status-badge-pill {
-    &.status-configured {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      border-color: rgba(16, 185, 129, 0.4);
-    }
-    &.status-incomplete {
-      background: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-    &.status-not-required,
-    &.status-not-configured {
-      background: #1e293b;
-      color: #94a3b8;
-      border-color: #334155;
-    }
-  }
-
-  .sub-process-box {
-    background: #131c2e;
-    border-color: #2a374f;
-    .sub-box-title { color: #f8fafc; }
-    .sub-box-badge {
-      background: #082f49;
-      color: #38bdf8;
-      border-color: #0284c7;
-    }
-  }
-
-  .synced-readonly-pill {
-    background: #131c2e;
-    border-color: #2a374f;
-    color: #cbd5e1;
-    strong { color: #38bdf8; }
-  }
-
-  .empty-step-notice {
-    background: #131c2e;
-    border-color: #2a374f;
-    color: #94a3b8;
-  }
-
-  .live-summary-card {
-    background: #111827;
-    border-color: #1f293d;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-
-    .summary-card-header {
-      background: #111827;
-      border-bottom-color: #1f293d;
-    }
-
-    .summary-section-block {
-      border-bottom-color: #1f293d;
-    }
-
-    .summary-kv-list {
-      .kv-row {
-        border-bottom-color: #1f293d;
-        .kv-label { color: #94a3b8; }
-        .kv-sep { color: #64748b; }
-        .kv-val {
-          color: #f8fafc;
-          &.highlight-blue { color: #38bdf8; }
-        }
-      }
-    }
-
-    .breakdown-sub-header {
-      background: #131c2e;
-      border-color: #1f293d;
-      color: #f8fafc;
-      svg { color: #38bdf8; }
-    }
-
-    .cost-rows-list {
-      .cost-row-item {
-        border-bottom-color: #1f293d;
-        .cost-row-label { color: #cbd5e1; }
-        .cost-row-sub { color: #64748b; }
-        .cost-row-amount { color: #f8fafc; }
-      }
-    }
-
-    .total-production-highlight-box {
-      background: linear-gradient(135deg, #082f49, #0c4a6e);
-      border-color: #0284c7;
-
-      .total-prod-label { color: #e0f2fe; }
-      .total-prod-val { color: #ffffff; }
-      .total-prod-subrow {
-        border-top-color: rgba(56, 189, 248, 0.25);
-        color: #bae6fd;
-        strong { color: #ffffff; }
-        .unit-highlight { color: #4ade80; }
-      }
-    }
-  }
-
-  .summary-bottom-actions {
-    .btn-reset-outline {
-      background: #111827;
-      border-color: #2a374f;
-      color: #e2e8f0;
-      &:hover {
-        background: #1e293b;
-        border-color: #38bdf8;
-      }
-    }
-  }
-}
-
 // =========================================================================
 // STEPS 4, 5, 6 & LIVE RIGHT-SIDE COST SUMMARY STYLES
 // =========================================================================
@@ -1970,7 +1570,7 @@
   &.status-not-configured {
     background: #f1f5f9;
     color: #64748b;
-    border-color: #cbd5e1;
+    border-color: #334155;
   }
 }
 
@@ -2035,7 +1635,7 @@
   }
 
   .sync-sep {
-    color: #94a3b8;
+    color: #475569;
   }
 }
 
@@ -2061,17 +1661,17 @@
 
 // Right-Side Sticky Live Summary Card (Reference Style)
 .live-summary-card {
-  background: #0b1322;
-  border: 1px solid #16243b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
 
   .summary-card-header {
-    background: #070d19;
-    color: #ffffff;
+    background: #f8fafc;
+    color: #0f172a;
     padding: 0.85rem 1.15rem;
-    border-bottom: 1px solid #16243b;
+    border-bottom: 1px solid #e2e8f0;
 
     .summary-header-top {
       display: flex;
@@ -2100,7 +1700,7 @@
       .summary-card-title {
         font-size: 0.95rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #0f172a;
         margin: 0;
       }
     }
@@ -2108,7 +1708,7 @@
 
   .summary-section-block {
     padding: 0.85rem 1.15rem;
-    border-bottom: 1px solid #16243b;
+    border-bottom: 1px solid #e2e8f0;
 
     &:last-child {
       border-bottom: none;
@@ -2125,7 +1725,7 @@
       grid-template-columns: 110px 10px 1fr;
       align-items: baseline;
       padding: 0.35rem 0;
-      border-bottom: 1px solid #121c2e;
+      border-bottom: 1px solid #f1f5f9;
       font-size: 0.8rem;
 
       &:last-child {
@@ -2133,17 +1733,17 @@
       }
 
       .kv-label {
-        color: #7e91a9;
+        color: #64748b;
         font-weight: 500;
       }
 
       .kv-sep {
-        color: #475569;
+        color: #64748b;
         font-weight: 700;
       }
 
       .kv-val {
-        color: #ffffff;
+        color: #0f172a;
         font-weight: 700;
         word-break: break-word;
       }
@@ -2154,7 +1754,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #ffffff;
+    color: #0f172a;
     font-size: 0.85rem;
     font-weight: 800;
     margin-bottom: 0.65rem;
@@ -2181,13 +1781,13 @@
       }
 
       .cost-row-label {
-        color: #7e91a9;
+        color: #64748b;
         font-size: 0.8rem;
         font-weight: 500;
       }
 
       .cost-row-amount {
-        color: #ffffff;
+        color: #0f172a;
         font-size: 0.85rem;
         font-weight: 700;
         white-space: nowrap;
@@ -2254,8 +1854,8 @@
       justify-content: center;
       gap: 0.5rem;
       background: transparent;
-      color: #cbd5e1;
-      border: 1px solid #1e293b;
+      color: #334155;
+      border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 0.85rem;
       font-weight: 600;
@@ -2263,9 +1863,9 @@
       transition: all 0.2s ease;
 
       &:hover {
-        background: #16243b;
-        color: #ffffff;
-        border-color: #334155;
+        background: #e2e8f0;
+        color: #0f172a;
+        border-color: #94a3b8;
       }
     }
   }
@@ -2284,7 +1884,7 @@
   align-items: center;
   gap: 0.45rem;
   cursor: pointer;
-  color: #cbd5e1;
+  color: #334155;
   font-size: 0.825rem;
   font-weight: 500;
 
@@ -2301,7 +1901,7 @@
 }
 
 .info-callout-blue {
-  background: #06172d;
+  background: #f0f9ff;
   border: 1px solid #0284c7;
   border-radius: 8px;
   padding: 0.65rem 0.85rem;
@@ -2310,14 +1910,14 @@
   gap: 0.75rem;
 
   .info-icon-badge {
-    color: #38bdf8;
+    color: #0284c7;
     display: flex;
     align-items: center;
     flex-shrink: 0;
   }
 
   .info-text-col {
-    color: #38bdf8;
+    color: #0284c7;
     font-size: 0.78rem;
     line-height: 1.45;
 
@@ -2340,7 +1940,7 @@
 }
 
 .result-box-pill {
-  background: #061a33;
+  background: #f0f9ff;
   border: 1px solid #0284c7;
   border-radius: 8px;
   padding: 0.45rem 0.75rem;
@@ -2353,7 +1953,7 @@
 
   .pill-label {
     font-size: 0.65rem;
-    color: #38bdf8;
+    color: #0284c7;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -2361,7 +1961,7 @@
 
   .pill-val {
     font-size: 1.05rem;
-    color: #ffffff;
+    color: #0f172a;
     font-weight: 800;
     line-height: 1.2;
   }
@@ -2386,11 +1986,11 @@
       align-items: center;
       gap: 0.45rem;
       font-size: 0.825rem;
-      color: #38bdf8;
+      color: #0284c7;
       font-weight: 600;
 
       strong {
-        color: #f8fafc;
+        color: #0f172a;
         font-weight: 700;
       }
     }
@@ -2423,27 +2023,27 @@
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid rgba(51, 65, 85, 0.5);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 0.55rem 0.7rem;
       transition: all 0.2s ease;
 
       &:hover {
         border-color: rgba(56, 189, 248, 0.4);
-        background: rgba(15, 23, 42, 0.85);
+        background: #f8fafc;
       }
 
       .rate-quad-label {
         font-size: 0.725rem;
-        color: #94a3b8;
+        color: #475569;
         font-weight: 600;
       }
 
       .rate-quad-val {
         font-size: 1.05rem;
         font-weight: 800;
-        color: #38bdf8;
+        color: #0284c7;
       }
 
       .rate-quad-group {
@@ -2469,11 +2069,11 @@
   font-size: 0.8rem;
 
   .group-badge-title {
-    color: #6ee7b7;
+    color: #047857;
     font-weight: 600;
 
     strong {
-      color: #f8fafc;
+      color: #0f172a;
     }
   }
 
@@ -2483,15 +2083,15 @@
     flex-wrap: wrap;
 
     .rate-tag {
-      background: rgba(15, 23, 42, 0.7);
+      background: #ffffff;
       border: 1px solid rgba(16, 185, 129, 0.3);
       padding: 0.2rem 0.55rem;
       border-radius: 6px;
-      color: #94a3b8;
+      color: #475569;
       font-size: 0.75rem;
 
       strong {
-        color: #34d399;
+        color: #059669;
       }
     }
   }
@@ -2499,7 +2099,7 @@
 
 // Machine Rates Mini Grid in Right Summary
 .machine-rates-summary-panel {
-  background: rgba(15, 23, 42, 0.55);
+  background: #f8fafc;
   border: 1px solid rgba(56, 189, 248, 0.2);
   border-radius: 8px;
   padding: 0.5rem 0.65rem;
@@ -2509,7 +2109,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #38bdf8;
+    color: #0284c7;
     margin-bottom: 0.4rem;
   }
 
@@ -2523,17 +2123,17 @@
       justify-content: space-between;
       align-items: center;
       font-size: 0.7rem;
-      background: rgba(30, 41, 59, 0.7);
+      background: #ffffff;
       padding: 0.2rem 0.45rem;
       border-radius: 5px;
-      border: 1px solid rgba(51, 65, 85, 0.4);
+      border: 1px solid #e2e8f0;
 
       .m-lbl {
-        color: #94a3b8;
+        color: #475569;
       }
 
       .m-val {
-        color: #38bdf8;
+        color: #0284c7;
         font-weight: 700;
       }
     }
@@ -2541,7 +2141,7 @@
 }
 
 .highlight-green {
-  color: #34d399 !important;
+  color: #059669 !important;
   font-weight: 700;
 }
 

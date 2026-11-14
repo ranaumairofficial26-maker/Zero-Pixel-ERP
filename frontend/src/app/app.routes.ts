@@ -154,6 +154,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/procurement/pages/supplier-payment-form/supplier-payment-form.component').then(m => m.SupplierPaymentFormComponent)
       },
       {
+        path: 'procurement/supplier-payments/:id/edit',
+        loadComponent: () => import('./features/procurement/pages/supplier-payment-form/supplier-payment-form.component').then(m => m.SupplierPaymentFormComponent)
+      },
+      {
         path: 'procurement/supplier-payments/:id',
         loadComponent: () => import('./features/procurement/pages/supplier-payment-view/supplier-payment-view.component').then(m => m.SupplierPaymentViewComponent)
       },

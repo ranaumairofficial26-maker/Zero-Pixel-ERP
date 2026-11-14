@@ -26,11 +26,29 @@ public class InvoicesController : ControllerBase
     [ProducesResponseType(typeof(PaginatedInvoicesResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedInvoicesResponse>> GetInvoices(
         [FromQuery] string? search = null,
+        [FromQuery] string? period = null,
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
-        var response = await _invoiceService.GetInvoicesAsync(search, page, pageSize);
+        var response = await _invoiceService.GetInvoicesAsync(search, period, fromDate, toDate, page, pageSize);
         return Ok(response);
+    }
+
+    /// <summary>
+    /// Generates and downloads a Daily, Weekly, Monthly, Yearly, Custom Date Range, or All Invoices summary PDF report.
+    /// </summary>
+    [HttpGet("report/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInvoicesReportPdf(
+        [FromQuery] string? period = null,
+        [FromQuery] string? search = null,
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null)
+    {
+        var result = await _invoiceService.GenerateReportPdfAsync(period, search, fromDate, toDate);
+        return File(result.FileBytes, "application/pdf", result.FileName);
     }
 
     /// <summary>

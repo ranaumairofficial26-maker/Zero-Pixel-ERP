@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } fr
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SupplierService } from '../../services/supplier.service';
-import { Supplier, SupplierListItem } from '../../models/supplier.model';
+import { SupplierListItem } from '../../models/supplier.model';
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { PurchaseOrderListItem, PurchaseOrder } from '../../models/purchase-order.model';
 import { SupplierBillService } from '../../services/supplier-bill.service';

@@ -161,6 +161,45 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
     </div>
+
+    <!-- Invoices & Clients -->
+    <div class="kpi-card rose-theme">
+      <div class="card-glow"></div>
+      <div class="kpi-top">
+        <div class="label-wrapper">
+          <span class="kpi-tag">BILLING &amp; INVOICES</span>
+          <h3 class="kpi-label">Invoices</h3>
+        </div>
+        <div class="icon-disc">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <div class="number-display">
+          <span class="number">{{ totalInvoices() }}</span>
+          <span class="subtext">{{ invoiceClients().length }} Client(s)</span>
+        </div>
+        @if (invoiceClients().length > 0) {
+          <div class="invoice-clients-list">
+            @for (c of invoiceClients(); track c.customerName) {
+              <div class="invoice-client-row" [title]="c.invoiceNumbers.join(', ')">
+                <span class="ic-name">{{ c.customerName }}</span>
+                <span class="ic-count">{{ c.count }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <a routerLink="/admin/invoices" class="card-link">
+        <span>View All Invoices</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+    </div>
   </section>
 
   <!-- Executive Dual Layout (Main Operations + Strategic Shortcuts) -->

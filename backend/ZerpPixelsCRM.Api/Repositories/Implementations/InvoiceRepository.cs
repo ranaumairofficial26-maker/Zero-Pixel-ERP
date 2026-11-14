@@ -14,12 +14,55 @@ public class InvoiceRepository : IInvoiceRepository
         _context = context;
     }
 
-    public async Task<(IEnumerable<Invoice> Items, int TotalCount)> GetInvoicesAsync(string? search = null, int page = 1, int pageSize = 10)
+    public async Task<(IEnumerable<Invoice> Items, int TotalCount)> GetInvoicesAsync(string? search = null, string? period = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10)
     {
         var query = _context.Invoices
             .Include(i => i.Items)
             .AsNoTracking()
             .AsQueryable();
+
+        if (fromDate.HasValue || toDate.HasValue)
+        {
+            if (fromDate.HasValue)
+            {
+                var startUtc = DateTime.SpecifyKind(fromDate.Value.Date, DateTimeKind.Utc);
+                query = query.Where(i => i.InvoiceDate >= startUtc);
+            }
+
+            if (toDate.HasValue)
+            {
+                var endExclusiveUtc = DateTime.SpecifyKind(toDate.Value.Date.AddDays(1), DateTimeKind.Utc);
+                query = query.Where(i => i.InvoiceDate < endExclusiveUtc);
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(period))
+        {
+            var p = period.Trim().ToLowerInvariant();
+            var todayUtc = DateTime.UtcNow.Date;
+            var tomorrowUtc = todayUtc.AddDays(1);
+
+            if (p == "daily")
+            {
+                query = query.Where(i => i.InvoiceDate >= todayUtc && i.InvoiceDate < tomorrowUtc);
+            }
+            else if (p == "weekly")
+            {
+                var weekStart = todayUtc.AddDays(-6);
+                query = query.Where(i => i.InvoiceDate >= weekStart && i.InvoiceDate < tomorrowUtc);
+            }
+            else if (p == "monthly")
+            {
+                var monthStart = new DateTime(todayUtc.Year, todayUtc.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+                var nextMonth = monthStart.AddMonths(1);
+                query = query.Where(i => i.InvoiceDate >= monthStart && i.InvoiceDate < nextMonth);
+            }
+            else if (p == "yearly")
+            {
+                var yearStart = new DateTime(todayUtc.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                var nextYear = yearStart.AddYears(1);
+                query = query.Where(i => i.InvoiceDate >= yearStart && i.InvoiceDate < nextYear);
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(search))
         {

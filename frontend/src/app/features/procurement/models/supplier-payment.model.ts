@@ -6,6 +6,10 @@ export interface SupplierPaymentListItem {
   supplierBillId: number;
   internalBillNumber: string;
   supplierInvoiceNumber: string;
+  billTotalAmount?: number;
+  billPaidAmount?: number;
+  billOutstandingBalance?: number;
+  billStatus?: string;
   paymentDate: string;
   amount: number;
   paymentMethod: 'Cash' | 'Bank Transfer' | 'Cheque' | string;
@@ -39,6 +43,8 @@ export interface SupplierPayment {
   reversedAt?: string | null;
   reversedBy?: string | null;
   createdBy?: string | null;
+  recordIntegrityHash?: string | null;
+  isIntegrityVerified?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +63,15 @@ export interface CreateSupplierPaymentRequest {
 
 export interface ReverseSupplierPaymentRequest {
   reversalReason: string;
+}
+
+export interface UpdateSupplierPaymentRequest {
+  paymentDate: string;
+  amount: number;
+  paymentMethod: 'Cash' | 'Bank Transfer' | 'Cheque' | string;
+  paymentAccountReference?: string | null;
+  transactionReference?: string | null;
+  notes?: string | null;
 }
 
 export interface PaginatedSupplierPaymentsResponse {

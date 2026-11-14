@@ -100,11 +100,11 @@
               <strong class="meta-val invoice-code">{{ invoice.invoiceNumber }}</strong>
             </div>
             <div class="meta-row">
-              <span class="meta-label">Date#:</span>
+              <span class="meta-label">Date:</span>
               <strong class="meta-val">{{ invoice.invoiceDate | date:'mediumDate' }}</strong>
             </div>
             <div class="meta-row">
-              <span class="meta-label">NTN#:</span>
+              <span class="meta-label">NTN:</span>
               <strong class="meta-val">{{ invoice.ntnNumber || '' }}</strong>
             </div>
           </div>
@@ -130,7 +130,7 @@
           </div>
           <div class="cust-contact-col">
             <div class="contact-line">
-              <span class="c-lbl">Client' PO#:</span>
+              <span class="c-lbl">Client' PO:</span>
               <strong class="c-val">{{ invoice.clientPoNumber || '' }}</strong>
             </div>
             <div class="contact-line" *ngIf="invoice.contactNumber">
@@ -185,21 +185,35 @@
           </ng-template>
         </div>
 
-        <!-- Math Totals Box -->
-        <div class="sheet-totals-box">
-          <div class="s-totals-row total-row">
-            <span class="s-label">TOTAL:</span>
-            <span class="s-val">Rs. {{ invoice.total | number:'1.2-2' }}</span>
+        <!-- Math Totals Box (+ Optional Previous Balance Box) -->
+        <div class="sheet-totals-stack">
+          <div class="sheet-totals-box">
+            <div class="s-totals-row total-row">
+              <span class="s-label">TOTAL:</span>
+              <span class="s-val">Rs. {{ invoice.total | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="s-totals-row advance-row">
+              <span class="s-label">{{ getAdjustmentLabel(invoice) }}</span>
+              <span class="s-val">Rs. {{ invoice.advance | number:'1.2-2' }}</span>
+            </div>
+
+            <div class="s-totals-row balance-row">
+              <span class="s-label">BALANCE:</span>
+              <strong class="s-val balance-text">Rs. {{ invoice.balance | number:'1.2-2' }}</strong>
+            </div>
           </div>
 
-          <div class="s-totals-row advance-row">
-            <span class="s-label">{{ getAdjustmentLabel(invoice) }}</span>
-            <span class="s-val">Rs. {{ invoice.advance | number:'1.2-2' }}</span>
-          </div>
+          <div class="sheet-totals-box previous-balance-box" *ngIf="(invoice.previousBalance || 0) > 0">
+            <div class="s-totals-row">
+              <span class="s-label">PREVIOUS BALANCE:</span>
+              <span class="s-val">Rs. {{ invoice.previousBalance | number:'1.2-2' }}</span>
+            </div>
 
-          <div class="s-totals-row balance-row">
-            <span class="s-label">BALANCE:</span>
-            <strong class="s-val balance-text">Rs. {{ invoice.balance | number:'1.2-2' }}</strong>
+            <div class="s-totals-row balance-row">
+              <span class="s-label">TOTAL BALANCE:</span>
+              <strong class="s-val total-balance-text">Rs. {{ (invoice.balance + (invoice.previousBalance || 0)) | number:'1.2-2' }}</strong>
+            </div>
           </div>
         </div>
 

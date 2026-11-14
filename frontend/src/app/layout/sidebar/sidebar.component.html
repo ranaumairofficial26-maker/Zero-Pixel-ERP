@@ -1,4 +1,4 @@
-<aside class="sidebar-wrapper" [class.dark-sidebar]="themeService.isDarkMode()">
+<aside class="sidebar-wrapper">
   <!-- Top Brand Section (Prominent Branding) -->
   <div class="brand-top">
     <img src="/zeropixel_sidebar_logo.png" alt="ZEROPIXEL - Global Perspective, Local Expertise" class="brand-logo-img" />
@@ -33,6 +33,24 @@
         <span class="item-label">Dashboard</span>
       </a>
 
+      <!-- Customers (Standalone Module) -->
+      <a 
+        routerLink="/admin/customers" 
+        routerLinkActive="active" 
+        class="nav-item-link"
+        title="Customers"
+      >
+        <span class="item-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        <span class="item-label">Customers</span>
+      </a>
+
       <!-- 2. Sales (Dropdown Group) -->
       <div class="nav-group" [class.group-active]="isSalesRouteActive()">
         <button 
@@ -59,24 +77,6 @@
 
         <!-- Sales Dropdown Submenu -->
         <div class="nav-submenu" *ngIf="salesExpanded()">
-          <a 
-            routerLink="/admin/customers" 
-            routerLinkActive="sub-active" 
-            class="submenu-link"
-            title="Customers"
-          >
-            <span class="submenu-bullet"></span>
-            <span class="submenu-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </span>
-            <span class="submenu-label">Customers</span>
-          </a>
-
           <!-- Smart Quotations -->
           <a 
             routerLink="/admin/quotations" 

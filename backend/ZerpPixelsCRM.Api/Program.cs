@@ -318,6 +318,7 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_po_number VARCHAR(100);
             ALTER TABLE invoices ADD COLUMN IF NOT EXISTS adjustment_type VARCHAR(30) NOT NULL DEFAULT 'advance';
             ALTER TABLE invoices ADD COLUMN IF NOT EXISTS adjustment_rate NUMERIC(18,2);
+            ALTER TABLE invoices ADD COLUMN IF NOT EXISTS previous_balance NUMERIC(18,2);
 
             CREATE TABLE IF NOT EXISTS invoice_items (
                 id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,

@@ -10,5 +10,6 @@ public interface ISupplierPaymentService
     Task<List<SupplierPaymentListItemDto>> GetPaymentsByBillIdAsync(long billId);
     Task<string> GetNextPaymentNumberAsync();
     Task<SupplierPaymentDto> CreateSupplierPaymentAsync(CreateSupplierPaymentRequest request, string? createdBy);
+    Task<SupplierPaymentDto?> UpdateSupplierPaymentAsync(long id, UpdateSupplierPaymentRequest request);
     Task<SupplierPaymentDto?> ReverseSupplierPaymentAsync(long id, ReverseSupplierPaymentRequest request, string? reversedBy);
 }

@@ -46,6 +46,10 @@ public class Supplier
     [Column("account_number_or_iban")]
     public string? AccountNumberOrIban { get; set; }
 
+    [MaxLength(64)]
+    [Column("account_number_hash")]
+    public string? AccountNumberHash { get; set; }
+
     [Required]
     [MaxLength(30)]
     [Column("status")]

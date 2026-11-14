@@ -11,5 +11,13 @@ public interface ISupplierPaymentRepository
     Task<string> GetNextPaymentNumberAsync();
     Task<decimal> GetValidPaidThisMonthAsync();
     Task<SupplierPayment> AddPaymentAtomicAsync(SupplierPayment payment);
+    Task<SupplierPayment?> UpdatePaymentAtomicAsync(
+        long id,
+        DateTime paymentDate,
+        decimal amount,
+        string paymentMethod,
+        string? paymentAccountReference,
+        string? transactionReference,
+        string? notes);
     Task<SupplierPayment?> ReversePaymentAtomicAsync(long id, string reversalReason, string? reversedBy);
 }

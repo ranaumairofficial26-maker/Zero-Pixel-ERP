@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer.model';
 import { CustomerFormComponent } from '../../components/customer-form/customer-form.component';
@@ -15,7 +15,6 @@ import { ToastService } from '../../../../core/services/toast.service';
 })
 export class CustomerDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private customerService = inject(CustomerService);
   private toastService = inject(ToastService);
 

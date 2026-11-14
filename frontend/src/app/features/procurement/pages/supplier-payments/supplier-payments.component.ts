@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { SupplierPaymentListItem } from '../../models/supplier-payment.model';
 import { SupplierPaymentService } from '../../services/supplier-payment.service';
+import { SupplierBillService } from '../../services/supplier-bill.service';
+import { encodeRouteId } from '../../../../core/utils/id-hash.util';
 
 @Component({
   selector: 'app-supplier-payments',
@@ -26,6 +28,10 @@ export class SupplierPaymentsComponent implements OnInit {
   totalCount = 0;
   totalPages = 0;
 
+  outstandingPayables = 0;
+  overdueBillsCount = 0;
+  isLoadingSummary = true;
+
   paymentToReverse: SupplierPaymentListItem | null = null;
   reversalReason = '';
   reversalError: string | null = null;
@@ -33,12 +39,36 @@ export class SupplierPaymentsComponent implements OnInit {
 
   constructor(
     private paymentService: SupplierPaymentService,
+    private billService: SupplierBillService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.loadSummary();
     this.loadPayments();
+  }
+
+  loadSummary(): void {
+    this.isLoadingSummary = true;
+    this.billService
+      .getSummary()
+      .pipe(
+        finalize(() => {
+          this.isLoadingSummary = false;
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (summary) => {
+          this.outstandingPayables = summary.outstandingPayables ?? 0;
+          this.overdueBillsCount = summary.overdueBillsCount ?? 0;
+        },
+        error: () => {
+          // Keep existing values if summary temporarily fails
+        }
+      });
   }
 
   loadPayments(): void {
@@ -82,7 +112,11 @@ export class SupplierPaymentsComponent implements OnInit {
   }
 
   viewPayment(id: number): void {
-    this.router.navigate(['/admin/procurement/supplier-payments', id]);
+    this.router.navigate(['/admin/procurement/supplier-payments', encodeRouteId(id)]);
+  }
+
+  editPayment(id: number): void {
+    this.router.navigate(['/admin/procurement/supplier-payments', encodeRouteId(id), 'edit']);
   }
 
   openReverseModal(payment: SupplierPaymentListItem): void {
@@ -128,6 +162,7 @@ export class SupplierPaymentsComponent implements OnInit {
         next: () => {
           this.closeReverseModal();
           this.actionMessage = `Payment ${num} has been reversed and the linked bill balance has been recalculated.`;
+          this.loadSummary();
           this.loadPayments();
         },
         error: (err) => {

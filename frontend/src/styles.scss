@@ -1,4 +1,3 @@
-@use './dark-theme';
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 * {
@@ -9,6 +8,7 @@
 
 html, body {
   height: 100%;
+  overflow-x: hidden;
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #0f172a;
   background-color: #f8fafc;
@@ -18,6 +18,12 @@ html, body {
 
 button, input, select, textarea {
   font-family: inherit;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media print {

@@ -51,19 +51,111 @@
       />
     </div>
 
-    <div class="records-counter" *ngIf="!loading">
+    <div class="period-toolbar">
+      <div class="period-pills">
+        <button
+          type="button"
+          class="period-pill"
+          [class.active]="selectedPeriod === 'all' && !hasCustomDateRange"
+          (click)="onPeriodChange('all')"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          class="period-pill"
+          [class.active]="selectedPeriod === 'daily' && !hasCustomDateRange"
+          (click)="onPeriodChange('daily')"
+        >
+          Daily
+        </button>
+        <button
+          type="button"
+          class="period-pill"
+          [class.active]="selectedPeriod === 'weekly' && !hasCustomDateRange"
+          (click)="onPeriodChange('weekly')"
+        >
+          Weekly
+        </button>
+        <button
+          type="button"
+          class="period-pill"
+          [class.active]="selectedPeriod === 'monthly' && !hasCustomDateRange"
+          (click)="onPeriodChange('monthly')"
+        >
+          Monthly
+        </button>
+        <button
+          type="button"
+          class="period-pill"
+          [class.active]="selectedPeriod === 'yearly' && !hasCustomDateRange"
+          (click)="onPeriodChange('yearly')"
+        >
+          Yearly
+        </button>
+      </div>
+
+      <div class="date-range-group">
+        <label class="date-field" title="From Date">
+          <span class="date-label">From</span>
+          <input
+            type="date"
+            class="date-input"
+            [(ngModel)]="fromDate"
+            [max]="toDate || null"
+            (change)="onDateRangeChange()"
+          />
+        </label>
+        <span class="date-sep">to</span>
+        <label class="date-field" title="To Date">
+          <span class="date-label">To</span>
+          <input
+            type="date"
+            class="date-input"
+            [(ngModel)]="toDate"
+            [min]="fromDate || null"
+            (change)="onDateRangeChange()"
+          />
+        </label>
+        <button
+          *ngIf="hasCustomDateRange"
+          type="button"
+          class="btn-clear-dates"
+          (click)="clearDateRange()"
+          title="Clear date filter"
+        >
+          &times;
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="btn-download-report"
+        (click)="downloadReportPdf()"
+        [disabled]="isDownloadingReport"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        {{ isDownloadingReport ? 'Generating PDF...' : 'Download Report PDF' }}
+      </button>
+    </div>
+
+    <div class="records-counter">
       <span>Total Invoices: <strong>{{ totalCount }}</strong></span>
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div class="loading-box" *ngIf="loading">
+  <!-- Loading State (only when no rows yet) -->
+  <div class="loading-box" *ngIf="loading && invoices.length === 0">
     <div class="spinner"></div>
     <span>Loading Invoices...</span>
   </div>
 
   <!-- Invoices Table Card -->
-  <div class="table-card" *ngIf="!loading">
+  <div class="table-card" *ngIf="!loading || invoices.length > 0" [class.is-refreshing]="loading">
     <div class="table-responsive" *ngIf="invoices.length > 0">
       <table class="data-table">
         <thead>
@@ -192,9 +284,25 @@
       </div>
       <h3 class="empty-title">No Invoices Found</h3>
       <p class="empty-desc">
-        {{ searchTerm ? 'No invoices match your search query. Try another term.' : 'You have not created any printing invoices yet.' }}
+        {{
+          searchTerm
+            ? 'No invoices match your search query. Try another term.'
+            : hasCustomDateRange
+            ? 'No invoices found for the selected date range.'
+            : selectedPeriod !== 'all'
+            ? 'No invoices found for the selected ' + selectedPeriod + ' period.'
+            : 'You have not created any printing invoices yet.'
+        }}
       </p>
-      <a routerLink="/admin/invoices/create" class="btn-create-invoice mt-3">
+      <button
+        *ngIf="selectedPeriod !== 'all' || hasCustomDateRange"
+        type="button"
+        class="btn-create-invoice mt-3"
+        (click)="onPeriodChange('all')"
+      >
+        Show All Invoices
+      </button>
+      <a *ngIf="selectedPeriod === 'all' && !hasCustomDateRange" routerLink="/admin/invoices/create" class="btn-create-invoice mt-3">
         + Create First Invoice
       </a>
     </div>

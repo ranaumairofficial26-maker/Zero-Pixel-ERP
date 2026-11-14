@@ -1,11 +1,10 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { PrintingCalculatorService } from '../../services/printing-calculator.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { ThemeService } from '../../../../core/services/theme.service';
 import {
   PrintingCategory,
   PrintingItem,
@@ -15,12 +14,9 @@ import {
   CostCategory,
   EstimateQuantityInput,
   EstimateCostItemInput,
-  CalculateEstimateRequest,
-  CalculateEstimateResponse,
   QuantityCalculationResult,
   SaveEstimateRequest,
   EstimateSummary,
-  EstimateDetail,
   LinkEstimateToQuotationRequest,
   PlateSizePreset,
   PrintingMachineRate
@@ -37,7 +33,6 @@ export class PrintingCalculatorComponent implements OnInit {
   private calcService = inject(PrintingCalculatorService);
   private toast = inject(ToastService);
   private router = inject(Router);
-  public themeService = inject(ThemeService);
 
   // Tabs
   activeTab = signal<'calculator' | 'saved-estimates'>('calculator');

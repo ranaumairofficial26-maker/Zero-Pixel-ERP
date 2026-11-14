@@ -6,6 +6,7 @@ import {
   SupplierPayment,
   SupplierPaymentListItem,
   CreateSupplierPaymentRequest,
+  UpdateSupplierPaymentRequest,
   ReverseSupplierPaymentRequest,
   PaginatedSupplierPaymentsResponse
 } from '../models/supplier-payment.model';
@@ -57,6 +58,10 @@ export class SupplierPaymentService {
 
   createSupplierPayment(payload: CreateSupplierPaymentRequest): Observable<SupplierPayment> {
     return this.http.post<SupplierPayment>(this.apiUrl, payload);
+  }
+
+  updateSupplierPayment(id: number, payload: UpdateSupplierPaymentRequest): Observable<SupplierPayment> {
+    return this.http.put<SupplierPayment>(`${this.apiUrl}/${id}`, payload);
   }
 
   reverseSupplierPayment(id: number, payload: ReverseSupplierPaymentRequest): Observable<SupplierPayment> {

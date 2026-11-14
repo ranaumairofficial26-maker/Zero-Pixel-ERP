@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { ThemeService } from '../../../../core/services/theme.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ProductionJobSheetService, ProductionJobSheet } from '../../services/production-job-sheet.service';
 
@@ -28,7 +27,7 @@ function dateOrderValidator(group: AbstractControl): ValidationErrors | null {
   standalone: true,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   template: `
-    <div class="production-sheet-wrapper" [class.dark-mode]="themeService.isDarkMode()">
+    <div class="production-sheet-wrapper">
       
       <!-- ====================================================================== -->
       <!-- SCREEN FORM (Visible on screen, hidden on print) -->
@@ -1706,97 +1705,7 @@ function dateOrderValidator(group: AbstractControl): ValidationErrors | null {
     /* ==========================================================================
        DARK MODE OVERRIDES (SCREEN ONLY - NEVER AFFECTS PRINT)
        ========================================================================== */
-    .production-sheet-wrapper.dark-mode {
-      background: #0b1120;
-      color: #f1f5f9;
-
-      .breadcrumbs {
-        color: #94a3b8;
-        a { color: #94a3b8; &:hover { color: #38bdf8; } }
-        .sep { color: #475569; }
-        .active-crumb { color: #f8fafc; }
-      }
-
-      .page-title { color: #f8fafc; }
-      .page-subtitle { color: #cbd5e1; }
-      .page-instruction { color: #94a3b8; }
-
-      .btn-new {
-        background: #1e293b;
-        border-color: #334155;
-        color: #f8fafc;
-        &:hover { background: #334155; }
-      }
-
-      .saved-sheets-bar {
-        background: #111827;
-        border-color: #1f2937;
-      }
-
-      .saved-label { color: #e2e8f0; }
-
-      .saved-dropdown {
-        background: #0f172a;
-        border-color: #334155;
-        color: #f8fafc;
-        &:focus { border-color: #38bdf8; }
-      }
-
-      .form-section {
-        background: #111827;
-        border-color: #1f2937;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-      }
-
-      .section-header {
-        border-bottom-color: #1f2937;
-        .section-title { color: #f8fafc; }
-        .section-desc { color: #94a3b8; }
-      }
-
-      .field-label { color: #e2e8f0; }
-
-      .form-control,
-      .form-select {
-        background: #0f172a;
-        border-color: #334155;
-        color: #f8fafc;
-
-        &::placeholder { color: #64748b; }
-
-        &:focus {
-          border-color: #38bdf8;
-          box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
-        }
-
-        &.is-invalid {
-          border-color: #f87171;
-          box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2);
-        }
-      }
-
-      .form-actions-bar {
-        background: #111827;
-        border-color: #1f2937;
-
-        .btn-secondary {
-          background: #1f2937;
-          border-color: #374151;
-          color: #e5e7eb;
-          &:hover {
-            background: #374151;
-            color: #ffffff;
-          }
-        }
-      }
-
-      .live-preview-section {
-        background: #111827;
-        border-color: #1f2937;
-      }
-    }
-
-    /* ==========================================================================
+        /* ==========================================================================
        A4 PRINT MEDIA STYLES (EXACT INDUSTRIAL SHEET TICKET)
        ========================================================================== */
     @media print {
@@ -1960,7 +1869,6 @@ function dateOrderValidator(group: AbstractControl): ValidationErrors | null {
 })
 export class ProductionSheetComponent implements OnInit {
   private fb = inject(FormBuilder);
-  public themeService = inject(ThemeService);
   private toast = inject(ToastService);
   private sheetService = inject(ProductionJobSheetService);
 

@@ -256,23 +256,3 @@
   .btn-back-link { color: #991b1b; font-weight: 700; }
 }
 
-:host-context(.dark-mode),
-:host-context([data-theme="dark"]) {
-  .view-header-card,
-  .view-card {
-    background: #111827;
-    border-color: #1f293d;
-  }
-  .view-header-card .quote-title,
-  .view-header-card .header-meta strong,
-  .view-card .card-title,
-  .info-grid .info-item .info-val,
-  .items-table .item-desc,
-  .items-table .item-amount {
-    color: #f8fafc;
-  }
-  .view-card .card-title { border-bottom-color: #1f293d; }
-  .items-table thead th { background: #131c2e; color: #94a3b8; border-bottom-color: #1f293d; }
-  .total-bar { background: #172133; border-color: #2a374f; }
-}
-

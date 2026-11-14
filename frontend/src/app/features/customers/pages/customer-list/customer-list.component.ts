@@ -120,7 +120,7 @@ export class CustomerListComponent implements OnInit {
     this.customerToEdit.set(null);
   }
 
-  onCustomerSaved(customer: Customer): void {
+  onCustomerSaved(_customer: Customer): void {
     this.closeFormModal();
     this.loadCustomers();
   }
@@ -130,14 +130,14 @@ export class CustomerListComponent implements OnInit {
     event.stopPropagation();
     const newStatus = !customer.isActive;
     this.customerService.updateCustomerStatus(customer.clientId, newStatus).subscribe({
-      next: (updated) => {
+      next: () => {
         this.toastService.success(
           `Customer "${customer.companyName}" marked as ${newStatus ? 'Active' : 'Inactive'}.`,
           'Status Updated'
         );
         this.loadCustomers();
       },
-      error: (err) => {
+      error: () => {
         this.toastService.error('Failed to change customer status.', 'Error');
       }
     });
@@ -197,7 +197,7 @@ export class CustomerListComponent implements OnInit {
           this.toastService.success(`Customer "${customer.companyName}" archived successfully.`, 'Archived');
           this.loadCustomers();
         },
-        error: (err) => {
+        error: () => {
           this.isProcessingAction.set(false);
           this.toastService.error('Failed to archive customer.', 'Error');
         }
@@ -210,7 +210,7 @@ export class CustomerListComponent implements OnInit {
           this.toastService.success(`Customer "${customer.companyName}" restored successfully!`, 'Restored');
           this.loadCustomers();
         },
-        error: (err) => {
+        error: () => {
           this.isProcessingAction.set(false);
           this.toastService.error('Failed to restore customer.', 'Error');
         }

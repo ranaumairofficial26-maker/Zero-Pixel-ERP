@@ -115,6 +115,57 @@ public class SupplierPaymentsController : ControllerBase
         }
     }
 
+    [HttpPut("{id:long}")]
+    [ProducesResponseType(typeof(SupplierPaymentDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<SupplierPaymentDto>> UpdateSupplierPayment(long id, [FromBody] UpdateSupplierPaymentRequest request)
+    {
+        try
+        {
+            var updated = await _paymentService.UpdateSupplierPaymentAsync(id, request);
+            if (updated == null)
+            {
+                return NotFound(new ProblemDetails
+                {
+                    Status = StatusCodes.Status404NotFound,
+                    Title = "Supplier Payment Not Found",
+                    Detail = $"Supplier Payment with ID {id} was not found."
+                });
+            }
+            return Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Validation Error",
+                Detail = ex.Message
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "Update Not Allowed",
+                Detail = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error updating supplier payment ID {Id}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+            {
+                Status = StatusCodes.Status500InternalServerError,
+                Title = "Internal Server Error",
+                Detail = "An unexpected error occurred while updating the supplier payment."
+            });
+        }
+    }
+
     [HttpPost("{id:long}/reverse")]
     [ProducesResponseType(typeof(SupplierPaymentDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

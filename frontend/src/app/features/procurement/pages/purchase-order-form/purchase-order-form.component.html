@@ -146,29 +146,6 @@
           </span>
         </div>
       </div>
-
-      <!-- Optional Project / Job Reference -->
-      <div class="selector-block">
-        <div class="form-group">
-          <label class="field-label" for="jobSearch">Project / Job (Optional)</label>
-          <div class="searchable-row">
-            <input
-              id="jobSearch"
-              type="text"
-              class="form-control"
-              [(ngModel)]="jobSearchTerm"
-              [ngModelOptions]="{ standalone: true }"
-              placeholder="Search printing jobs..."
-            />
-            <select class="form-control" formControlName="projectJobId">
-              <option [ngValue]="null">-- None (General / No Job Linked) --</option>
-              <option *ngFor="let j of filteredJobs" [ngValue]="j.jobId">
-                {{ j.jobNumber }} — {{ j.customerName || j.orderNumber }} ({{ j.status }})
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- SECTION B: PURCHASE ORDER ITEMS -->

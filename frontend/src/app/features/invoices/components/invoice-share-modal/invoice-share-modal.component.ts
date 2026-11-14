@@ -406,52 +406,7 @@ export interface ShareableInvoice {
       }
     }
 
-    :host-context(.dark-mode),
-    :host-context([data-theme="dark"]) {
-      .share-modal-card {
-        background: #111827;
-        border-color: #1f293d;
-      }
-      .modal-header {
-        border-bottom-color: #1f293d;
-        .modal-title { color: #f8fafc; }
-        .modal-subtitle { color: #94a3b8; }
-        .btn-close {
-          background: #172133;
-          border-color: #2a374f;
-          color: #94a3b8;
-        }
-      }
-      .method-tabs .method-tab {
-        background: #172133;
-        border-color: #2a374f;
-        color: #cbd5e1;
-      }
-      .form-group {
-        .form-label { color: #cbd5e1; }
-        .form-input {
-          background: #172133;
-          border-color: #2a374f;
-          color: #f8fafc;
-        }
-        .field-hint { color: #94a3b8; }
-      }
-      .pdf-file-pill {
-        background: #172133;
-        border-color: #2a374f;
-        .pdf-file-info { color: #f8fafc; }
-      }
-      .modal-footer {
-        background: #131c2e;
-        border-top-color: #1f293d;
-        .btn-cancel {
-          background: #172133;
-          border-color: #2a374f;
-          color: #e2e8f0;
-        }
-      }
-    }
-  `]
+      `]
 })
 export class InvoiceShareModalComponent implements OnChanges {
   private invoiceService = inject(InvoiceService);

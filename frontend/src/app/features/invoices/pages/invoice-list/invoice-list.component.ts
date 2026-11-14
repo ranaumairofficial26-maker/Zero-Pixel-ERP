@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { switchMap, finalize } from 'rxjs';
 import { InvoiceService } from '../../services/invoice.service';
 import { InvoiceListItem } from '../../models/invoice.model';
-import { ThemeService } from '../../../../core/services/theme.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { InvoiceShareModalComponent, ShareableInvoice } from '../../components/invoice-share-modal/invoice-share-modal.component';
 
@@ -18,13 +17,16 @@ import { InvoiceShareModalComponent, ShareableInvoice } from '../../components/i
 })
 export class InvoiceListComponent implements OnInit {
   private invoiceService = inject(InvoiceService);
-  public themeService = inject(ThemeService);
   private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
   invoices: InvoiceListItem[] = [];
   loading: boolean = true;
   searchTerm: string = '';
+  selectedPeriod: 'all' | 'daily' | 'weekly' | 'monthly' | 'yearly' = 'all';
+  fromDate: string = '';
+  toDate: string = '';
+  isDownloadingReport: boolean = false;
   currentPage: number = 1;
   pageSize: number = 10;
   totalCount: number = 0;
@@ -42,10 +44,21 @@ export class InvoiceListComponent implements OnInit {
     this.loadInvoices();
   }
 
+  get hasCustomDateRange(): boolean {
+    return Boolean(this.fromDate || this.toDate);
+  }
+
   loadInvoices(): void {
     this.loading = true;
     this.cdr.markForCheck();
-    this.invoiceService.getInvoices(this.searchTerm, this.currentPage, this.pageSize).subscribe({
+    this.invoiceService.getInvoices(
+      this.searchTerm,
+      this.currentPage,
+      this.pageSize,
+      this.selectedPeriod,
+      this.fromDate || undefined,
+      this.toDate || undefined
+    ).subscribe({
       next: (res) => {
         this.invoices = res.items || [];
         this.totalCount = res.totalCount || 0;
@@ -66,6 +79,57 @@ export class InvoiceListComponent implements OnInit {
   onSearch(): void {
     this.currentPage = 1;
     this.loadInvoices();
+  }
+
+  onPeriodChange(period: 'all' | 'daily' | 'weekly' | 'monthly' | 'yearly'): void {
+    if (this.selectedPeriod === period && !this.hasCustomDateRange) return;
+    this.selectedPeriod = period;
+    this.fromDate = '';
+    this.toDate = '';
+    this.currentPage = 1;
+    this.loadInvoices();
+  }
+
+  onDateRangeChange(): void {
+    if (this.fromDate && this.toDate && this.fromDate > this.toDate) {
+      const temp = this.fromDate;
+      this.fromDate = this.toDate;
+      this.toDate = temp;
+    }
+    this.currentPage = 1;
+    this.loadInvoices();
+  }
+
+  clearDateRange(): void {
+    if (!this.hasCustomDateRange) return;
+    this.fromDate = '';
+    this.toDate = '';
+    this.currentPage = 1;
+    this.loadInvoices();
+  }
+
+  downloadReportPdf(): void {
+    if (this.isDownloadingReport) return;
+    this.isDownloadingReport = true;
+    this.cdr.markForCheck();
+
+    this.invoiceService.downloadReportPdf(
+      this.selectedPeriod,
+      this.searchTerm,
+      this.fromDate || undefined,
+      this.toDate || undefined
+    ).pipe(
+      finalize(() => {
+        this.isDownloadingReport = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      error: (err) => {
+        console.error('Failed to download invoice report PDF:', err);
+        this.toastService.error('Failed to download invoice report PDF. Please try again.', 'Download Failed');
+      }
+    });
   }
 
   goToPage(page: number): void {

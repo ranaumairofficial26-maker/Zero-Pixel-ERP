@@ -31,6 +31,50 @@
   <div class="alert alert-success" *ngIf="actionMessage">{{ actionMessage }}</div>
   <div class="alert alert-error" *ngIf="errorMessage">{{ errorMessage }}</div>
 
+  <!-- OUTSTANDING SUMMARY CARDS -->
+  <section class="summary-grid">
+    <div class="summary-card outstanding-card">
+      <div class="summary-top">
+        <span class="summary-label">Outstanding Payment</span>
+        <span class="summary-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </span>
+      </div>
+      <div class="summary-value">PKR {{ formatCurrency(outstandingPayables) }}</div>
+      <div class="summary-hint">Remaining unpaid balance across supplier bills</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-top">
+        <span class="summary-label">Overdue Bills</span>
+        <span class="summary-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </span>
+      </div>
+      <div class="summary-value">{{ overdueBillsCount }}</div>
+      <div class="summary-hint">Unpaid bills past due date</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-top">
+        <span class="summary-label">Total Payments</span>
+        <span class="summary-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </span>
+      </div>
+      <div class="summary-value">{{ totalCount }}</div>
+      <div class="summary-hint">Recorded supplier payment transactions</div>
+    </div>
+  </section>
+
   <!-- SEARCH BAR -->
   <section class="filter-card">
     <div class="search-input-wrap">
@@ -64,6 +108,7 @@
           <th>Supplier &amp; Bill</th>
           <th>Method &amp; Account</th>
           <th class="num">Amount (PKR)</th>
+          <th class="num">Remaining (PKR)</th>
           <th class="act">Actions</th>
         </tr>
       </thead>
@@ -96,10 +141,32 @@
           <td class="num strong mono" [class.reversed-amt]="p.status === 'Reversed'">
             {{ formatCurrency(p.amount) }}
           </td>
+          <td class="num">
+            <div class="remaining-col">
+              <span
+                class="strong mono"
+                [class.remaining-due]="(p.billOutstandingBalance ?? 0) > 0"
+                [class.remaining-paid]="(p.billOutstandingBalance ?? 0) <= 0"
+              >
+                {{ formatCurrency(p.billOutstandingBalance ?? 0) }}
+              </span>
+              <span class="bill-total-hint" *ngIf="p.billTotalAmount != null">
+                of {{ formatCurrency(p.billTotalAmount) }}
+              </span>
+            </div>
+          </td>
           <td class="act">
             <div class="actions-group">
               <button type="button" class="action-btn" (click)="viewPayment(p.id)">
                 View
+              </button>
+              <button
+                *ngIf="p.status === 'Posted'"
+                type="button"
+                class="action-btn"
+                (click)="editPayment(p.id)"
+              >
+                Edit
               </button>
               <button
                 *ngIf="p.status === 'Posted'"

@@ -121,6 +121,20 @@
 
 @media (max-width: 640px) {
   .page-container {
+    padding: 0.65rem;
+  }
+
+  .toast-container {
+    top: 0.75rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-container {
     padding: 0.65rem 0.55rem;
   }
 

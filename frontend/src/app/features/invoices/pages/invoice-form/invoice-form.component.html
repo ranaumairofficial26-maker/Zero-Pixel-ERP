@@ -306,7 +306,6 @@
               formControlName="adjustmentType"
               aria-label="Adjustment Type"
             >
-              <option value="advance">ADVANCE (PKR):</option>
               <option value="tax_amount">TAX (PKR):</option>
               <option value="tax_percent">TAX (%):</option>
               <option value="percent_off">% OFF (DISCOUNT):</option>
@@ -346,6 +345,32 @@
           <div class="totals-row balance-row" [class.balance-cleared]="balance === 0">
             <span class="totals-label">BALANCE DUE (PKR):</span>
             <span class="totals-val balance-val">Rs. {{ balance | number:'1.2-2' }}</span>
+          </div>
+
+          <!-- OPTIONAL PREVIOUS BALANCE & TOTAL BALANCE -->
+          <div class="totals-row advance-row" style="margin-top: 8px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+            <label for="previousBalanceInput" class="totals-label" style="font-size: 0.85rem;">
+              PREVIOUS BALANCE (Optional):
+            </label>
+            <div class="advance-input-group">
+              <div class="input-with-prefix">
+                <span class="prefix-tag">Rs.</span>
+                <input
+                  id="previousBalanceInput"
+                  type="number"
+                  class="form-control advance-input"
+                  formControlName="previousBalance"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="totals-row balance-row" *ngIf="previousBalanceAmount > 0">
+            <span class="totals-label">TOTAL BALANCE (PKR):</span>
+            <span class="totals-val balance-val">Rs. {{ totalBalance | number:'1.2-2' }}</span>
           </div>
 
         </div>

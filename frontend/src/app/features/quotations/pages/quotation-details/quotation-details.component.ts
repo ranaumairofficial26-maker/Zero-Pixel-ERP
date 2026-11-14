@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { QuotationService } from '../../services/quotation.service';
 import { QuotationDetails } from '../../models/quotation.models';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -904,7 +904,6 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
 })
 export class QuotationDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private quotationService = inject(QuotationService);
   private toastService = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);

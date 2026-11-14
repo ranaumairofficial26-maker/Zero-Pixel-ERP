@@ -1,13 +1,14 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SupplierService } from '../../services/supplier.service';
 import { SupplierListItem } from '../../models/supplier.model';
 import { SupplierBillService } from '../../services/supplier-bill.service';
 import { SupplierBillListItem } from '../../models/supplier-bill.model';
 import { SupplierPaymentService } from '../../services/supplier-payment.service';
+import { decodeRouteId, encodeRouteId } from '../../../../core/utils/id-hash.util';
 
 @Component({
   selector: 'app-supplier-payment-form',
@@ -33,6 +34,9 @@ export class SupplierPaymentFormComponent implements OnInit {
   isLoadingBills = false;
 
   isSubmitting = false;
+  isLoadingPayment = false;
+  isEditMode = false;
+  editPaymentId: number | null = null;
   errorMessage: string | null = null;
   private idempotencyKey: string = '';
 
@@ -40,6 +44,7 @@ export class SupplierPaymentFormComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
     private supplierService: SupplierService,
     private billService: SupplierBillService,
@@ -48,10 +53,18 @@ export class SupplierPaymentFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.idempotencyKey = this.generateIdempotencyKey();
     this.initForm();
-    this.loadNextPaymentNumber();
-    this.loadSuppliers();
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const decodedId = decodeRouteId(idParam);
+    if (decodedId) {
+      this.isEditMode = true;
+      this.editPaymentId = decodedId;
+      this.loadPaymentForEdit(this.editPaymentId);
+    } else {
+      this.idempotencyKey = this.generateIdempotencyKey();
+      this.loadNextPaymentNumber();
+      this.loadSuppliers();
+    }
   }
 
   private generateIdempotencyKey(): string {
@@ -85,6 +98,84 @@ export class SupplierPaymentFormComponent implements OnInit {
       },
       error: (err) => console.error('Failed to get next payment number:', err)
     });
+  }
+
+  loadPaymentForEdit(id: number): void {
+    this.isLoadingPayment = true;
+    this.errorMessage = null;
+
+    this.paymentService
+      .getSupplierPaymentById(id)
+      .pipe(
+        finalize(() => {
+          this.isLoadingPayment = false;
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (p) => {
+          if (p.status === 'Reversed') {
+            this.errorMessage = `Payment ${p.paymentNumber} has been reversed and cannot be edited.`;
+          }
+
+          this.selectedSupplier = {
+            id: p.supplierId,
+            supplierName: p.supplierName,
+            contactPerson: p.supplierContactPerson || '',
+            phoneNumber: '',
+            email: '',
+            status: 'Active',
+            createdAt: p.createdAt
+          } as SupplierListItem;
+          this.supplierSearch = p.supplierName;
+
+          const otherPaid = Math.max(0, Math.round((p.billPaidAmount - p.amount) * 100) / 100);
+          const maxAllowable = Math.max(0, Math.round((p.billOutstandingBalance + p.amount) * 100) / 100);
+
+          this.selectedBill = {
+            id: p.supplierBillId,
+            internalBillNumber: p.internalBillNumber,
+            supplierInvoiceNumber: p.supplierInvoiceNumber,
+            supplierId: p.supplierId,
+            supplierName: p.supplierName,
+            billDate: p.paymentDate,
+            dueDate: p.paymentDate,
+            totalAmount: p.billTotalAmount,
+            paidAmount: otherPaid,
+            balance: maxAllowable,
+            status: p.billStatus,
+            createdAt: p.createdAt
+          } as SupplierBillListItem;
+          this.billSearch = `${p.internalBillNumber} (Inv: ${p.supplierInvoiceNumber})`;
+
+          const dateOnly = p.paymentDate ? p.paymentDate.substring(0, 10) : new Date().toISOString().substring(0, 10);
+
+          this.paymentForm.patchValue({
+            paymentNumber: p.paymentNumber,
+            supplierId: p.supplierId,
+            supplierBillId: p.supplierBillId,
+            paymentDate: dateOnly,
+            amount: p.amount,
+            paymentMethod: p.paymentMethod,
+            paymentAccountReference: p.paymentAccountReference || '',
+            transactionReference: p.transactionReference || '',
+            notes: p.notes || ''
+          });
+        },
+        error: (err) => {
+          this.errorMessage = err?.error?.detail || err?.error?.message || 'Failed to load supplier payment for editing.';
+        }
+      });
+  }
+
+  fillFullBalance(): void {
+    if (!this.selectedBill) return;
+    this.paymentForm.patchValue({
+      amount: Math.round(this.selectedBill.balance * 100) / 100
+    });
+    this.paymentForm.get('amount')?.markAsTouched();
+    this.cdr.markForCheck();
   }
 
   loadSuppliers(): void {
@@ -255,6 +346,37 @@ export class SupplierPaymentFormComponent implements OnInit {
     this.errorMessage = null;
 
     const raw = this.paymentForm.getRawValue();
+
+    if (this.isEditMode && this.editPaymentId) {
+      const updatePayload = {
+        paymentDate: raw.paymentDate,
+        amount: Math.round(Number(raw.amount) * 100) / 100,
+        paymentMethod: raw.paymentMethod,
+        paymentAccountReference: raw.paymentAccountReference ? raw.paymentAccountReference.trim() : null,
+        transactionReference: raw.transactionReference ? raw.transactionReference.trim() : null,
+        notes: raw.notes ? raw.notes.trim() : null
+      };
+
+      this.paymentService
+        .updateSupplierPayment(this.editPaymentId, updatePayload)
+        .pipe(
+          finalize(() => {
+            this.isSubmitting = false;
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
+          })
+        )
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/admin/procurement/supplier-payments']);
+          },
+          error: (err) => {
+            this.errorMessage = err?.error?.detail || err?.error?.message || 'Failed to update supplier payment.';
+          }
+        });
+      return;
+    }
+
     const payload = {
       supplierId: Number(raw.supplierId),
       supplierBillId: Number(raw.supplierBillId),
@@ -278,7 +400,7 @@ export class SupplierPaymentFormComponent implements OnInit {
       )
       .subscribe({
         next: (created) => {
-          this.router.navigate(['/admin/procurement/supplier-payments', created.id]);
+          this.router.navigate(['/admin/procurement/supplier-payments', encodeRouteId(created.id)]);
         },
         error: (err) => {
           this.errorMessage = err?.error?.detail || err?.error?.message || 'Failed to record supplier payment.';

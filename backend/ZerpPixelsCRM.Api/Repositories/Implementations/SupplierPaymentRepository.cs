@@ -171,6 +171,10 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
             }
 
             payment.PaymentNumber = await GetNextPaymentNumberAsync();
+            payment.PaymentAccountHash = string.IsNullOrWhiteSpace(payment.PaymentAccountReference)
+                ? null
+                : ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSha256(payment.PaymentAccountReference);
+            payment.RecordIntegrityHash = ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSupplierPaymentIntegrityHash(payment);
             _context.SupplierPayments.Add(payment);
 
             var newPaid = Math.Round(currentPaid + payment.Amount, 2);
@@ -178,6 +182,88 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
 
             bill.PaidAmount = newPaid;
             bill.Status = DeriveBillStatus(bill.TotalAmount, newPaid, bill.DueDate);
+            bill.UpdatedAt = DateTime.UtcNow;
+            _context.SupplierBills.Update(bill);
+
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return (await GetByIdAsync(payment.Id)) ?? payment;
+        }
+        catch
+        {
+            await tx.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<SupplierPayment?> UpdatePaymentAtomicAsync(
+        long id,
+        DateTime paymentDate,
+        decimal amount,
+        string paymentMethod,
+        string? paymentAccountReference,
+        string? transactionReference,
+        string? notes)
+    {
+        using var tx = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var payment = await _context.SupplierPayments
+                .FromSqlInterpolated($"SELECT * FROM supplier_payments WHERE id = {id} FOR UPDATE")
+                .FirstOrDefaultAsync();
+
+            if (payment == null)
+            {
+                return null;
+            }
+
+            if (payment.Status == "Reversed")
+            {
+                throw new InvalidOperationException("Reversed payments cannot be edited.");
+            }
+
+            var bill = await _context.SupplierBills
+                .FromSqlInterpolated($"SELECT * FROM supplier_bills WHERE id = {payment.SupplierBillId} FOR UPDATE")
+                .FirstOrDefaultAsync();
+
+            if (bill == null)
+            {
+                throw new InvalidOperationException("Linked supplier bill could not be found.");
+            }
+
+            if (bill.Status == "Cancelled")
+            {
+                throw new InvalidOperationException("Cannot edit a payment for a cancelled supplier bill.");
+            }
+
+            var otherPostedPaid = await _context.SupplierPayments
+                .Where(p => p.SupplierBillId == bill.Id && p.Status == "Posted" && p.Id != payment.Id)
+                .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+            var roundedAmount = Math.Round(amount, 2);
+            var maxAllowable = Math.Round(bill.TotalAmount - otherPostedPaid, 2);
+
+            if (roundedAmount > maxAllowable)
+            {
+                throw new InvalidOperationException($"Payment amount cannot exceed the remaining allowable balance of PKR {maxAllowable:N2}.");
+            }
+
+            payment.PaymentDate = paymentDate;
+            payment.Amount = roundedAmount;
+            payment.PaymentMethod = paymentMethod;
+            payment.PaymentAccountReference = paymentAccountReference;
+            payment.PaymentAccountHash = string.IsNullOrWhiteSpace(paymentAccountReference)
+                ? null
+                : ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSha256(paymentAccountReference);
+            payment.TransactionReference = transactionReference;
+            payment.Notes = notes;
+            payment.RecordIntegrityHash = ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSupplierPaymentIntegrityHash(payment);
+            payment.UpdatedAt = DateTime.UtcNow;
+            _context.SupplierPayments.Update(payment);
+
+            bill.PaidAmount = Math.Round(otherPostedPaid + roundedAmount, 2);
+            bill.Status = DeriveBillStatus(bill.TotalAmount, bill.PaidAmount, bill.DueDate);
             bill.UpdatedAt = DateTime.UtcNow;
             _context.SupplierBills.Update(bill);
 
@@ -225,6 +311,7 @@ public class SupplierPaymentRepository : ISupplierPaymentRepository
             payment.ReversalReason = reversalReason.Trim();
             payment.ReversedAt = DateTime.UtcNow;
             payment.ReversedBy = reversedBy;
+            payment.RecordIntegrityHash = ZerpPixelsCRM.Api.Utils.SecurityHashHelper.ComputeSupplierPaymentIntegrityHash(payment);
             payment.UpdatedAt = DateTime.UtcNow;
             _context.SupplierPayments.Update(payment);
 

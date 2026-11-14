@@ -9,6 +9,10 @@ public class SupplierPaymentListItemDto
     public long SupplierBillId { get; set; }
     public string InternalBillNumber { get; set; } = string.Empty;
     public string SupplierInvoiceNumber { get; set; } = string.Empty;
+    public decimal BillTotalAmount { get; set; }
+    public decimal BillPaidAmount { get; set; }
+    public decimal BillOutstandingBalance { get; set; }
+    public string BillStatus { get; set; } = string.Empty;
     public DateTime PaymentDate { get; set; }
     public decimal Amount { get; set; }
     public string PaymentMethod { get; set; } = string.Empty;
@@ -43,6 +47,8 @@ public class SupplierPaymentDto
     public DateTime? ReversedAt { get; set; }
     public string? ReversedBy { get; set; }
     public string? CreatedBy { get; set; }
+    public string? RecordIntegrityHash { get; set; }
+    public bool IsIntegrityVerified { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
@@ -63,6 +69,16 @@ public class CreateSupplierPaymentRequest
 public class ReverseSupplierPaymentRequest
 {
     public string ReversalReason { get; set; } = string.Empty;
+}
+
+public class UpdateSupplierPaymentRequest
+{
+    public DateTime PaymentDate { get; set; }
+    public decimal Amount { get; set; }
+    public string PaymentMethod { get; set; } = string.Empty;
+    public string? PaymentAccountReference { get; set; }
+    public string? TransactionReference { get; set; }
+    public string? Notes { get; set; }
 }
 
 public class PaginatedSupplierPaymentsResponse

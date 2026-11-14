@@ -7,6 +7,7 @@ import { CustomerService } from '../customers/services/customer.service';
 import { QuotationService } from '../quotations/services/quotation.service';
 import { ProductionService } from '../production/services/production.service';
 import { ProductionJob } from '../production/models/production.model';
+import { InvoiceService } from '../invoices/services/invoice.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +21,7 @@ export class DashboardComponent implements OnInit {
   private customerService = inject(CustomerService);
   private quotationService = inject(QuotationService);
   private productionService = inject(ProductionService);
+  private invoiceService = inject(InvoiceService);
 
   totalActive = signal<number>(0);
   totalQuotations = signal<number>(0);
@@ -27,6 +29,8 @@ export class DashboardComponent implements OnInit {
   inHouseInProgress = signal<number>(0);
   totalOutsourcedJobs = signal<number>(0);
   outsourcedInProgress = signal<number>(0);
+  totalInvoices = signal<number>(0);
+  invoiceClients = signal<{ customerName: string; count: number; invoiceNumbers: string[] }[]>([]);
   
   // Live Queue & Recent Jobs
   recentJobs = signal<ProductionJob[]>([]);
@@ -64,15 +68,36 @@ export class DashboardComponent implements OnInit {
       ),
       outsourced: this.productionService.getJobs('OUTSOURCED').pipe(
         catchError(() => of([]))
+      ),
+      invoices: this.invoiceService.getInvoices(undefined, 1, 100).pipe(
+        catchError(() => of({ totalCount: 0, items: [], page: 1, pageSize: 100, totalPages: 0 }))
       )
     }).subscribe({
-      next: ({ customers, quotations, inHouse, outsourced }) => {
+      next: ({ customers, quotations, inHouse, outsourced, invoices }) => {
         this.totalActive.set(customers.totalCount || 0);
         this.totalQuotations.set((quotations as any)?.totalQuotations || 0);
         this.totalInHouseJobs.set(inHouse.length || 0);
         this.inHouseInProgress.set(inHouse.filter(j => j.status === 'In Progress' || j.status === 'Printing').length);
         this.totalOutsourcedJobs.set(outsourced.length || 0);
         this.outsourcedInProgress.set(outsourced.filter(j => j.status === 'In Progress' || j.status === 'Pending Vendor PO').length);
+
+        this.totalInvoices.set(invoices.totalCount || 0);
+        const clientMap = new Map<string, { customerName: string; count: number; invoiceNumbers: string[] }>();
+        for (const inv of invoices.items || []) {
+          const name = (inv.customerName || 'Unknown Client').trim();
+          const existing = clientMap.get(name);
+          if (existing) {
+            existing.count += 1;
+            if (inv.invoiceNumber) existing.invoiceNumbers.push(inv.invoiceNumber);
+          } else {
+            clientMap.set(name, {
+              customerName: name,
+              count: 1,
+              invoiceNumbers: inv.invoiceNumber ? [inv.invoiceNumber] : []
+            });
+          }
+        }
+        this.invoiceClients.set(Array.from(clientMap.values()).sort((a, b) => b.count - a.count));
         
         // Combine and sort top 5 recent production jobs
         const allJobs = [...inHouse, ...outsourced].sort((a, b) => 

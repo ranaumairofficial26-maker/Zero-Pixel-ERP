@@ -6,7 +6,6 @@ import { InvoiceService } from '../../services/invoice.service';
 import { Invoice, InvoiceAdjustmentType } from '../../models/invoice.model';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { Customer } from '../../../customers/models/customer.model';
-import { ThemeService } from '../../../../core/services/theme.service';
 import { InvoiceShareModalComponent } from '../../components/invoice-share-modal/invoice-share-modal.component';
 
 @Component({
@@ -22,7 +21,6 @@ export class InvoiceFormComponent implements OnInit {
   private customerService = inject(CustomerService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  public themeService = inject(ThemeService);
   private cdr = inject(ChangeDetectorRef);
 
   invoiceForm!: FormGroup;
@@ -55,8 +53,9 @@ export class InvoiceFormComponent implements OnInit {
       invoiceDate: [today, [Validators.required]],
       ntnNumber: [''],
       clientPoNumber: [''],
-      adjustmentType: ['advance'],
+      adjustmentType: ['tax_amount'],
       advance: [0, [Validators.required, Validators.min(0)]],
+      previousBalance: [null, [Validators.min(0)]],
       notes: ['1. Please clear the remaining balance within 15 days of invoice date.\n2. Any discrepancy in quantity or quality must be reported within 48 hours of delivery.'],
       items: this.fb.array([])
     });
@@ -167,7 +166,8 @@ export class InvoiceFormComponent implements OnInit {
         this.previewInvoiceNumber = inv.invoiceNumber;
         const dateStr = inv.invoiceDate ? inv.invoiceDate.split('T')[0] : '';
 
-        const adjType: InvoiceAdjustmentType = (inv.adjustmentType as InvoiceAdjustmentType) || 'advance';
+        const rawType = (inv.adjustmentType as InvoiceAdjustmentType) || 'tax_amount';
+        const adjType: InvoiceAdjustmentType = (rawType === 'advance' && inv.advance === 0) ? 'tax_amount' : rawType;
         const isPct = adjType === 'tax_percent' || adjType === 'percent_off';
 
         this.invoiceForm.patchValue({
@@ -177,6 +177,7 @@ export class InvoiceFormComponent implements OnInit {
           clientPoNumber: inv.clientPoNumber || '',
           adjustmentType: adjType,
           advance: isPct ? (inv.adjustmentRate ?? 0) : inv.advance,
+          previousBalance: inv.previousBalance ?? null,
           notes: inv.notes || ''
         });
 
@@ -318,6 +319,15 @@ export class InvoiceFormComponent implements OnInit {
     return Math.max(0, Math.round((this.total - this.calculatedAdjustmentAmount) * 100) / 100);
   }
 
+  get previousBalanceAmount(): number {
+    const val = Number(this.invoiceForm?.get('previousBalance')?.value || 0);
+    return val > 0 ? Math.round(val * 100) / 100 : 0;
+  }
+
+  get totalBalance(): number {
+    return Math.round((this.balance + this.previousBalanceAmount) * 100) / 100;
+  }
+
   get isAdvanceInvalid(): boolean {
     if (this.adjustmentType === 'percent_off') {
       return this.advance > 100;
@@ -393,6 +403,7 @@ export class InvoiceFormComponent implements OnInit {
       adjustmentType: this.adjustmentType,
       adjustmentRate: this.isPercentageMode ? this.advance : null,
       advance: this.calculatedAdjustmentAmount,
+      previousBalance: this.previousBalanceAmount > 0 ? this.previousBalanceAmount : null,
       notes: formVal.notes || null,
       items: formVal.items.map((it: any) => ({
         grNumber: it.grNumber ? it.grNumber.trim() : null,

@@ -205,3 +205,26 @@
   to { transform: rotate(360deg); }
 }
 
+@media (max-width: 480px) {
+  .login-wrapper {
+    padding: 1rem;
+  }
+
+  .login-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 16px;
+  }
+
+  .brand-section {
+    margin-bottom: 1.5rem;
+
+    .logo-box .brand-logo {
+      height: 54px;
+    }
+
+    .portal-title {
+      font-size: 1.35rem;
+    }
+  }
+}
+

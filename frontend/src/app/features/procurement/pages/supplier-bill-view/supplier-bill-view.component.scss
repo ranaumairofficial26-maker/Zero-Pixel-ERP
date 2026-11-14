@@ -147,8 +147,9 @@
 
 .brand-block {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .brand-logo {
@@ -156,19 +157,12 @@
   width: auto;
 }
 
-.brand-text {
-  h2 {
-    margin: 0;
-    font-size: 19px;
-    font-weight: 700;
-    color: #0f172a;
-  }
-
-  p {
-    margin: 2px 0 0;
-    font-size: 12px;
-    color: #64748b;
-  }
+.voucher-subtitle {
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #334155;
+  letter-spacing: 0.01em;
 }
 
 .doc-title-block {

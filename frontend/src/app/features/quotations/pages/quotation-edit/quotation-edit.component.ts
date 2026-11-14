@@ -1196,8 +1196,6 @@ export class QuotationEditComponent implements OnInit {
       let pagesCount = 5;
       let postsCount = 12;
       let videoCount = 4;
-      let adsDetails = 'Meta & Google Ads Campaign';
-      let seoDetails = 'On-Page & Technical SEO';
 
       // Parse JSON serviceDetails if present
       if (item.serviceDetails) {
@@ -1207,10 +1205,6 @@ export class QuotationEditComponent implements OnInit {
             if (parsed.pagesCount != null) pagesCount = parsed.pagesCount;
             if (parsed.postsCount != null) postsCount = parsed.postsCount;
             if (parsed.videoCount != null) videoCount = parsed.videoCount;
-            if (parsed.ads != null) adsDetails = parsed.ads;
-            if (parsed.adsDetails != null) adsDetails = parsed.adsDetails;
-            if (parsed.seo != null) seoDetails = parsed.seo;
-            if (parsed.seoDetails != null) seoDetails = parsed.seoDetails;
           }
         } catch {}
       }

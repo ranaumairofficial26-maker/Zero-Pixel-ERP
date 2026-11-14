@@ -446,6 +446,12 @@
     }
   }
 
+  .sheet-totals-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
   .sheet-totals-box {
     background: #f9fafb;
     border: 1px solid #e5e7eb;
@@ -489,6 +495,11 @@
         .balance-text {
           font-size: 1.15rem;
           color: #b91c1c;
+        }
+
+        .total-balance-text {
+          font-size: 1.15rem;
+          color: #0f172a;
         }
       }
     }
@@ -620,37 +631,6 @@
 // =========================================================================
 // DARK MODE STYLES (For screen view only; print stays pure white)
 // =========================================================================
-:host-context(.dark-mode),
-:host-context([data-theme="dark"]) {
-  .top-actions-bar {
-    background: #111827;
-    border-color: #1f293d;
-
-    .actions-left {
-      .btn-back {
-        background: #172133;
-        border-color: #2a374f;
-        color: #e2e8f0;
-        &:hover { background: #1f293d; color: #ffffff; }
-      }
-      .view-status-pill {
-        background: #064e3b;
-        color: #34d399;
-        border-color: #059669;
-      }
-    }
-
-    .actions-right {
-      .btn-edit-header {
-        background: #172133;
-        border-color: #2a374f;
-        color: #e2e8f0;
-        &:hover { background: #1f293d; border-color: #0284c7; }
-      }
-    }
-  }
-}
-
 // =========================================================================
 // PRINT STYLES (@media print) - STRICT A4 PURITY
 // =========================================================================
@@ -722,6 +702,12 @@
       page-break-inside: avoid !important;
       break-inside: avoid !important;
     }
+  }
+
+  .sheet-totals-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
   }
 
   .sheet-totals-box {
