@@ -85,25 +85,77 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 24px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .bucket-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 14px 16px;
+  background: linear-gradient(155deg, #ffffff 50%, #f0f9ff 100%);
+  border: 1.5px solid #bae6fd;
+  border-radius: 14px;
+  padding: 15px 16px;
   cursor: pointer;
-  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 5px 16px -6px rgba(15, 23, 42, 0.08);
+  transition: all 0.2s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -36px;
+    right: -24px;
+    width: 130px;
+    height: 75px;
+    border-radius: 60% 45% 0 0;
+    transform: rotate(-14deg);
+    background: rgba(186, 230, 253, 0.35);
+    pointer-events: none;
+  }
+
+  &:has(.text-safe) {
+    background: linear-gradient(155deg, #ffffff 50%, #ecfdf5 100%);
+    border-color: #a7f3d0;
+    &::after { background: rgba(167, 243, 208, 0.42); }
+  }
+
+  &:has(.text-warning) {
+    background: linear-gradient(155deg, #ffffff 50%, #fffbeb 100%);
+    border-color: #fde68a;
+    &::after { background: rgba(253, 230, 138, 0.42); }
+  }
+
+  &:has(.text-danger),
+  &:has(.text-critical) {
+    background: linear-gradient(155deg, #ffffff 50%, #fff1f2 100%);
+    border-color: #fecdd3;
+    &::after { background: rgba(254, 205, 211, 0.45); }
+  }
 
   &:hover {
-    border-color: #0284c7;
-    background: #f0f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px -6px rgba(15, 23, 42, 0.12);
   }
 
   &.active {
     border-color: #0284c7;
-    background: #f0f9ff;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.22);
+  }
+
+  .b-lbl,
+  .b-val,
+  .b-sub,
+  .b-count {
+    position: relative;
+    z-index: 1;
   }
 
   .b-lbl {

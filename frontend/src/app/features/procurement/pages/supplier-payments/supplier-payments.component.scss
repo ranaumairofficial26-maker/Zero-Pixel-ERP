@@ -126,68 +126,145 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-bottom: 20px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .summary-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 20px -6px rgba(15, 23, 42, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-  &.outstanding-card {
-    border-left: 4px solid #f59e0b;
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -44px;
+    right: -24px;
+    width: 190px;
+    height: 105px;
+    border-radius: 65% 40% 0 0;
+    transform: rotate(-11deg);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -54px;
+    right: -46px;
+    width: 225px;
+    height: 118px;
+    border-radius: 60% 45% 0 0;
+    transform: rotate(-16deg);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px -8px rgba(15, 23, 42, 0.12);
+  }
+
+  &:has(.summary-icon.amber) {
+    background: linear-gradient(155deg, #ffffff 50%, #fffbeb 100%);
+    border-color: #fde68a;
+    &::before { background: linear-gradient(135deg, rgba(251, 191, 36, 0.28), rgba(245, 158, 11, 0.4)); }
+    &::after { background: rgba(253, 230, 138, 0.48); }
+    .summary-label { color: #b45309; }
+  }
+
+  &:has(.summary-icon.red) {
+    background: linear-gradient(155deg, #ffffff 50%, #fff1f2 100%);
+    border-color: #fecdd3;
+    &::before { background: linear-gradient(135deg, rgba(251, 113, 133, 0.28), rgba(225, 29, 72, 0.36)); }
+    &::after { background: rgba(254, 205, 211, 0.48); }
+    .summary-label { color: #be123c; }
+  }
+
+  &:has(.summary-icon.blue) {
+    background: linear-gradient(155deg, #ffffff 50%, #f0f9ff 100%);
+    border-color: #bae6fd;
+    &::before { background: linear-gradient(135deg, rgba(56, 189, 248, 0.28), rgba(14, 165, 233, 0.4)); }
+    &::after { background: rgba(186, 230, 253, 0.45); }
+    .summary-label { color: #0369a1; }
+  }
+
+  .summary-top,
+  .summary-value,
+  .summary-hint {
+    position: relative;
+    z-index: 1;
   }
 
   .summary-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .summary-label {
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 800;
     color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .summary-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    color: #ffffff;
 
     svg {
-      width: 17px;
-      height: 17px;
+      width: 19px;
+      height: 19px;
     }
 
     &.amber {
-      background: #fef3c7;
-      color: #d97706;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      box-shadow: 0 6px 14px -3px rgba(217, 119, 6, 0.45);
     }
     &.red {
-      background: #fee2e2;
-      color: #dc2626;
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      color: #ffffff;
+      box-shadow: 0 6px 14px -3px rgba(225, 29, 72, 0.45);
     }
     &.blue {
-      background: #e0f2fe;
-      color: #0284c7;
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #ffffff;
+      box-shadow: 0 6px 14px -3px rgba(2, 132, 199, 0.45);
     }
   }
 
   .summary-value {
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 25px;
+    font-weight: 900;
     color: #0f172a;
     margin-bottom: 4px;
+    letter-spacing: -0.02em;
   }
 
   .summary-hint {
-    font-size: 12px;
+    font-size: 12.5px;
+    font-weight: 500;
     color: #64748b;
   }
 }

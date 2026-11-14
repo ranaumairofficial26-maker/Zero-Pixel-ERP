@@ -420,45 +420,108 @@ import { QuotationApprovalDialogComponent } from '../../components/quotation-app
     }
     .summary-card {
       background: #fff;
-      border: 1px solid #E2E8F0;
-      border-radius: 10px;
-      padding: 14px 16px;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 15px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      transition: transform 0.15s, box-shadow 0.15s;
+      gap: 13px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 18px -6px rgba(15, 23, 42, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      bottom: -38px;
+      right: -22px;
+      width: 145px;
+      height: 78px;
+      border-radius: 65% 40% 0 0;
+      transform: rotate(-11deg);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      bottom: -46px;
+      right: -38px;
+      width: 175px;
+      height: 88px;
+      border-radius: 60% 45% 0 0;
+      transform: rotate(-16deg);
+      pointer-events: none;
+      z-index: 0;
     }
     .summary-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.12);
     }
+    .summary-card:has(.total) {
+      background: linear-gradient(155deg, #ffffff 50%, #f0f9ff 100%);
+      border-color: #bae6fd;
+    }
+    .summary-card:has(.total)::before { background: rgba(14, 165, 233, 0.24); }
+    .summary-card:has(.total)::after { background: rgba(186, 230, 253, 0.45); }
+    .summary-card:has(.draft) {
+      background: linear-gradient(155deg, #ffffff 50%, #fffbeb 100%);
+      border-color: #fde68a;
+    }
+    .summary-card:has(.draft)::before { background: rgba(245, 158, 11, 0.26); }
+    .summary-card:has(.draft)::after { background: rgba(253, 230, 138, 0.48); }
+    .summary-card:has(.finalized) {
+      background: linear-gradient(155deg, #ffffff 50%, #f5f3ff 100%);
+      border-color: #ddd6fe;
+    }
+    .summary-card:has(.finalized)::before { background: rgba(139, 92, 246, 0.24); }
+    .summary-card:has(.finalized)::after { background: rgba(221, 214, 254, 0.45); }
+    .summary-card:has(.approved) {
+      background: linear-gradient(155deg, #ffffff 50%, #ecfdf5 100%);
+      border-color: #a7f3d0;
+    }
+    .summary-card:has(.approved)::before { background: rgba(16, 185, 129, 0.24); }
+    .summary-card:has(.approved)::after { background: rgba(167, 243, 208, 0.45); }
+    .summary-card:has(.expired) {
+      background: linear-gradient(155deg, #ffffff 50%, #fff1f2 100%);
+      border-color: #fecdd3;
+    }
+    .summary-card:has(.expired)::before { background: rgba(244, 63, 94, 0.22); }
+    .summary-card:has(.expired)::after { background: rgba(254, 205, 211, 0.46); }
     .card-icon {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
+      color: #ffffff;
+      position: relative;
+      z-index: 1;
     }
-    .card-icon.total { background: #F0F9FF; color: #0284C7; }
-    .card-icon.draft { background: #FEF3C7; color: #D97706; }
-    .card-icon.finalized { background: #ECFDF5; color: #059669; }
-    .card-icon.approved { background: #DCFCE7; color: #16A34A; }
-    .card-icon.expired { background: #FEE2E2; color: #DC2626; }
+    .card-icon.total { background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 6px 14px -3px rgba(2, 132, 199, 0.42); }
+    .card-icon.draft { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 6px 14px -3px rgba(217, 119, 6, 0.42); }
+    .card-icon.finalized { background: linear-gradient(135deg, #8b5cf6, #7c3aed); box-shadow: 0 6px 14px -3px rgba(124, 58, 237, 0.42); }
+    .card-icon.approved { background: linear-gradient(135deg, #22c55e, #059669); box-shadow: 0 6px 14px -3px rgba(5, 150, 105, 0.42); }
+    .card-icon.expired { background: linear-gradient(135deg, #f43f5e, #e11d48); box-shadow: 0 6px 14px -3px rgba(225, 29, 72, 0.42); }
     .card-body {
       display: flex;
       flex-direction: column;
+      position: relative;
+      z-index: 1;
     }
     .card-count {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 900;
       color: #0F172A;
-      line-height: 1.2;
+      line-height: 1.15;
     }
     .card-label {
       font-size: 12px;
-      color: #64748B;
-      font-weight: 500;
+      color: #475569;
+      font-weight: 700;
     }
     .toolbar-section {
       display: flex;
